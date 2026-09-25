@@ -1,0 +1,8 @@
+[functions.sumup-webhook]
+verify_jwt = false
+
+[functions.create-sumup-checkout]
+verify_jwt = false
+
+[functions.payment-request-info]
+verify_jwt = false
