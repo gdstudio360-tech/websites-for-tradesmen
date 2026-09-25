@@ -85,3 +85,24 @@ Do not advertise the form as live until the Formspree Form ID has been added and
 
 ## Live Formspree ID
 Configured Formspree form ID: `mjykeaej`
+
+
+## V5 — Privacy Notice
+
+Added:
+- `privacy.html` in the same GD TradeWeb visual style
+- Privacy Notice link directly beside the enquiry form
+- Privacy Notice link in the footer
+- clearer form privacy wording
+- UK privacy sections covering purpose, lawful basis, retention, Formspree, international processing, rights, objections, complaints and automated decisions
+
+Current privacy policy assumptions:
+- enquiry data is used only to respond to enquiries / prepare requested services
+- no marketing list is created from this form
+- non-client enquiries are normally deleted or anonymised within 12 months
+- Formspree is used as the form processor
+- no analytics or advertising tracking has been added to this website
+
+Before adding analytics, advertising pixels, mailing-list marketing, new form integrations or other tracking, review the Privacy Notice and cookie requirements again.
+
+Note: if the business later confirms a formal legal/trading identity that should appear publicly, update the "Who we are" section accordingly.
