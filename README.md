@@ -20,18 +20,17 @@ Sales landing page for a website-building service aimed at UK tradespeople.
 ## Live demo linked from the site
 https://gdstudio360-tech.github.io/tradesman-template/
 
-## IMPORTANT BEFORE PROMOTION
-Open `script.js` and replace:
+## Contact setup
 
-`YOUR-EMAIL@example.com`
+Configured for:
+- GD Studio 360 email
+- UK phone number
+- WhatsApp message link with a pre-filled text message
 
-with the real email address that should receive preview requests.
+The phone number and email are not shown as plain text in the HTML. They are assembled in `script.js`.
+This helps against simple scraping but is not absolute protection from determined bots.
 
-Also decide whether to keep the temporary brand name:
-
-`GD TradeWeb`
-
-You can change it later without rebuilding the structure.
+The WhatsApp button opens a text conversation. A website link cannot disable WhatsApp's own call button after the visitor opens the chat.
 
 ## Suggested GitHub repository
 `websites-for-tradesmen`
