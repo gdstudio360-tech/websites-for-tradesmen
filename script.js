@@ -58,25 +58,105 @@ if (whatsappButton) {
   whatsappButton.href = `https://wa.me/${whatsappNumber}?text=${message}`;
 }
 
+/*
+  REAL CONTACT FORM SETUP
+  -----------------------
+  1. Create a Formspree form.
+  2. Copy its form ID, e.g. "xabcdefg".
+  3. Paste the ID below in place of PASTE_FORMSPREE_FORM_ID_HERE.
+
+  The Formspree form ID does not expose your destination email address.
+*/
+const FORMSPREE_FORM_ID = "mjykeaej";
+
 const form = document.getElementById("lead-form");
+const formStatus = document.getElementById("form-status");
+const submitButton = document.getElementById("lead-submit");
+
+function setFormStatus(message, type = "") {
+  if (!formStatus) return;
+  formStatus.textContent = message;
+  formStatus.className = `form-status ${type}`.trim();
+}
+
 if (form) {
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const data = new FormData(form);
-    const name = String(data.get("name") || "").trim();
-    const business = String(data.get("business") || "").trim();
-    const trade = String(data.get("trade") || "").trim();
-    const area = String(data.get("area") || "").trim();
-    const replyTo = String(data.get("contact") || "").trim();
-    const message = String(data.get("message") || "").trim();
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
 
-    const subject = encodeURIComponent(`Free website preview request — ${business || trade}`);
-    const body = encodeURIComponent(
-      `Name: ${name}\nBusiness: ${business}\nTrade: ${trade}\nArea: ${area}\nPhone/email: ${replyTo}\n\nExtra details:\n${message}`
-    );
+    if (
+      !FORMSPREE_FORM_ID ||
+      FORMSPREE_FORM_ID === "PASTE_FORMSPREE_FORM_ID_HERE"
+    ) {
+      setFormStatus(
+        "The enquiry form is being connected. Please use WhatsApp or email for now.",
+        "error"
+      );
+      return;
+    }
 
-    window.location.href =
-      `mailto:${contact.email}?subject=${subject}&body=${body}`;
+    const originalLabel = submitButton
+      ? submitButton.querySelector(".submit-label")?.textContent
+      : "";
+
+    if (submitButton) {
+      submitButton.disabled = true;
+      const label = submitButton.querySelector(".submit-label");
+      if (label) label.textContent = "Sending…";
+    }
+
+    setFormStatus("Sending your enquiry…", "sending");
+
+    try {
+      const formData = new FormData(form);
+
+      const response = await fetch(
+        `https://formspree.io/f/${FORMSPREE_FORM_ID}`,
+        {
+          method: "POST",
+          body: formData,
+          headers: {
+            Accept: "application/json"
+          }
+        }
+      );
+
+      if (response.ok) {
+        form.reset();
+        setFormStatus(
+          "Thanks — your request has been sent. We’ll get back to you as soon as possible.",
+          "success"
+        );
+      } else if (response.status === 429) {
+        setFormStatus(
+          "Too many attempts were sent in a short time. Please wait a little and try again.",
+          "error"
+        );
+      } else {
+        let message = "We couldn’t send your request. Please try again or use WhatsApp.";
+        try {
+          const data = await response.json();
+          if (data?.errors?.length) {
+            message = data.errors.map((item) => item.message).join(" ");
+          }
+        } catch (_) {}
+        setFormStatus(message, "error");
+      }
+    } catch (_) {
+      setFormStatus(
+        "Connection problem. Please try again or send us a WhatsApp message.",
+        "error"
+      );
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        const label = submitButton.querySelector(".submit-label");
+        if (label) label.textContent = originalLabel || "Request my free preview →";
+      }
+    }
   });
 }

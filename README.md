@@ -58,3 +58,30 @@ Settings → Pages → Deploy from a branch → main → /(root)
 - Add real portfolio examples as they are completed
 - Add genuine client testimonials only after receiving them
 - Add privacy / cookie content if tracking or analytics are introduced
+
+
+## Real enquiry form — V4
+
+The old `mailto:` enquiry form has been replaced with an AJAX-ready Formspree integration.
+
+Before the form can receive live enquiries:
+
+1. Create a Formspree account and verify the destination email.
+2. Create a new form.
+3. Copy the Form ID from the endpoint, for example `xabcdefg`.
+4. Open `script.js`.
+5. Replace `PASTE_FORMSPREE_FORM_ID_HERE` with the real Formspree Form ID.
+
+The form:
+- submits without opening the visitor's email app
+- shows sending / success / error states on the same page
+- disables the button while sending
+- keeps the destination email address out of the public HTML
+- includes Formspree's `_gotcha` honeypot field
+- handles rate-limit and network errors
+
+Do not advertise the form as live until the Formspree Form ID has been added and a test submission has been received.
+
+
+## Live Formspree ID
+Configured Formspree form ID: `mjykeaej`

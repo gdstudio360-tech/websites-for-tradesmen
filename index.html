@@ -445,7 +445,9 @@
           </div>
         </div>
 
-        <form class="lead-form" id="lead-form">
+        <form class="lead-form" id="lead-form" novalidate>
+          <input class="honeypot" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <input type="hidden" name="_subject" value="New GD TradeWeb website enquiry">
           <div class="form-title">
             <span>FREE HOMEPAGE PREVIEW</span>
             <strong>Tell us about your business</strong>
@@ -453,18 +455,18 @@
 
           <label>
             Your name
-            <input type="text" name="name" required autocomplete="name">
+            <input type="text" name="name" id="lead-name" required autocomplete="name">
           </label>
 
           <label>
             Business name
-            <input type="text" name="business" required autocomplete="organization">
+            <input type="text" name="business" id="lead-business" required autocomplete="organization">
           </label>
 
           <div class="form-two">
             <label>
               Trade
-              <select name="trade">
+              <select name="trade" id="lead-trade">
                 <option>Electrician</option>
                 <option>Plumber</option>
                 <option>Builder</option>
@@ -478,22 +480,25 @@
 
             <label>
               Area
-              <input type="text" name="area" placeholder="e.g. Ipswich, Suffolk">
+              <input type="text" name="area" id="lead-area" placeholder="e.g. Ipswich, Suffolk">
             </label>
           </div>
 
           <label>
             Phone or email
-            <input type="text" name="contact" required>
+            <input type="text" name="contact" id="lead-contact" required autocomplete="email">
           </label>
 
           <label>
             Anything else?
-            <textarea name="message" rows="4" placeholder="Tell us what you want the website to achieve..."></textarea>
+            <textarea name="message" id="lead-message" rows="4" placeholder="Tell us what you want the website to achieve..."></textarea>
           </label>
 
-          <button class="button button-yellow button-full" type="submit">Request my free preview →</button>
-          <p class="form-note">Submitting this form opens your email app with the enquiry already prepared. Phone number and email are not displayed as plain text on the page.</p>
+          <button class="button button-yellow button-full" id="lead-submit" type="submit">
+            <span class="submit-label">Request my free preview →</span>
+          </button>
+          <div class="form-status" id="form-status" role="status" aria-live="polite"></div>
+          <p class="form-note">Your details are used to respond to your website enquiry. The form sends securely without opening your email app.</p>
         </form>
       </div>
     </section>
