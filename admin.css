@@ -1,0 +1,47 @@
+:root{
+  --ink:#111827;--muted:#687386;--line:#dce3ea;--soft:#f4f6f8;
+  --navy:#08111f;--yellow:#ffd83d;--green:#18794e;--red:#b42318;
+  --max:1180px
+}
+*{box-sizing:border-box}
+body{margin:0;background:#f5f7f9;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.admin-shell{width:min(calc(100% - 34px),var(--max));margin-inline:auto}
+.admin-header{background:var(--navy);color:#fff}
+.admin-nav{min-height:72px;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.admin-brand{display:flex;gap:10px;align-items:center;color:#fff;text-decoration:none}
+.admin-brand>span{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:var(--yellow);color:#111;font-weight:950}
+.admin-brand strong,.admin-brand small{display:block;line-height:1}.admin-brand small{margin-top:5px;color:#8190a4;font-size:.65rem;text-transform:uppercase;letter-spacing:.13em}
+.login-card{width:min(480px,100%);margin:80px auto;padding:34px;border:1px solid var(--line);border-radius:22px;background:#fff;box-shadow:0 24px 70px rgba(8,17,31,.1)}
+.eyebrow{color:#957400;font-size:.65rem;font-weight:950;letter-spacing:.14em}
+h1{margin:8px 0 8px;font-size:clamp(2rem,5vw,3.4rem);letter-spacing:-.05em}
+.login-card p,.dashboard-heading p{margin:0;color:var(--muted)}
+form{display:grid;gap:14px;margin-top:25px}
+label{display:grid;gap:6px;font-size:.78rem;font-weight:850;color:#445063}
+input,select{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:10px;background:#fff;outline:none}
+input:focus,select:focus{border-color:#b58d00;box-shadow:0 0 0 3px rgba(255,216,61,.2)}
+form button,.approve-button{min-height:46px;border:0;border-radius:10px;background:var(--yellow);font-weight:950}
+.ghost-button,.secondary-button,.danger-button{min-height:40px;padding:0 14px;border-radius:9px;background:#fff;border:1px solid var(--line);font-weight:850}
+.admin-header .ghost-button{background:transparent;color:#fff;border-color:rgba(255,255,255,.2)}
+.dashboard-heading{display:flex;justify-content:space-between;align-items:end;gap:25px;padding:54px 0 28px}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.stats-grid article{padding:20px;border:1px solid var(--line);border-radius:16px;background:#fff}
+.stats-grid span,.stats-grid strong{display:block}.stats-grid span{color:var(--muted);font-size:.62rem;font-weight:900;letter-spacing:.1em}.stats-grid strong{margin-top:7px;font-size:2rem}
+.toolbar{display:flex;gap:12px;margin:22px 0}.toolbar label{min-width:180px}.search-label{flex:1}
+.status-text{min-height:22px;margin:12px 0;color:var(--muted);font-size:.82rem}
+.lead-list{display:grid;gap:14px;padding-bottom:70px}
+.lead-card{padding:24px;border:1px solid var(--line);border-radius:18px;background:#fff;box-shadow:0 12px 35px rgba(8,17,31,.05)}
+.lead-card-top{display:flex;justify-content:space-between;gap:20px;align-items:start}
+.lead-status{display:inline-flex;padding:5px 8px;border-radius:999px;background:#eef2f5;color:#536073;font-size:.6rem;font-weight:950;letter-spacing:.08em;text-transform:uppercase}
+.lead-card h2{margin:8px 0 2px;font-size:1.35rem}.lead-person{margin:0;color:var(--muted);font-size:.85rem}
+.lead-package{padding:8px 10px;border-radius:9px;background:#fff6c8;font-size:.76rem;font-weight:900}
+.lead-meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:18px;color:#5b6676;font-size:.78rem}
+.lead-meta a{color:inherit}
+.lead-message{margin:18px 0 0;padding:14px;border-radius:10px;background:#f7f9fb;color:#4f5a6a;font-size:.86rem;white-space:pre-wrap}
+.lead-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}.lead-actions a{display:inline-flex;align-items:center;text-decoration:none;color:var(--ink)}
+.approve-button{padding:0 15px}.danger-button{color:var(--red)}.deposit-result{margin-top:14px;padding:12px;border-radius:10px;background:#eef9f1;color:#23613c;font-size:.8rem}
+@media(max-width:760px){
+  .stats-grid{grid-template-columns:1fr 1fr}.toolbar{display:grid}.lead-card-top{display:grid}.lead-package{justify-self:start}
+  .dashboard-heading{align-items:start}.lead-actions{display:grid}.lead-actions>*{width:100%;justify-content:center}
+}

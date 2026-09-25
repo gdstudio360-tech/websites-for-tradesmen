@@ -132,3 +132,149 @@ Enquiry Terms cover:
 - preservation of applicable consumer rights
 
 Important: a paid project should still use a separate quotation/project agreement rather than relying only on these enquiry terms.
+
+
+## V7 — About / Trust
+
+Added:
+- `Why GD` navigation item
+- new About / Trust section between the benefits and live demo
+- positions GD TradeWeb as an independent service focused on UK trades
+- mentions real UK electrical/BMS trade experience without overstating qualifications
+- highlights direct communication, practical trade-minded websites and clear scope/pricing
+- includes CTA to free homepage preview and live demo
+
+This section is designed to answer the visitor's trust question: "Who is behind this service and why should I trust them?"
+
+
+## V8 — Remove manual free preview
+
+The manual free homepage preview offer has been removed.
+
+New lead flow:
+- CTA: Get a website quote / Tell us about your project
+- enquiry form asks for business details
+- optional current website/social link
+- package-interest selector
+- GD TradeWeb reviews the enquiry and recommends the appropriate package
+- no unpaid design work is promised at enquiry stage
+
+A future automated "Instant Preview" tool can be added separately if it can generate the preview without manual design time.
+
+
+## V9 — Package selection carried into enquiry
+
+Pricing buttons now carry the selected package into the enquiry form.
+
+Behaviour:
+- Choose Starter -> form selects `Starter — £249`
+- Choose Business -> form selects `Business — £399`
+- Choose Pro -> form selects `Pro — £599`
+- the chosen package is shown clearly at the top of the enquiry form
+- visitor can still change the package before submitting
+- Formspree receives the `package` field, so the chosen package appears in the enquiry submission/email
+- generic CTAs keep `Not sure — recommend one` unless the visitor selects a package manually
+
+
+## V10 — Admin approval + deposit workflow
+
+This version adds the foundation for the complete customer pipeline:
+
+`NEW -> DEPOSIT SENT -> DEPOSIT PAID -> BUILDING -> REVIEW -> BALANCE DUE -> COMPLETED`
+
+### New public files
+- `site-config.js` — public Supabase URL + publishable key
+- `payment-success.html`
+- `payment-cancelled.html`
+
+### New private/admin UI
+- `admin.html`
+- `admin.css`
+- `admin.js`
+
+The admin page is not linked publicly and is protected by Supabase Auth + database Row Level Security.
+Knowing the URL alone does not grant access.
+
+### New Supabase files
+- `supabase/schema.sql`
+- `supabase/functions/approve-lead/index.ts`
+- `supabase/functions/stripe-webhook/index.ts`
+- `supabase/config.toml`
+
+### How the live workflow works
+1. Customer submits the normal website enquiry.
+2. Formspree still sends the existing notification email.
+3. When Supabase is connected, the same enquiry is also stored in the admin pipeline.
+4. Admin signs into `admin.html`.
+5. Admin reviews the lead and clicks `Approve & create deposit`.
+6. Secure server-side function creates the correct 50% Stripe Checkout deposit:
+   - Starter £249 -> £124.50
+   - Business £399 -> £199.50
+   - Pro £599 -> £299.50
+7. If Resend email is configured, approval + payment link is emailed automatically.
+8. Stripe webhook changes the lead to `DEPOSIT PAID` after successful payment.
+9. Admin can move it to `BUILDING` and later `COMPLETED`.
+
+### Important security rule
+Only browser-safe Supabase values go in `site-config.js`.
+
+Never put these into GitHub/public JavaScript:
+- Stripe secret key
+- Stripe webhook secret
+- Supabase service-role / secret key
+- Resend API key
+
+Those belong only in Supabase Edge Function secrets.
+
+### Setup still required
+The code is ready, but live automation requires external account configuration:
+1. Create Supabase project.
+2. Run `supabase/schema.sql`.
+3. Create one Supabase Auth user and add its UUID to `admin_users`.
+4. Put Supabase URL + publishable key in `site-config.js`.
+5. Create Stripe account and add `STRIPE_SECRET_KEY` as a Supabase function secret.
+6. Set `SITE_URL`.
+7. Deploy `approve-lead` and `stripe-webhook`.
+8. Add Stripe webhook endpoint and save `STRIPE_WEBHOOK_SECRET`.
+9. Optional: configure Resend (`RESEND_API_KEY`, `EMAIL_FROM`) for automatic approval emails.
+
+Until Supabase is connected, the existing Formspree enquiry flow continues to work.
+
+
+## V11 — SumUp Hosted Checkout
+
+V11 replaces the planned Stripe payment integration with the existing GD TradeWeb SumUp merchant account.
+
+### Important design change
+SumUp Hosted Checkout sessions are short-lived (currently around 30 minutes), so V11 does **not** create the actual SumUp checkout when an admin approves a project.
+
+Instead:
+1. Admin approves a lead.
+2. A long-lived GD TradeWeb payment-request URL is generated.
+3. Client opens that URL and reviews business / package / deposit.
+4. Client accepts the project terms.
+5. Only then does the server create a **fresh SumUp Hosted Checkout**.
+6. Client is redirected to SumUp to pay.
+7. SumUp calls the webhook when checkout status changes.
+8. The webhook retrieves the checkout from SumUp again and verifies `PAID`, amount and GBP currency before changing the project to `deposit_paid`.
+
+This avoids emailing a SumUp payment URL that may expire before the client opens it.
+
+### SumUp secrets
+Store these only as Supabase Edge Function secrets:
+- `SUMUP_API_KEY`
+- `SUMUP_MERCHANT_CODE`
+
+Do not put either value in GitHub Pages JavaScript.
+
+### V11 Edge Functions
+- `approve-lead`
+- `payment-request-info`
+- `create-sumup-checkout`
+- `sumup-webhook`
+
+### Public payment files
+- `pay-deposit.html`
+- `pay-deposit.js`
+
+The existing Formspree enquiry notification remains in place.

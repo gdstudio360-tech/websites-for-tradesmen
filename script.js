@@ -69,6 +69,94 @@ if (whatsappButton) {
 */
 const FORMSPREE_FORM_ID = "mjykeaej";
 
+
+// Package selection: carry the visitor's pricing choice into the enquiry form.
+const packageSelect = document.getElementById("lead-package");
+const selectedPackageBox = document.getElementById("selected-package");
+const selectedPackageName = document.getElementById("selected-package-name");
+const changePackageButton = document.getElementById("change-package");
+const packageField = document.getElementById("package-field");
+
+function updateSelectedPackage(packageName, showSummary = true) {
+  if (!packageSelect) return;
+
+  const matchingOption = Array.from(packageSelect.options).find(
+    (option) => option.value === packageName
+  );
+
+  if (matchingOption) {
+    packageSelect.value = packageName;
+  }
+
+  if (selectedPackageBox && selectedPackageName) {
+    const isSpecificPackage =
+      packageName && packageName !== "Not sure — recommend one";
+
+    selectedPackageBox.hidden = !(showSummary && isSpecificPackage);
+
+    if (isSpecificPackage) {
+      selectedPackageName.textContent = packageName;
+    }
+  }
+}
+
+document.querySelectorAll(".package-select-button").forEach((button) => {
+  button.addEventListener("click", () => {
+    const packageName = button.dataset.package;
+    updateSelectedPackage(packageName, true);
+  });
+});
+
+if (packageSelect) {
+  packageSelect.addEventListener("change", () => {
+    updateSelectedPackage(packageSelect.value, true);
+  });
+}
+
+if (changePackageButton && packageField && packageSelect) {
+  changePackageButton.addEventListener("click", () => {
+    packageField.scrollIntoView({ behavior: "smooth", block: "center" });
+    packageSelect.focus();
+  });
+}
+
+
+
+const gdConfig = window.GD_CONFIG || {};
+const gdSupabase =
+  window.supabase &&
+  gdConfig.SUPABASE_URL &&
+  gdConfig.SUPABASE_PUBLISHABLE_KEY
+    ? window.supabase.createClient(
+        gdConfig.SUPABASE_URL,
+        gdConfig.SUPABASE_PUBLISHABLE_KEY
+      )
+    : null;
+
+async function saveLeadToDashboard(formData) {
+  if (!gdSupabase) return { skipped: true };
+
+  const packageValue = String(formData.get("package") || "Not sure — recommend one");
+  const payload = {
+    name: String(formData.get("name") || "").trim(),
+    business: String(formData.get("business") || "").trim(),
+    trade: String(formData.get("trade") || "").trim(),
+    area: String(formData.get("area") || "").trim(),
+    email: String(formData.get("email") || "").trim(),
+    phone: String(formData.get("phone") || "").trim() || null,
+    current_site: String(formData.get("currentSite") || "").trim() || null,
+    package: packageValue,
+    message: String(formData.get("message") || "").trim() || null,
+    terms_accepted: formData.get("termsAccepted") === "on",
+    status: "new"
+  };
+
+  const { error } = await gdSupabase.from("leads").insert(payload);
+  if (error) throw error;
+  return { skipped: false };
+}
+
+
 const form = document.getElementById("lead-form");
 const formStatus = document.getElementById("form-status");
 const submitButton = document.getElementById("lead-submit");
@@ -126,9 +214,16 @@ if (form) {
       );
 
       if (response.ok) {
+        try {
+          await saveLeadToDashboard(formData);
+        } catch (dashboardError) {
+          console.error("Dashboard lead sync failed:", dashboardError);
+        }
+
         form.reset();
+        updateSelectedPackage("Not sure — recommend one", false);
         setFormStatus(
-          "Thanks — your request has been sent. We’ll get back to you as soon as possible.",
+          "Thanks — your enquiry has been sent. We’ll review it and, if the project is a good fit, send you an approval and secure deposit link.",
           "success"
         );
       } else if (response.status === 429) {
@@ -155,7 +250,7 @@ if (form) {
       if (submitButton) {
         submitButton.disabled = false;
         const label = submitButton.querySelector(".submit-label");
-        if (label) label.textContent = originalLabel || "Request my free preview →";
+        if (label) label.textContent = originalLabel || "Send my enquiry →";
       }
     }
   });

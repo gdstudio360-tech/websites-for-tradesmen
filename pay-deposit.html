@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#0a1220">
+  <title>Project deposit | GD TradeWeb</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html">
+        <span class="brand-mark">GD</span>
+        <span class="brand-copy"><strong>TradeWeb</strong><small>Secure project payment</small></span>
+      </a>
+    </div>
+  </header>
+
+  <main class="privacy-page">
+    <div class="container">
+      <article class="privacy-content payment-card">
+        <span class="privacy-updated">SECURE DEPOSIT</span>
+        <h1>Confirm your project deposit.</h1>
+        <p id="payment-intro">Loading your approved project…</p>
+
+        <div class="payment-summary" id="payment-summary" hidden>
+          <div><span>BUSINESS</span><strong id="payment-business"></strong></div>
+          <div><span>PACKAGE</span><strong id="payment-package"></strong></div>
+          <div><span>DEPOSIT</span><strong id="payment-amount"></strong></div>
+        </div>
+
+        <div class="privacy-callout">
+          <strong>Payment is handled by SumUp</strong>
+          <p>Your card details are entered on SumUp's hosted checkout page and are not stored by GD TradeWeb.</p>
+        </div>
+
+        <label class="terms-consent payment-terms" id="payment-terms-row" hidden>
+          <input type="checkbox" id="project-terms-accepted">
+          <span>
+            I have reviewed the approved package and agree to the
+            <a href="terms.html" target="_blank" rel="noopener">Project / Enquiry Terms</a>.
+          </span>
+        </label>
+
+        <div class="privacy-actions">
+          <button class="button button-yellow" id="pay-button" type="button" disabled>
+            Continue to SumUp →
+          </button>
+          <a class="button button-dark" href="index.html#contact">Contact GD TradeWeb</a>
+        </div>
+
+        <p class="form-note" id="payment-status" role="status" aria-live="polite"></p>
+      </article>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="site-config.js"></script>
+  <script src="pay-deposit.js"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GD TradeWeb Admin</title>
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#08111f">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <header class="admin-header">
+    <div class="admin-shell admin-nav">
+      <a class="admin-brand" href="index.html">
+        <span>GD</span>
+        <div><strong>TradeWeb</strong><small>Admin</small></div>
+      </a>
+      <button id="logout-button" class="ghost-button" type="button" hidden>Log out</button>
+    </div>
+  </header>
+
+  <main class="admin-shell">
+    <section class="login-card" id="login-view">
+      <span class="eyebrow">PRIVATE ADMIN</span>
+      <h1>Project pipeline</h1>
+      <p>Sign in with the Supabase admin account connected to GD TradeWeb.</p>
+
+      <form id="login-form">
+        <label>Email<input id="admin-email" type="email" required autocomplete="username"></label>
+        <label>Password<input id="admin-password" type="password" required autocomplete="current-password"></label>
+        <button type="submit">Sign in</button>
+        <div id="login-status" class="status-text" role="status"></div>
+      </form>
+    </section>
+
+    <section id="dashboard-view" hidden>
+      <div class="dashboard-heading">
+        <div>
+          <span class="eyebrow">GD TRADEWEB</span>
+          <h1>Project pipeline</h1>
+          <p>Approve enquiries, create deposits and track project status.</p>
+        </div>
+        <button id="refresh-button" class="ghost-button" type="button">Refresh</button>
+      </div>
+
+      <div class="stats-grid">
+        <article><span>NEW</span><strong id="stat-new">0</strong></article>
+        <article><span>DEPOSIT SENT</span><strong id="stat-sent">0</strong></article>
+        <article><span>DEPOSIT PAID</span><strong id="stat-paid">0</strong></article>
+        <article><span>BUILDING</span><strong id="stat-building">0</strong></article>
+      </div>
+
+      <div class="toolbar">
+        <label>
+          Status
+          <select id="status-filter">
+            <option value="all">All</option>
+            <option value="new">New</option>
+            <option value="deposit_sent">Deposit sent</option>
+            <option value="deposit_paid">Deposit paid</option>
+            <option value="building">Building</option>
+            <option value="review">Review</option>
+            <option value="balance_due">Balance due</option>
+            <option value="completed">Completed</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </label>
+        <label class="search-label">
+          Search
+          <input id="search-input" type="search" placeholder="Business, name, email...">
+        </label>
+      </div>
+
+      <div id="dashboard-status" class="status-text" role="status"></div>
+      <div id="lead-list" class="lead-list"></div>
+    </section>
+  </main>
+
+  <template id="lead-template">
+    <article class="lead-card">
+      <div class="lead-card-top">
+        <div>
+          <span class="lead-status"></span>
+          <h2 class="lead-business"></h2>
+          <p class="lead-person"></p>
+        </div>
+        <div class="lead-package"></div>
+      </div>
+
+      <div class="lead-meta"></div>
+      <p class="lead-message"></p>
+
+      <div class="lead-actions">
+        <button class="approve-button" type="button">Approve & create deposit</button>
+        <button class="secondary-button copy-link-button" type="button" hidden>Copy deposit link</button>
+        <a class="secondary-button open-link-button" href="#" target="_blank" rel="noopener" hidden>Open payment</a>
+        <button class="secondary-button building-button" type="button" hidden>Mark building</button>
+        <button class="secondary-button complete-button" type="button" hidden>Mark completed</button>
+        <button class="danger-button reject-button" type="button">Reject</button>
+      </div>
+
+      <div class="deposit-result" hidden></div>
+    </article>
+  </template>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="site-config.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
