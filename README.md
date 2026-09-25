@@ -11,11 +11,19 @@ Sales landing page for a website-building service aimed at UK tradespeople.
 - Decorators
 - Other local trades
 
-## Introductory packages
-- Starter — £399
-- Business — £599
-- Pro — £799
-- Optional care — from £35/month
+## Introductory launch packages
+- Starter — £249
+- Business — £399
+- Pro — £599
+- Optional care — from £29/month
+
+Launch pricing is positioned as an introductory rate while building the UK trades portfolio, not as a fake percentage discount.
+
+### Package limits
+- Starter: 1 page, up to 6 core sections, 1 revision round
+- Business: up to 5 pages, 2 revision rounds
+- Pro: up to 8 pages, 3 revision rounds
+- Domain registration, paid third-party services and work outside package scope are quoted separately
 
 ## Live demo linked from the site
 https://gdstudio360-tech.github.io/tradesman-template/
