@@ -494,13 +494,21 @@
             <textarea name="message" id="lead-message" rows="4" placeholder="Tell us what you want the website to achieve..."></textarea>
           </label>
 
+          <label class="terms-consent">
+            <input type="checkbox" name="termsAccepted" id="terms-accepted" required>
+            <span>
+              I have read and agree to the <a href="terms.html" target="_blank" rel="noopener">Enquiry Terms</a>
+              and acknowledge the <a href="privacy.html" target="_blank" rel="noopener">Privacy Notice</a>.
+            </span>
+          </label>
+
           <button class="button button-yellow button-full" id="lead-submit" type="submit">
             <span class="submit-label">Request my free preview →</span>
           </button>
           <div class="form-status" id="form-status" role="status" aria-live="polite"></div>
           <p class="form-note">
-            We use your details only to respond to your enquiry and prepare the service you request.
-            See our <a href="privacy.html">Privacy Notice</a> for how we handle personal information.
+            Sending this form is an enquiry only — it does not place an order or create a paid contract.
+            We use your details to respond and prepare the service you request.
           </p>
         </form>
       </div>
@@ -524,6 +532,8 @@
     <div class="container footer-bottom">
       <span>© <span id="year"></span> GD TradeWeb</span>
       <span class="footer-legal">
+        <a href="terms.html">Enquiry Terms</a>
+        <span aria-hidden="true">•</span>
         <a href="privacy.html">Privacy Notice</a>
         <span aria-hidden="true">•</span>
         <span>Introductory launch pricing for new projects. Package scope and any extra costs are agreed before work starts.</span>

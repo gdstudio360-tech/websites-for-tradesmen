@@ -106,3 +106,29 @@ Current privacy policy assumptions:
 Before adding analytics, advertising pixels, mailing-list marketing, new form integrations or other tracking, review the Privacy Notice and cookie requirements again.
 
 Note: if the business later confirms a formal legal/trading identity that should appear publicly, update the "Who we are" section accordingly.
+
+
+## V6 — Enquiry Terms
+
+Added:
+- `terms.html`
+- required unticked checkbox on the enquiry form
+- link to Enquiry Terms and Privacy Notice beside the form
+- Enquiry Terms link in the footer
+- clear statement that submitting the free-preview form is an enquiry, not an order or paid contract
+
+Enquiry Terms cover:
+- free preview scope
+- customer responsibility for accurate business information
+- rights/permission for supplied photos, logos, reviews and content
+- package scope and extra costs
+- estimated timings and customer dependencies
+- no guarantee of rankings, leads or sales
+- third-party services
+- intellectual property at enquiry stage
+- sensible liability wording
+- privacy
+- separate project terms if paid work proceeds
+- preservation of applicable consumer rights
+
+Important: a paid project should still use a separate quotation/project agreement rather than relying only on these enquiry terms.

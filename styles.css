@@ -656,3 +656,50 @@ button{cursor:pointer}
     display:none;
   }
 }
+
+
+/* V6 enquiry terms acknowledgement */
+.terms-consent{
+  display:grid !important;
+  grid-template-columns:20px 1fr;
+  align-items:start;
+  gap:10px;
+  padding:13px 14px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:#fafbfd;
+  color:#4a5563 !important;
+  font-size:.74rem !important;
+  font-weight:650 !important;
+  line-height:1.5;
+}
+.terms-consent input{
+  width:18px !important;
+  height:18px;
+  margin:2px 0 0;
+  accent-color:#b58d00;
+}
+.terms-consent a{
+  color:#6d5600;
+  font-weight:900;
+  text-decoration:underline;
+  text-underline-offset:3px;
+}
+.terms-consent:has(input:focus-visible){
+  outline:3px solid rgba(255,216,61,.28);
+  outline-offset:2px;
+}
+
+/* Enquiry Terms page uses the same content shell as Privacy Notice. */
+.terms-highlight{
+  margin:18px 0;
+  padding:18px 20px;
+  border-left:4px solid var(--yellow);
+  border-radius:0 12px 12px 0;
+  background:#fffbea;
+}
+.terms-highlight strong{
+  display:block;
+  margin-bottom:5px;
+  color:var(--ink);
+}
