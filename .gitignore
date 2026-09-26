@@ -8,3 +8,5 @@ supabase/.temp/
 .care-option-ui-backup/
 
 .care-policy-backup/
+
+.remove-care-columns-backup/
