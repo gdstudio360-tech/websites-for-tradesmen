@@ -76,6 +76,14 @@ const selectedPackageBox = document.getElementById("selected-package");
 const selectedPackageName = document.getElementById("selected-package-name");
 const changePackageButton = document.getElementById("change-package");
 const packageField = document.getElementById("package-field");
+const carePlanSelect = document.getElementById("lead-care-plan");
+const careField = document.getElementById("care-field");
+
+function updateSelectedCare(carePlan) {
+  if (!carePlanSelect || !carePlan) return;
+  const option = Array.from(carePlanSelect.options).find((item) => item.value === carePlan);
+  if (option) carePlanSelect.value = carePlan;
+}
 
 function updateSelectedPackage(packageName, showSummary = true) {
   if (!packageSelect) return;
@@ -103,7 +111,16 @@ function updateSelectedPackage(packageName, showSummary = true) {
 document.querySelectorAll(".package-select-button").forEach((button) => {
   button.addEventListener("click", () => {
     const packageName = button.dataset.package;
+    const carePicker = button.closest(".price-card")?.querySelector(".card-care-select");
     updateSelectedPackage(packageName, true);
+    if (carePicker) updateSelectedCare(carePicker.value);
+  });
+});
+
+document.querySelectorAll(".care-select-button").forEach((button) => {
+  button.addEventListener("click", () => {
+    updateSelectedCare(button.dataset.care);
+    careField?.scrollIntoView({ behavior: "smooth", block: "center" });
   });
 });
 
@@ -146,6 +163,7 @@ async function saveLeadToDashboard(formData) {
     phone: String(formData.get("phone") || "").trim() || null,
     current_site: String(formData.get("currentSite") || "").trim() || null,
     package: packageValue,
+    care_plan: String(formData.get("care_plan") || "No care plan"),
     message: String(formData.get("message") || "").trim() || null,
     terms_accepted: formData.get("termsAccepted") === "on",
     status: "new"

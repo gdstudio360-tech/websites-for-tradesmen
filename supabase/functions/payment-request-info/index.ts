@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
 
     const { data: lead, error } = await supabase
       .from("leads")
-      .select("business, package, deposit_amount, status")
+      .select("business, package, care_plan, deposit_amount, status")
       .eq("payment_token", token)
       .single();
 
@@ -41,6 +41,7 @@ Deno.serve(async (req) => {
         ok: true,
         business: lead.business,
         package: lead.package,
+        care_plan: lead.care_plan || "No care plan",
         deposit_amount: lead.deposit_amount,
         status: lead.status,
       },

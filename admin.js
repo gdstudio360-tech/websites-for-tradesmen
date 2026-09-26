@@ -134,7 +134,8 @@ function renderLeads() {
       lead.phone,
       lead.trade,
       lead.area,
-      lead.package
+      lead.package,
+      lead.care_plan
     ].join(" ").toLowerCase();
     const matchesSearch = !query || haystack.includes(query);
     return matchesStatus && matchesSearch;
@@ -154,7 +155,8 @@ function renderLeads() {
     fragment.querySelector(".lead-status").textContent = prettyStatus(lead.status);
     fragment.querySelector(".lead-business").textContent = lead.business || "Unnamed business";
     fragment.querySelector(".lead-person").textContent = `${lead.name || ""} • ${lead.trade || "Trade not supplied"}`;
-    fragment.querySelector(".lead-package").textContent = lead.package || "Package not selected";
+    fragment.querySelector(".lead-package").textContent =
+      `${lead.package || "Package not selected"} • Care: ${lead.care_plan || "No care plan"}`;
 
     const meta = fragment.querySelector(".lead-meta");
     const parts = [

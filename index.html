@@ -35,6 +35,7 @@
         <a href="#about">Why GD</a>
         <a href="#demo">Demo</a>
         <a href="#pricing">Pricing</a>
+        <a href="#care">Website care</a>
         <a href="#process">How it works</a>
         <a href="#faq">FAQ</a>
       </nav>
@@ -311,6 +312,18 @@
               <li>Basic local SEO setup</li>
               <li>1 revision round</li>
             </ul>
+            <div class="package-care-picker">
+              <label>
+                <span>OPTIONAL WEBSITE CARE</span>
+                <select class="card-care-select" aria-label="Starter website care plan">
+                  <option value="No care plan">No care plan</option>
+                  <option value="Website Care — £29/month" selected>Website Care — £29/month</option>
+                  <option value="Business Care — £59/month">Business Care — £59/month</option>
+                  <option value="Automation Care — £99/month">Automation Care — £99/month</option>
+                </select>
+              </label>
+              <small>Optional. You can change this before sending your enquiry.</small>
+            </div>
             <a class="button button-dark package-select-button" href="#contact" data-package="Starter — £249">Choose Starter</a>
           </article>
 
@@ -332,6 +345,18 @@
               <li>Domain setup support</li>
               <li>2 revision rounds</li>
             </ul>
+            <div class="package-care-picker">
+              <label>
+                <span>OPTIONAL WEBSITE CARE</span>
+                <select class="card-care-select" aria-label="Business website care plan">
+                  <option value="No care plan">No care plan</option>
+                  <option value="Website Care — £29/month">Website Care — £29/month</option>
+                  <option value="Business Care — £59/month" selected>Business Care — £59/month</option>
+                  <option value="Automation Care — £99/month">Automation Care — £99/month</option>
+                </select>
+              </label>
+              <small>Optional. You can change this before sending your enquiry.</small>
+            </div>
             <a class="button button-yellow package-select-button" href="#contact" data-package="Business — £399">Choose Business</a>
           </article>
 
@@ -350,22 +375,107 @@
               <li>3 revision rounds</li>
               <li>Priority build queue</li>
             </ul>
+            <div class="package-care-picker">
+              <label>
+                <span>OPTIONAL WEBSITE CARE</span>
+                <select class="card-care-select" aria-label="Pro website care plan">
+                  <option value="No care plan">No care plan</option>
+                  <option value="Website Care — £29/month">Website Care — £29/month</option>
+                  <option value="Business Care — £59/month" selected>Business Care — £59/month</option>
+                  <option value="Automation Care — £99/month">Automation Care — £99/month</option>
+                </select>
+              </label>
+              <small>Choose Automation Care if the project includes backend automations.</small>
+            </div>
             <a class="button button-dark package-select-button" href="#contact" data-package="Pro — £599">Choose Pro</a>
           </article>
-        </div>
-
-        <div class="care-plan">
-          <div>
-            <span>OPTIONAL WEBSITE CARE</span>
-            <strong>From £29/month</strong>
-          </div>
-          <p>Small text changes, image updates and general website maintenance after launch.</p>
         </div>
 
         <p class="pricing-note">
           Launch prices apply to new projects agreed during the introductory period.
           Domain registration, paid third-party services and major work outside the selected package are quoted separately.
         </p>
+      </div>
+    </section>
+
+    <section class="section care-section" id="care">
+      <div class="container">
+        <div class="care-intro">
+          <div>
+            <p class="kicker">WEBSITE CARE</p>
+            <h2>You own the website. We look after the technical side.</h2>
+          </div>
+          <p>
+            Website Care is optional. It is designed for business owners who do not want to deal with code,
+            backups, DNS, forms or technical problems themselves. Choose a plan with your website package,
+            and GD TradeWeb can continue looking after the existing website after launch.
+          </p>
+        </div>
+
+        <div class="care-grid">
+          <article class="care-card">
+            <div class="care-card-top">
+              <span>WEBSITE CARE</span>
+              <strong>£29<small>/month</small></strong>
+              <p>For straightforward brochure-style websites that mainly need to stay online and up to date.</p>
+            </div>
+            <ul>
+              <li>Monthly website health check</li>
+              <li>Website-file backup</li>
+              <li>Small text or image updates — up to 30 minutes/month</li>
+              <li>Domain and DNS support</li>
+              <li>Help if the existing website stops loading correctly</li>
+            </ul>
+            <a class="button button-dark care-select-button" href="#contact" data-care="Website Care — £29/month">Choose Website Care</a>
+          </article>
+
+          <article class="care-card featured-care">
+            <div class="popular">MOST POPULAR</div>
+            <div class="care-card-top">
+              <span>BUSINESS CARE</span>
+              <strong>£59<small>/month</small></strong>
+              <p>For active business websites using enquiry forms, email delivery and regular content updates.</p>
+            </div>
+            <ul>
+              <li>Everything in Website Care</li>
+              <li>Content updates — up to 60 minutes/month</li>
+              <li>Enquiry-form and email-delivery checks</li>
+              <li>Backup / restore assistance</li>
+              <li>Technical troubleshooting for the existing site</li>
+              <li>Priority support over basic care</li>
+            </ul>
+            <a class="button button-yellow care-select-button" href="#contact" data-care="Business Care — £59/month">Choose Business Care</a>
+          </article>
+
+          <article class="care-card">
+            <div class="care-card-top">
+              <span>AUTOMATION CARE</span>
+              <strong>£99<small>/month</small></strong>
+              <p>For websites with admin systems, databases, automated email, webhooks or payment integrations.</p>
+            </div>
+            <ul>
+              <li>Everything in Business Care</li>
+              <li>Maintenance — up to 90 minutes/month</li>
+              <li>Supabase / backend function checks</li>
+              <li>Automated email and webhook support</li>
+              <li>Existing payment-integration support</li>
+              <li>Troubleshooting of existing automations</li>
+            </ul>
+            <a class="button button-dark care-select-button" href="#contact" data-care="Automation Care — £99/month">Choose Automation Care</a>
+          </article>
+        </div>
+
+        <div class="care-explainer">
+          <div>
+            <span>WHAT CARE COVERS</span>
+            <strong>Maintenance of the website we already built.</strong>
+          </div>
+          <p>
+            Care plans cover routine maintenance and small updates to the existing website. New pages,
+            redesigns, new features, new integrations, advertising work and paid third-party services are
+            quoted separately before any extra work starts. Unused monthly update time does not roll over.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -434,7 +544,11 @@
           </details>
           <details>
             <summary>Will I be able to change things later?<span>+</span></summary>
-            <p>Yes. You can request future changes when needed, or use the optional care plan for regular small updates.</p>
+            <p>Yes. You can request one-off changes when needed, or choose a Website Care plan for ongoing maintenance and included small updates after launch.</p>
+          </details>
+          <details>
+            <summary>Do I have to take a Website Care plan?<span>+</span></summary>
+            <p>No. Website Care is optional. You still own the website. A care plan simply means GD TradeWeb continues handling agreed maintenance and technical support after launch.</p>
           </details>
           <details>
             <summary>Are there any extra costs?<span>+</span></summary>
@@ -555,6 +669,20 @@
               <option value="Pro — £599">Pro — £599</option>
             </select>
           </label>
+
+          <label id="care-field">
+            Website care <span class="optional">(optional)</span>
+            <select name="care_plan" id="lead-care-plan">
+              <option value="No care plan">No care plan</option>
+              <option value="Website Care — £29/month">Website Care — £29/month</option>
+              <option value="Business Care — £59/month">Business Care — £59/month</option>
+              <option value="Automation Care — £99/month">Automation Care — £99/month</option>
+            </select>
+          </label>
+
+          <p class="care-form-note">
+            Care starts after launch and covers maintenance of the existing website. New development and paid third-party services are quoted separately.
+          </p>
 
           <label>
             Anything else?

@@ -3,6 +3,7 @@ const intro = document.getElementById("payment-intro");
 const summary = document.getElementById("payment-summary");
 const business = document.getElementById("payment-business");
 const packageName = document.getElementById("payment-package");
+const carePlan = document.getElementById("payment-care");
 const amount = document.getElementById("payment-amount");
 const termsRow = document.getElementById("payment-terms-row");
 const terms = document.getElementById("project-terms-accepted");
@@ -62,6 +63,7 @@ async function loadRequest() {
 
   business.textContent = data.business;
   packageName.textContent = data.package;
+  carePlan.textContent = data.care_plan || "No care plan";
   amount.textContent = formatPence(data.deposit_amount);
 
   summary.hidden = false;

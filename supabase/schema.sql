@@ -25,6 +25,13 @@ create table if not exists public.leads (
       'Business — £399',
       'Pro — £599'
     )),
+  care_plan text not null default 'No care plan'
+    check (care_plan in (
+      'No care plan',
+      'Website Care — £29/month',
+      'Business Care — £59/month',
+      'Automation Care — £99/month'
+    )),
   message text,
   terms_accepted boolean not null default false,
 

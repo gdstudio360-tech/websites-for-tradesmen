@@ -51,7 +51,7 @@ Deno.serve(async (req) => {
 
     const { data: lead, error: leadError } = await supabase
       .from("leads")
-      .select("id, name, business, email, package, deposit_amount, status")
+      .select("id, name, business, email, package, care_plan, deposit_amount, status")
       .eq("sumup_checkout_id", checkout.id)
       .maybeSingle();
 
@@ -83,7 +83,7 @@ Deno.serve(async (req) => {
       })
       .eq("id", lead.id)
       .neq("status", "deposit_paid")
-      .select("id, name, business, email, package, deposit_amount")
+      .select("id, name, business, email, package, care_plan, deposit_amount")
       .maybeSingle();
 
     if (updateError) {
@@ -117,6 +117,7 @@ Deno.serve(async (req) => {
           <p>
             <strong>Business:</strong> ${escapeHtml(paidLead.business)}<br>
             <strong>Package:</strong> ${escapeHtml(paidLead.package)}<br>
+            <strong>Care plan:</strong> ${escapeHtml(paidLead.care_plan || "No care plan")}<br>
             <strong>Deposit received:</strong> ${deposit}
           </p>
 
@@ -139,6 +140,7 @@ Deno.serve(async (req) => {
             <strong>Client:</strong> ${escapeHtml(paidLead.name)}<br>
             <strong>Email:</strong> ${escapeHtml(paidLead.email)}<br>
             <strong>Package:</strong> ${escapeHtml(paidLead.package)}<br>
+            <strong>Care plan:</strong> ${escapeHtml(paidLead.care_plan || "No care plan")}<br>
             <strong>Deposit:</strong> ${deposit}
           </p>
 

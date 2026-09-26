@@ -123,6 +123,7 @@ Deno.serve(async (req) => {
               <p>Thanks for your enquiry. I’m happy to take on the project.</p>
               <p>
                 <strong>Package:</strong> ${escapeHtml(lead.package)}<br>
+                <strong>Care plan:</strong> ${escapeHtml(lead.care_plan || "No care plan")}<br>
                 <strong>Deposit:</strong> ${formattedDeposit}
               </p>
               <p>
