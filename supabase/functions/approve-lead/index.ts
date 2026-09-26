@@ -113,6 +113,7 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           from: emailFrom,
+          reply_to: ["gdstudio360@gmail.com"],
           to: [lead.email],
           subject: `GD TradeWeb — ${lead.business} project approved`,
           html: `
