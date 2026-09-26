@@ -4,3 +4,5 @@
 .care-plan-backup/
 .care-choice-backup/
 supabase/.temp/
+
+.care-option-ui-backup/

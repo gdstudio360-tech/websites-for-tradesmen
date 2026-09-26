@@ -937,54 +937,88 @@ button{cursor:pointer}
 /* V12 Website Care */
 .package-care-picker{
   margin:0 0 15px;
-  padding:13px;
+  padding:14px;
   border:1px solid var(--line);
-  border-radius:13px;
-  background:#f8fafb;
+  border-radius:14px;
+  background:#f7f9fb;
   display:grid;
-  gap:8px;
+  gap:9px;
 }
 .package-care-title{
   display:block;
-  margin:0 0 2px 2px;
+  margin:0 0 3px;
   color:#806500;
-  font-size:.58rem;
+  font-size:.59rem;
   font-weight:950;
-  letter-spacing:.12em;
+  letter-spacing:.13em;
 }
 .care-choice{
   position:relative;
-  display:grid !important;
-  grid-template-columns:20px 1fr;
-  gap:10px !important;
+  display:flex !important;
   align-items:center;
-  padding:11px 12px;
-  border:1px solid var(--line);
-  border-radius:10px;
+  gap:12px !important;
+  min-height:58px;
+  padding:11px 13px;
+  border:1px solid #d9dfe6;
+  border-radius:11px;
   background:#fff;
   cursor:pointer;
-  transition:border-color .15s ease,box-shadow .15s ease,background .15s ease;
+  user-select:none;
+  transition:
+    border-color .15s ease,
+    box-shadow .15s ease,
+    background .15s ease,
+    transform .15s ease;
 }
-.care-choice:hover{border-color:#c5ad50}
+.care-choice:hover{
+  border-color:#c9ad3d;
+  transform:translateY(-1px);
+}
+.care-choice input{
+  position:absolute;
+  opacity:0;
+  pointer-events:none;
+}
+.care-choice::before{
+  content:"";
+  width:18px;
+  height:18px;
+  flex:0 0 18px;
+  border:2px solid #9ba5b3;
+  border-radius:50%;
+  background:#fff;
+  box-shadow:inset 0 0 0 4px #fff;
+}
 .care-choice:has(input:checked){
   border-color:#b58d00;
   background:#fff9d9;
-  box-shadow:0 0 0 2px rgba(255,216,61,.14);
+  box-shadow:0 0 0 2px rgba(255,216,61,.16);
 }
-.care-choice input{
-  width:18px !important;
-  height:18px;
-  margin:0;
-  accent-color:#9b7900;
+.care-choice:has(input:checked)::before{
+  border-color:#111827;
+  background:var(--yellow);
 }
-.care-choice span,.care-choice strong,.care-choice small{display:block}
-.care-choice strong{color:var(--ink);font-size:.82rem}
+.care-choice>span{
+  display:block;
+  flex:1;
+  min-width:0;
+}
+.care-choice strong,
 .care-choice small{
-  margin-top:2px;
+  display:block;
+}
+.care-choice strong{
+  color:var(--ink);
+  font-size:.86rem;
+  line-height:1.25;
+  font-weight:900;
+}
+.care-choice small{
+  margin-top:3px;
   color:var(--muted);
-  font-size:.68rem;
+  font-size:.69rem;
   line-height:1.35;
-  font-weight:600;
+  font-weight:650;
 }
 .care-section{background:#fff}
 .care-intro{display:grid;grid-template-columns:1.05fr .95fr;gap:70px;align-items:end;margin-bottom:45px}
