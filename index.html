@@ -313,16 +313,21 @@
               <li>1 revision round</li>
             </ul>
             <div class="package-care-picker">
-              <label>
-                <span>OPTIONAL WEBSITE CARE</span>
-                <select class="card-care-select" aria-label="Starter website care plan">
-                  <option value="No care plan">No care plan</option>
-                  <option value="Website Care — £29/month" selected>Website Care — £29/month</option>
-                  <option value="Business Care — £59/month">Business Care — £59/month</option>
-                  <option value="Automation Care — £99/month">Automation Care — £99/month</option>
-                </select>
+              <span class="package-care-title">CHOOSE YOUR SUPPORT</span>
+              <label class="care-choice">
+                <input type="radio" name="starter-care-choice" value="No care plan" checked>
+                <span>
+                  <strong>Website only</strong>
+                  <small>No monthly care plan</small>
+                </span>
               </label>
-              <small>Optional. You can change this before sending your enquiry.</small>
+              <label class="care-choice">
+                <input type="radio" name="starter-care-choice" value="Website Care — £29/month">
+                <span>
+                  <strong>Website + Starter Care</strong>
+                  <small>£29/month after launch</small>
+                </span>
+              </label>
             </div>
             <a class="button button-dark package-select-button" href="#contact" data-package="Starter — £249">Choose Starter</a>
           </article>
@@ -346,16 +351,21 @@
               <li>2 revision rounds</li>
             </ul>
             <div class="package-care-picker">
-              <label>
-                <span>OPTIONAL WEBSITE CARE</span>
-                <select class="card-care-select" aria-label="Business website care plan">
-                  <option value="No care plan">No care plan</option>
-                  <option value="Website Care — £29/month">Website Care — £29/month</option>
-                  <option value="Business Care — £59/month" selected>Business Care — £59/month</option>
-                  <option value="Automation Care — £99/month">Automation Care — £99/month</option>
-                </select>
+              <span class="package-care-title">CHOOSE YOUR SUPPORT</span>
+              <label class="care-choice">
+                <input type="radio" name="business-care-choice" value="No care plan" checked>
+                <span>
+                  <strong>Website only</strong>
+                  <small>No monthly care plan</small>
+                </span>
               </label>
-              <small>Optional. You can change this before sending your enquiry.</small>
+              <label class="care-choice">
+                <input type="radio" name="business-care-choice" value="Business Care — £59/month">
+                <span>
+                  <strong>Website + Business Care</strong>
+                  <small>£59/month after launch</small>
+                </span>
+              </label>
             </div>
             <a class="button button-yellow package-select-button" href="#contact" data-package="Business — £399">Choose Business</a>
           </article>
@@ -376,16 +386,21 @@
               <li>Priority build queue</li>
             </ul>
             <div class="package-care-picker">
-              <label>
-                <span>OPTIONAL WEBSITE CARE</span>
-                <select class="card-care-select" aria-label="Pro website care plan">
-                  <option value="No care plan">No care plan</option>
-                  <option value="Website Care — £29/month">Website Care — £29/month</option>
-                  <option value="Business Care — £59/month" selected>Business Care — £59/month</option>
-                  <option value="Automation Care — £99/month">Automation Care — £99/month</option>
-                </select>
+              <span class="package-care-title">CHOOSE YOUR SUPPORT</span>
+              <label class="care-choice">
+                <input type="radio" name="pro-care-choice" value="No care plan" checked>
+                <span>
+                  <strong>Website only</strong>
+                  <small>No monthly care plan</small>
+                </span>
               </label>
-              <small>Choose Automation Care if the project includes backend automations.</small>
+              <label class="care-choice">
+                <input type="radio" name="pro-care-choice" value="Pro Care — £99/month">
+                <span>
+                  <strong>Website + Pro Care</strong>
+                  <small>£99/month after launch</small>
+                </span>
+              </label>
             </div>
             <a class="button button-dark package-select-button" href="#contact" data-package="Pro — £599">Choose Pro</a>
           </article>
@@ -406,18 +421,18 @@
             <h2>You own the website. We look after the technical side.</h2>
           </div>
           <p>
-            Website Care is optional. It is designed for business owners who do not want to deal with code,
-            backups, DNS, forms or technical problems themselves. Choose a plan with your website package,
-            and GD TradeWeb can continue looking after the existing website after launch.
+            Website Care is optional. Each website package has one matching care level, so there is no
+            complicated technical choice to make. Choose the website on its own, or add the matching care plan
+            and GD TradeWeb will continue looking after the agreed technical side after launch.
           </p>
         </div>
 
         <div class="care-grid">
           <article class="care-card">
             <div class="care-card-top">
-              <span>WEBSITE CARE</span>
+              <span>STARTER CARE</span>
               <strong>£29<small>/month</small></strong>
-              <p>For straightforward brochure-style websites that mainly need to stay online and up to date.</p>
+              <p>Matched to the Starter website package — simple ongoing maintenance without technical hassle.</p>
             </div>
             <ul>
               <li>Monthly website health check</li>
@@ -426,7 +441,7 @@
               <li>Domain and DNS support</li>
               <li>Help if the existing website stops loading correctly</li>
             </ul>
-            <a class="button button-dark care-select-button" href="#contact" data-care="Website Care — £29/month">Choose Website Care</a>
+            <a class="button button-dark care-select-button" href="#contact" data-package="Starter — £249" data-care="Website Care — £29/month">Choose Starter + Care</a>
           </article>
 
           <article class="care-card featured-care">
@@ -434,7 +449,7 @@
             <div class="care-card-top">
               <span>BUSINESS CARE</span>
               <strong>£59<small>/month</small></strong>
-              <p>For active business websites using enquiry forms, email delivery and regular content updates.</p>
+              <p>Matched to the Business website package — for forms, email delivery and more regular content support.</p>
             </div>
             <ul>
               <li>Everything in Website Care</li>
@@ -444,14 +459,14 @@
               <li>Technical troubleshooting for the existing site</li>
               <li>Priority support over basic care</li>
             </ul>
-            <a class="button button-yellow care-select-button" href="#contact" data-care="Business Care — £59/month">Choose Business Care</a>
+            <a class="button button-yellow care-select-button" href="#contact" data-package="Business — £399" data-care="Business Care — £59/month">Choose Business + Care</a>
           </article>
 
           <article class="care-card">
             <div class="care-card-top">
-              <span>AUTOMATION CARE</span>
+              <span>PRO CARE</span>
               <strong>£99<small>/month</small></strong>
-              <p>For websites with admin systems, databases, automated email, webhooks or payment integrations.</p>
+              <p>Matched to the Pro website package — for advanced sites that may include admin, database or automation features.</p>
             </div>
             <ul>
               <li>Everything in Business Care</li>
@@ -461,7 +476,7 @@
               <li>Existing payment-integration support</li>
               <li>Troubleshooting of existing automations</li>
             </ul>
-            <a class="button button-dark care-select-button" href="#contact" data-care="Automation Care — £99/month">Choose Automation Care</a>
+            <a class="button button-dark care-select-button" href="#contact" data-package="Pro — £599" data-care="Pro Care — £99/month">Choose Pro + Care</a>
           </article>
         </div>
 
@@ -471,9 +486,10 @@
             <strong>Maintenance of the website we already built.</strong>
           </div>
           <p>
-            Care plans cover routine maintenance and small updates to the existing website. New pages,
-            redesigns, new features, new integrations, advertising work and paid third-party services are
-            quoted separately before any extra work starts. Unused monthly update time does not roll over.
+            Care is tied to the website package you choose: Starter Care £29/month, Business Care £59/month
+            or Pro Care £99/month. It covers routine maintenance and the included small-update allowance for
+            the existing website. New pages, redesigns, new features, new integrations, advertising work and
+            paid third-party services are quoted separately. Unused monthly update time does not roll over.
           </p>
         </div>
       </div>
@@ -673,15 +689,12 @@
           <label id="care-field">
             Website care <span class="optional">(optional)</span>
             <select name="care_plan" id="lead-care-plan">
-              <option value="No care plan">No care plan</option>
-              <option value="Website Care — £29/month">Website Care — £29/month</option>
-              <option value="Business Care — £59/month">Business Care — £59/month</option>
-              <option value="Automation Care — £99/month">Automation Care — £99/month</option>
+              <option value="No care plan">Website only — no monthly care plan</option>
             </select>
           </label>
 
-          <p class="care-form-note">
-            Care starts after launch and covers maintenance of the existing website. New development and paid third-party services are quoted separately.
+          <p class="care-form-note" id="care-form-note">
+            Choose a website package first. Its matching care option will appear here.
           </p>
 
           <label>

@@ -1,2 +1,6 @@
 
 .DS_Store
+
+.care-plan-backup/
+.care-choice-backup/
+supabase/.temp/

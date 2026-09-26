@@ -30,7 +30,7 @@ create table if not exists public.leads (
       'No care plan',
       'Website Care — £29/month',
       'Business Care — £59/month',
-      'Automation Care — £99/month'
+      'Pro Care — £99/month'
     )),
   message text,
   terms_accepted boolean not null default false,

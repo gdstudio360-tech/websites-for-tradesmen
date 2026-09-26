@@ -78,11 +78,59 @@ const changePackageButton = document.getElementById("change-package");
 const packageField = document.getElementById("package-field");
 const carePlanSelect = document.getElementById("lead-care-plan");
 const careField = document.getElementById("care-field");
+const careFormNote = document.getElementById("care-form-note");
+
+const CARE_BY_PACKAGE = {
+  "Starter — £249": {
+    value: "Website Care — £29/month",
+    label: "Website + Starter Care — £29/month"
+  },
+  "Business — £399": {
+    value: "Business Care — £59/month",
+    label: "Website + Business Care — £59/month"
+  },
+  "Pro — £599": {
+    value: "Pro Care — £99/month",
+    label: "Website + Pro Care — £99/month"
+  }
+};
+
+function refreshCareOptions(packageName, preferredValue = "No care plan") {
+  if (!carePlanSelect) return;
+
+  const care = CARE_BY_PACKAGE[packageName];
+  carePlanSelect.innerHTML = "";
+
+  const websiteOnly = document.createElement("option");
+  websiteOnly.value = "No care plan";
+  websiteOnly.textContent = "Website only — no monthly care plan";
+  carePlanSelect.appendChild(websiteOnly);
+
+  if (care) {
+    const withCare = document.createElement("option");
+    withCare.value = care.value;
+    withCare.textContent = care.label;
+    carePlanSelect.appendChild(withCare);
+
+    if (careFormNote) {
+      careFormNote.textContent =
+        "Care starts after launch. It covers the maintenance allowance shown for this website package.";
+    }
+  } else if (careFormNote) {
+    careFormNote.textContent =
+      "Choose a website package first. Its matching care option will appear here.";
+  }
+
+  carePlanSelect.value =
+    Array.from(carePlanSelect.options).some((item) => item.value === preferredValue)
+      ? preferredValue
+      : "No care plan";
+}
 
 function updateSelectedCare(carePlan) {
-  if (!carePlanSelect || !carePlan) return;
+  if (!carePlanSelect) return;
   const option = Array.from(carePlanSelect.options).find((item) => item.value === carePlan);
-  if (option) carePlanSelect.value = carePlan;
+  carePlanSelect.value = option ? carePlan : "No care plan";
 }
 
 function updateSelectedPackage(packageName, showSummary = true) {
@@ -111,15 +159,20 @@ function updateSelectedPackage(packageName, showSummary = true) {
 document.querySelectorAll(".package-select-button").forEach((button) => {
   button.addEventListener("click", () => {
     const packageName = button.dataset.package;
-    const carePicker = button.closest(".price-card")?.querySelector(".card-care-select");
+    const careChoice =
+      button.closest(".price-card")?.querySelector('input[type="radio"]:checked')?.value ||
+      "No care plan";
+
     updateSelectedPackage(packageName, true);
-    if (carePicker) updateSelectedCare(carePicker.value);
+    refreshCareOptions(packageName, careChoice);
   });
 });
 
 document.querySelectorAll(".care-select-button").forEach((button) => {
   button.addEventListener("click", () => {
-    updateSelectedCare(button.dataset.care);
+    const packageName = button.dataset.package;
+    updateSelectedPackage(packageName, true);
+    refreshCareOptions(packageName, button.dataset.care || "No care plan");
     careField?.scrollIntoView({ behavior: "smooth", block: "center" });
   });
 });
@@ -127,8 +180,11 @@ document.querySelectorAll(".care-select-button").forEach((button) => {
 if (packageSelect) {
   packageSelect.addEventListener("change", () => {
     updateSelectedPackage(packageSelect.value, true);
+    refreshCareOptions(packageSelect.value, "No care plan");
   });
 }
+
+refreshCareOptions(packageSelect?.value || "Not sure — recommend one", "No care plan");
 
 if (changePackageButton && packageField && packageSelect) {
   changePackageButton.addEventListener("click", () => {
@@ -240,6 +296,7 @@ if (form) {
 
         form.reset();
         updateSelectedPackage("Not sure — recommend one", false);
+        refreshCareOptions("Not sure — recommend one", "No care plan");
         setFormStatus(
           "Thanks — your enquiry has been sent. We’ll review it and, if the project is a good fit, send you an approval and secure deposit link.",
           "success"
