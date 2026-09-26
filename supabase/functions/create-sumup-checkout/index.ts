@@ -18,8 +18,16 @@ Deno.serve(async (req) => {
     const serviceKey =
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ||
       Deno.env.get("SUPABASE_SECRET_KEY")!;
-    const sumupKey = Deno.env.get("SUMUP_API_KEY");
-    const merchantCode = Deno.env.get("SUMUP_MERCHANT_CODE");
+    const testMode =
+      (Deno.env.get("SUMUP_TEST_MODE") || "").toLowerCase() === "true";
+
+    const sumupKey = testMode
+      ? Deno.env.get("SUMUP_SANDBOX_API_KEY")
+      : Deno.env.get("SUMUP_API_KEY");
+
+    const merchantCode = testMode
+      ? Deno.env.get("SUMUP_SANDBOX_MERCHANT_CODE")
+      : Deno.env.get("SUMUP_MERCHANT_CODE");
     const siteUrl = (Deno.env.get("SITE_URL") || "").replace(/\/$/, "");
 
     if (!sumupKey) throw new Error("SUMUP_API_KEY is not configured.");
@@ -124,6 +132,12 @@ Deno.serve(async (req) => {
     const checkout = await response.json();
 
     if (!response.ok) {
+      console.error(
+        "SUMUP_CREATE_FAILED",
+        response.status,
+        JSON.stringify(checkout),
+      );
+
       throw new Error(
         checkout?.message ||
         checkout?.error_message ||
