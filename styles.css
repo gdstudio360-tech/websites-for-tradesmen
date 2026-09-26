@@ -1034,11 +1034,69 @@ button{cursor:pointer}
 .care-card ul{list-style:none;padding:20px 0;margin:18px 0 22px;border-top:1px solid var(--line);flex:1}
 .care-card li{position:relative;padding:7px 0 7px 25px;font-size:.9rem}
 .care-card li:before{content:"✓";position:absolute;left:0;color:#937300;font-weight:950}
+.care-availability{
+  margin-top:auto;
+  padding:14px 15px;
+  border:1px solid #d9dfe6;
+  border-radius:11px;
+  background:#f7f9fb;
+}
+.care-availability span,
+.care-availability strong{
+  display:block;
+}
+.care-availability span{
+  color:#8e7200;
+  font-size:.56rem;
+  font-weight:950;
+  letter-spacing:.13em;
+}
+.care-availability strong{
+  margin-top:4px;
+  color:var(--ink);
+  font-size:.78rem;
+  line-height:1.4;
+}
 .care-explainer{margin-top:20px;padding:24px 26px;border:1px solid var(--line);border-radius:16px;background:#f6f8fa;display:grid;grid-template-columns:.75fr 1.25fr;gap:45px;align-items:center}
 .care-explainer span,.care-explainer strong{display:block}
 .care-explainer span{font-size:.6rem;font-weight:950;letter-spacing:.13em;color:#8e7200}
 .care-explainer strong{margin-top:4px;font-size:1.05rem}
 .care-explainer p{margin:0;color:var(--muted);font-size:.83rem;line-height:1.6}
+.care-policy-note{
+  margin-top:14px;
+  padding:22px 24px;
+  border-left:4px solid var(--yellow);
+  border-radius:0 14px 14px 0;
+  background:#fffbea;
+  display:grid;
+  grid-template-columns:.8fr 1.2fr auto;
+  gap:28px;
+  align-items:center;
+}
+.care-policy-note span,
+.care-policy-note strong{
+  display:block;
+}
+.care-policy-note span{
+  color:#8e7200;
+  font-size:.57rem;
+  font-weight:950;
+  letter-spacing:.13em;
+}
+.care-policy-note strong{
+  margin-top:4px;
+  font-size:.92rem;
+  line-height:1.4;
+}
+.care-policy-note p{
+  margin:0;
+  color:var(--muted);
+  font-size:.8rem;
+  line-height:1.55;
+}
+.care-policy-note .button{
+  white-space:nowrap;
+}
 .care-form-note{margin:-5px 0 0;color:#7b8593;font-size:.7rem;line-height:1.45}
 @media(max-width:980px){
   .care-intro{grid-template-columns:1fr;gap:18px}
@@ -1046,4 +1104,6 @@ button{cursor:pointer}
   .care-card{max-width:690px;width:100%;margin-inline:auto}
   .care-card-top>p{min-height:0}
   .care-explainer{grid-template-columns:1fr;gap:8px;max-width:690px;margin-inline:auto;margin-top:20px}
+  .care-policy-note{grid-template-columns:1fr;gap:12px;max-width:690px;margin-inline:auto;margin-top:14px}
+  .care-policy-note .button{justify-self:start}
 }
