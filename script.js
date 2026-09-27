@@ -330,3 +330,106 @@ if (form) {
     }
   });
 }
+
+
+/* GD PREMIUM MOTION START */
+
+(() => {
+
+  if (!document.body.classList.contains("gd-premium")) return;
+
+  const reduced =
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const header = document.querySelector(".site-header");
+  const heroPreview = document.querySelector(".hero-preview");
+
+  function scrollEffects(){
+
+    const y = window.scrollY || 0;
+
+    if(header){
+      header.classList.toggle("gd-scrolled", y > 20);
+    }
+
+    if(heroPreview && !reduced && window.innerWidth > 980){
+      heroPreview.style.transform =
+        `translateY(${Math.min(y * .025, 22)}px)`;
+    }
+
+  }
+
+  window.addEventListener(
+    "scroll",
+    () => requestAnimationFrame(scrollEffects),
+    {passive:true}
+  );
+
+  scrollEffects();
+
+  const selectors = [
+    ".section-head",
+    ".benefit",
+    ".about-copy",
+    ".trust-panel",
+    ".demo-copy",
+    ".demo-device",
+    ".pricing-head",
+    ".price-card",
+    ".care-intro",
+    ".care-explainer",
+    ".care-policy-note",
+    ".steps li",
+    ".faq-list details",
+    ".contact-copy",
+    ".lead-form"
+  ];
+
+  const items =
+    document.querySelectorAll(selectors.join(","));
+
+  items.forEach((el,index) => {
+
+    el.classList.add("gd-reveal");
+
+    el.style.setProperty(
+      "--gd-delay",
+      `${(index % 4) * 75}ms`
+    );
+
+  });
+
+  if(reduced || !("IntersectionObserver" in window)){
+
+    items.forEach(el =>
+      el.classList.add("gd-visible")
+    );
+
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    entries => {
+
+      entries.forEach(entry => {
+
+        if(!entry.isIntersecting) return;
+
+        entry.target.classList.add("gd-visible");
+
+        observer.unobserve(entry.target);
+
+      });
+
+    },
+    {
+      threshold:.12,
+      rootMargin:"0px 0px -45px 0px"
+    }
+  );
+
+  items.forEach(el => observer.observe(el));
+
+})();
+
+/* GD PREMIUM MOTION END */
