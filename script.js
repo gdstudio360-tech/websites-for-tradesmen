@@ -37,13 +37,9 @@ const contact = {
   email: ["gdstudio360", "@", "gmail.com"].join("")
 };
 
-const callButton = document.getElementById("contact-call");
 const whatsappButton = document.getElementById("contact-whatsapp");
 const emailButton = document.getElementById("contact-email");
 
-if (callButton) {
-  callButton.href = `tel:${contact.phone}`;
-}
 
 if (emailButton) {
   emailButton.href = `mailto:${contact.email}`;
