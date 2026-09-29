@@ -122,12 +122,12 @@ Deno.serve(async (req) => {
           </p>
 
           <p>
-            Your GD TradeWeb project is now confirmed.
+            Your GD Studio 360 project is now confirmed.
             I’ll contact you regarding the content, access details and
             anything else needed to begin the build.
           </p>
 
-          <p>GD TradeWeb</p>
+          <p>GD Studio 360</p>
         </div>
       `;
 
@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
 
           ${
             siteUrl
-              ? `<p><a href="${siteUrl}/admin.html">Open GD TradeWeb Admin</a></p>`
+              ? `<p><a href="${siteUrl}/admin.html">Open GD Studio 360 Admin</a></p>`
               : ""
           }
         </div>
@@ -157,7 +157,7 @@ Deno.serve(async (req) => {
           from: emailFrom,
           reply_to: [adminEmail],
           to: [paidLead.email],
-          subject: "GD TradeWeb — deposit received",
+          subject: "GD Studio 360 — deposit received",
           html: clientHtml,
         }),
 

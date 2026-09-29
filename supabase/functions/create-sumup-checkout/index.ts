@@ -122,7 +122,7 @@ Deno.serve(async (req) => {
         amount,
         currency: "GBP",
         merchant_code: merchantCode,
-        description: `GD TradeWeb deposit — ${lead.business}`,
+        description: `GD Studio 360 deposit — ${lead.business}`,
         return_url: webhookUrl,
         redirect_url: `${siteUrl}/payment-success.html?token=${encodeURIComponent(token)}`,
         hosted_checkout: { enabled: true },

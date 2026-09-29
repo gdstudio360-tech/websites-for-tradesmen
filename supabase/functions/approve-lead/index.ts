@@ -115,7 +115,7 @@ Deno.serve(async (req) => {
           from: emailFrom,
           reply_to: ["gdstudio360@gmail.com"],
           to: [lead.email],
-          subject: `GD TradeWeb — ${lead.business} project approved`,
+          subject: `GD Studio 360 — ${lead.business} project approved`,
           html: `
             <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#172033;line-height:1.6">
               <h2>Your website project has been approved</h2>
@@ -137,7 +137,7 @@ Deno.serve(async (req) => {
                 </a>
               </p>
               <p><a href="${termsUrl}">Read the project terms</a></p>
-              <p>GD TradeWeb</p>
+              <p>GD Studio 360</p>
             </div>
           `,
         }),
