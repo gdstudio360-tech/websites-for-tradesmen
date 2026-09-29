@@ -38,6 +38,19 @@ function prettyStatus(status) {
   return String(status || "new").replaceAll("_", " ");
 }
 
+const ADMIN_PACKAGES = [
+  "Not sure — recommend one",
+  "Starter — £249",
+  "Business — £399",
+  "Pro — £599"
+];
+
+const ADMIN_CARE_BY_PACKAGE = {
+  "Starter — £249": "Website Care — £29/month",
+  "Business — £399": "Business Care — £59/month",
+  "Pro — £599": "Pro Care — £99/month"
+};
+
 function showLogin() {
   loginView.hidden = false;
   dashboardView.hidden = true;
@@ -179,6 +192,65 @@ function renderLeads() {
     const complete = fragment.querySelector(".complete-button");
     const result = fragment.querySelector(".deposit-result");
 
+    let packageEditor = null;
+    let careEditor = null;
+
+    if (["new", "approved"].includes(lead.status)) {
+      const editor = document.createElement("div");
+      editor.className = "lead-decision";
+      editor.innerHTML = `
+        <label>
+          Package
+          <select class="admin-package-select">
+            ${ADMIN_PACKAGES.map((item) =>
+              `<option value="${item}">${item}</option>`
+            ).join("")}
+          </select>
+        </label>
+
+        <label>
+          Care plan
+          <select class="admin-care-select"></select>
+        </label>
+      `;
+
+      fragment.querySelector(".lead-actions").before(editor);
+
+      packageEditor = editor.querySelector(".admin-package-select");
+      careEditor = editor.querySelector(".admin-care-select");
+
+      packageEditor.value = ADMIN_PACKAGES.includes(lead.package)
+        ? lead.package
+        : "Not sure — recommend one";
+
+      const refreshAdminCare = () => {
+        const current = careEditor.value || lead.care_plan || "No care plan";
+        const matchingCare = ADMIN_CARE_BY_PACKAGE[packageEditor.value];
+
+        careEditor.innerHTML = "";
+
+        const noCare = document.createElement("option");
+        noCare.value = "No care plan";
+        noCare.textContent = "No care plan";
+        careEditor.appendChild(noCare);
+
+        if (matchingCare) {
+          const option = document.createElement("option");
+          option.value = matchingCare;
+          option.textContent = matchingCare;
+          careEditor.appendChild(option);
+        }
+
+        careEditor.value =
+          Array.from(careEditor.options).some((option) => option.value === current)
+            ? current
+            : "No care plan";
+      };
+
+      refreshAdminCare();
+      packageEditor.addEventListener("change", refreshAdminCare);
+    }
+
     const hasDepositLink = Boolean(lead.deposit_url);
     const canApprove = ["new", "approved"].includes(lead.status);
 
@@ -202,9 +274,34 @@ function renderLeads() {
     }
 
     approve.addEventListener("click", async () => {
+      const selectedPackage = packageEditor?.value || lead.package;
+      const selectedCare = careEditor?.value || lead.care_plan || "No care plan";
+
+      if (selectedPackage === "Not sure — recommend one") {
+        dashboardStatus.textContent =
+          "Choose Starter, Business or Pro before approving this project.";
+        packageEditor?.focus();
+        return;
+      }
+
       approve.disabled = true;
       approve.textContent = "Approving…";
       dashboardStatus.textContent = `Approving ${lead.business}…`;
+
+      const { error: selectionError } = await client
+        .from("leads")
+        .update({
+          package: selectedPackage,
+          care_plan: selectedCare
+        })
+        .eq("id", lead.id);
+
+      if (selectionError) {
+        dashboardStatus.textContent = selectionError.message;
+        approve.disabled = false;
+        approve.textContent = "Approve & create deposit";
+        return;
+      }
 
       const { data, error } = await client.functions.invoke("approve-lead", {
         body: { lead_id: lead.id }

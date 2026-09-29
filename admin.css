@@ -45,3 +45,19 @@ form button,.approve-button{min-height:46px;border:0;border-radius:10px;backgrou
   .stats-grid{grid-template-columns:1fr 1fr}.toolbar{display:grid}.lead-card-top{display:grid}.lead-package{justify-self:start}
   .dashboard-heading{align-items:start}.lead-actions{display:grid}.lead-actions>*{width:100%;justify-content:center}
 }
+
+
+.lead-decision{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:18px;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fbfcfd;
+}
+
+@media(max-width:760px){
+  .lead-decision{grid-template-columns:1fr}
+}
