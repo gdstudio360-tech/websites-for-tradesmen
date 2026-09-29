@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://gdtradeweb.co.uk/sitemap.xml
+Sitemap: https://gdstudio360.co.uk/sitemap.xml
