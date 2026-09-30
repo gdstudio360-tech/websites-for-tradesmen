@@ -345,7 +345,14 @@ Deno.serve(async (req) => {
           model: openaiModel,
           instructions: SYSTEM_PROMPT,
           input: transcript,
-          max_output_tokens: 450,
+          reasoning: {
+            effort: "minimal",
+          },
+          text: {
+            verbosity: "low",
+          },
+          max_output_tokens: 600,
+          store: false,
         }),
       },
     );
@@ -368,7 +375,13 @@ Deno.serve(async (req) => {
     const reply = extractOpenAIText(openaiPayload);
 
     if (!reply) {
-      throw new Error("AI service returned an empty response.");
+      console.error(
+        "OPENAI_EMPTY_RESPONSE",
+        JSON.stringify(openaiPayload),
+      );
+      throw new Error(
+        "AI service returned an empty response. Check Edge Function logs."
+      );
     }
 
     const { error: assistantMessageError } = await db
