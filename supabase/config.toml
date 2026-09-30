@@ -15,3 +15,6 @@ verify_jwt = false
 
 [functions.admin-inbox]
 verify_jwt = false
+
+[functions.resend-inbound]
+verify_jwt = false

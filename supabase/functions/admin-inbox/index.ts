@@ -297,13 +297,9 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             from: emailFrom,
             to: [email],
-            ...(adminEmail
-              ? {
-                  reply_to: [
-                    adminEmail,
-                  ],
-                }
-              : {}),
+            reply_to: [
+              `reply+${conversationId}@gdstudio360.co.uk`,
+            ],
             subject:
               `GD Studio 360 — ${business}`,
             text:
