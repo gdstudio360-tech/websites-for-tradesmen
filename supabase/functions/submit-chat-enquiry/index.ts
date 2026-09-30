@@ -54,6 +54,12 @@ Deno.serve(async (req) => {
     const acceptedTerms =
       body?.accepted_terms === true;
 
+    const humanContact =
+      body?.human_contact &&
+      typeof body.human_contact === "object"
+        ? body.human_contact
+        : null;
+
     if (!conversationId) {
       throw new Error("Missing conversation_id.");
     }
@@ -135,7 +141,47 @@ Deno.serve(async (req) => {
       throw new Error("Conversation not found.");
     }
 
-    const e = conversation.pending_enquiry;
+    let e = conversation.pending_enquiry;
+
+    if (humanContact) {
+      const name =
+        String(humanContact.name || "").trim();
+
+      const email =
+        String(humanContact.email || "").trim().toLowerCase();
+
+      const phone =
+        String(humanContact.phone || "").trim();
+
+      const business =
+        String(humanContact.business || "").trim();
+
+      const message =
+        String(humanContact.message || "").trim();
+
+      if (!name) {
+        throw new Error("Please enter your name.");
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        throw new Error("Please enter a valid email address.");
+      }
+
+      e = {
+        name,
+        business: business || "Not provided",
+        trade: "Not specified",
+        area: "Not specified",
+        email,
+        phone: phone || null,
+        current_site: null,
+        package: "Not sure — human consultation",
+        care_plan: "No care plan",
+        project_summary:
+          message ||
+          "Customer requested a human consultation before choosing a website package.",
+      };
+    }
 
     if (!e) {
       throw new Error(

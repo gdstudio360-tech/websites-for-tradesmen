@@ -459,6 +459,7 @@ if (form) {
   const launcher = document.getElementById("gd-chat-launcher");
   const panel = document.getElementById("gd-chat-panel");
   const closeButton = document.getElementById("gd-chat-close");
+  const newChatButton = document.getElementById("gd-chat-new");
   const messages = document.getElementById("gd-chat-messages");
   const form = document.getElementById("gd-chat-form");
   const input = document.getElementById("gd-chat-input");
@@ -549,6 +550,210 @@ if (form) {
 
     row.append(key, val);
     container.appendChild(row);
+  }
+
+
+  function renderHumanContactCard() {
+    document
+      .querySelectorAll(".gd-human-card")
+      .forEach((card) => card.remove());
+
+    document
+      .querySelectorAll(".gd-enquiry-card")
+      .forEach((card) => card.remove());
+
+    const card = document.createElement("div");
+    card.className = "gd-human-card";
+
+    const title = document.createElement("h4");
+    title.textContent = "Speak to a person";
+
+    const intro = document.createElement("p");
+    intro.textContent =
+      "You don't need to choose a package. Leave your details and GD Studio 360 can review your request.";
+
+    const fields = document.createElement("div");
+    fields.className = "gd-human-fields";
+
+    const name = document.createElement("input");
+    name.placeholder = "Your name *";
+    name.autocomplete = "name";
+
+    const business = document.createElement("input");
+    business.placeholder = "Business name (optional)";
+    business.autocomplete = "organization";
+
+    const email = document.createElement("input");
+    email.type = "email";
+    email.placeholder = "Email address *";
+    email.autocomplete = "email";
+
+    const phone = document.createElement("input");
+    phone.type = "tel";
+    phone.placeholder = "WhatsApp / phone (optional)";
+    phone.autocomplete = "tel";
+
+    const note = document.createElement("textarea");
+    note.placeholder =
+      "What would you like to discuss? (optional)";
+
+    fields.append(
+      name,
+      business,
+      email,
+      phone,
+      note
+    );
+
+    const consentLabel = document.createElement("label");
+    consentLabel.className = "gd-enquiry-consent";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+
+    const consentText = document.createElement("span");
+    consentText.append("I agree to the ");
+
+    const terms = document.createElement("a");
+    terms.href = "terms.html";
+    terms.target = "_blank";
+    terms.rel = "noopener";
+    terms.textContent = "Enquiry Terms";
+
+    const andText = document.createTextNode(" and ");
+
+    const privacy = document.createElement("a");
+    privacy.href = "privacy.html";
+    privacy.target = "_blank";
+    privacy.rel = "noopener";
+    privacy.textContent = "Privacy Notice";
+
+    consentText.append(
+      terms,
+      andText,
+      privacy,
+      document.createTextNode(
+        " and want GD Studio 360 to contact me."
+      )
+    );
+
+    consentLabel.append(
+      checkbox,
+      consentText
+    );
+
+    const submit = document.createElement("button");
+    submit.type = "button";
+    submit.className = "gd-enquiry-submit";
+    submit.textContent = "Request human contact";
+    submit.disabled = true;
+
+    const status = document.createElement("div");
+    status.className = "gd-enquiry-status";
+    status.textContent =
+      "Your details have not been sent yet.";
+
+    checkbox.addEventListener("change", () => {
+      submit.disabled = !checkbox.checked;
+    });
+
+    submit.addEventListener("click", async () => {
+      const nameValue = name.value.trim();
+      const emailValue = email.value.trim();
+
+      if (!nameValue) {
+        status.textContent = "Please enter your name.";
+        name.focus();
+        return;
+      }
+
+      if (!email.checkValidity() || !emailValue) {
+        status.textContent =
+          "Please enter a valid email address.";
+        email.focus();
+        return;
+      }
+
+      if (!checkbox.checked) return;
+
+      submit.disabled = true;
+      checkbox.disabled = true;
+      submit.textContent = "Sending…";
+      status.textContent =
+        "Sending your contact request securely…";
+
+      try {
+        const response = await fetch(submitEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            conversation_id: conversationId,
+            accepted_terms: true,
+            human_contact: {
+              name: nameValue,
+              business: business.value.trim(),
+              email: emailValue,
+              phone: phone.value.trim(),
+              message: note.value.trim()
+            }
+          })
+        });
+
+        let data = {};
+
+        try {
+          data = await response.json();
+        } catch (_) {}
+
+        if (!response.ok || !data?.ok) {
+          throw new Error(
+            data?.error || "Could not send the request."
+          );
+        }
+
+        submit.textContent = "Contact request sent";
+        status.textContent =
+          "GD Studio 360 will review your request.";
+
+        name.disabled = true;
+        business.disabled = true;
+        email.disabled = true;
+        phone.disabled = true;
+        note.disabled = true;
+
+        addMessage(
+          "assistant",
+          data.reply ||
+            "Thanks — your contact request has been sent."
+        );
+
+      } catch (error) {
+        console.error(
+          "GD Studio 360 human handoff:",
+          error
+        );
+
+        checkbox.disabled = false;
+        submit.disabled = !checkbox.checked;
+        submit.textContent = "Request human contact";
+        status.textContent =
+          "Could not send the request. Please try again.";
+      }
+    });
+
+    card.append(
+      title,
+      intro,
+      fields,
+      consentLabel,
+      submit,
+      status
+    );
+
+    messages.appendChild(card);
+    messages.scrollTop = messages.scrollHeight;
   }
 
   function renderEnquiryCard(enquiry) {
@@ -806,9 +1011,7 @@ if (form) {
           pendingEnquiryStorageKey
         );
 
-        document
-          .querySelectorAll(".gd-enquiry-card")
-          .forEach((card) => card.remove());
+        renderHumanContactCard();
       }
 
       if (
@@ -848,6 +1051,18 @@ if (form) {
   });
 
   closeButton?.addEventListener("click", closeChat);
+
+  newChatButton?.addEventListener("click", () => {
+    localStorage.removeItem(
+      conversationStorageKey
+    );
+
+    localStorage.removeItem(
+      pendingEnquiryStorageKey
+    );
+
+    window.location.reload();
+  });
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();

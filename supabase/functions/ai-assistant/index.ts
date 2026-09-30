@@ -413,6 +413,45 @@ function isHumanHandoffRequest(message: string): boolean {
   return patterns.some((pattern) => pattern.test(text));
 }
 
+
+function isGenericPackageHelpRequest(message: string): boolean {
+  const text = message.toLowerCase().trim();
+
+  const patterns = [
+    /help me choose.*package/i,
+    /which package.*need/i,
+    /not sure.*package/i,
+    /nežinau.*paket/i,
+    /nezinau.*paket/i,
+    /padėk.*pasirink.*paket/i,
+    /padek.*pasirink.*paket/i,
+    /какой.*пакет/i,
+    /помоги.*выбрать.*пакет/i,
+  ];
+
+  return patterns.some((pattern) => pattern.test(text));
+}
+
+function packageHelpReply(message: string): string {
+  const text = message.toLowerCase();
+
+  const looksLithuanian =
+    /nežinau|nezinau|paket|padėk|padek|pasirink/i.test(text);
+
+  const looksRussian =
+    /пакет|выбрать|помоги|какой/i.test(text);
+
+  if (looksLithuanian) {
+    return "Žinoma. Pirmiausia išsiaiškinkime, ko jums reikia — ar norite paprastos vieno puslapio svetainės su paslaugomis ir kontaktais, ar atskirų puslapių, darbų galerijos ir atsiliepimų?";
+  }
+
+  if (looksRussian) {
+    return "Конечно. Сначала уточним, что вам нужно: простой одностраничный сайт с услугами и контактами или отдельные страницы, галерея работ и отзывы?";
+  }
+
+  return "Absolutely. First, let's work out what you need — are you looking for a simple one-page website with your services and contact details, or separate pages, a project gallery and customer reviews?";
+}
+
 function humanHandoffReply(message: string): string {
   const text = message.toLowerCase();
 
@@ -636,6 +675,64 @@ Deno.serve(async (req) => {
           conversation_id: conversationId,
           reply: handoffReply,
           human_handoff: true,
+        },
+        200,
+        origin,
+      );
+    }
+
+    if (humanHandoffActive) {
+      const handoffReply =
+        "You asked to speak with a person. Please complete the human contact request below — you do not need to choose a package.";
+
+      const { error: handoffMessageError } =
+        await db
+          .from("messages")
+          .insert({
+            conversation_id: conversationId,
+            role: "assistant",
+            channel: "website",
+            content: handoffReply,
+          });
+
+      if (handoffMessageError) {
+        throw handoffMessageError;
+      }
+
+      return jsonResponse(
+        {
+          ok: true,
+          conversation_id: conversationId,
+          reply: handoffReply,
+          human_handoff: true,
+        },
+        200,
+        origin,
+      );
+    }
+
+    if (isGenericPackageHelpRequest(message)) {
+      const reply = packageHelpReply(message);
+
+      const { error: packageHelpMessageError } =
+        await db
+          .from("messages")
+          .insert({
+            conversation_id: conversationId,
+            role: "assistant",
+            channel: "website",
+            content: reply,
+          });
+
+      if (packageHelpMessageError) {
+        throw packageHelpMessageError;
+      }
+
+      return jsonResponse(
+        {
+          ok: true,
+          conversation_id: conversationId,
+          reply,
         },
         200,
         origin,
