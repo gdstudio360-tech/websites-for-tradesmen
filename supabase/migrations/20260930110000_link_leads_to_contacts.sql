@@ -2,6 +2,24 @@
 -- Link existing and future website leads to tenant/contact records
 -- without changing the existing SumUp/payment workflow.
 
+-- Keep contact source values aligned with future channels.
+alter table public.contacts
+  drop constraint if exists contacts_source_check;
+
+alter table public.contacts
+  add constraint contacts_source_check
+  check (
+    source in (
+      'website',
+      'email',
+      'whatsapp',
+      'phone',
+      'voice',
+      'manual',
+      'other'
+    )
+  );
+
 -- =========================================================
 -- EXTEND LEADS
 -- =========================================================
