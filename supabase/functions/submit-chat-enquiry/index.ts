@@ -175,7 +175,7 @@ Deno.serve(async (req) => {
         email,
         phone: phone || null,
         current_site: null,
-        package: "Not sure — human consultation",
+        package: "Not sure — recommend one",
         care_plan: "No care plan",
         project_summary:
           message ||
@@ -243,7 +243,7 @@ Deno.serve(async (req) => {
         tenant_id: tenant.id,
         contact_id: lead.contact_id,
         purpose:
-          e.package === "Not sure — human consultation"
+          e.package === "Not sure — recommend one"
             ? "human_consultation_request"
             : "website_project_enquiry",
         consent_given: true,
@@ -267,7 +267,7 @@ Deno.serve(async (req) => {
       });
 
     const isHumanHandoff =
-      e.package === "Not sure — human consultation";
+      e.package === "Not sure — recommend one";
 
     const reply = isHumanHandoff
       ? "Thanks — your request has been sent to GD Studio 360. A person will review it and contact you using the details you provided. No payment has been taken."

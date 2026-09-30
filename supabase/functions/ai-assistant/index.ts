@@ -207,7 +207,7 @@ When this happens:
 4. Say that you can prepare a human consultation request.
 5. Collect the missing enquiry information ONE item at a time.
 6. If no package has already been clearly chosen, use:
-   "Not sure — human consultation"
+   "Not sure — recommend one"
 7. Do not claim that a person will contact them until they have reviewed
    and submitted the confirmation card.
 
@@ -260,7 +260,7 @@ Required information:
 - trade / type of business;
 - town or service area;
 - email address;
-- recommended website package OR "Not sure — human consultation";
+- recommended website package OR "Not sure — recommend one";
 - a short summary of what they want.
 
 Optional:
@@ -308,7 +308,7 @@ const PREPARE_ENQUIRY_TOOL = {
           "Starter — £249",
           "Business — £399",
           "Pro — £599",
-          "Not sure — human consultation"
+          "Not sure — recommend one"
         ]
       },
       care_plan: {
@@ -787,7 +787,7 @@ Your only job now is to gather the information needed for a human consultation r
 Ask for ONE missing item at a time.
 
 When enough information is available, prepare the enquiry using:
-package = "Not sure — human consultation"
+package = "Not sure — recommend one"
 care_plan = "No care plan"
 
 Do not claim a person will contact the customer until the customer has reviewed and submitted the confirmation card.
@@ -861,7 +861,7 @@ Do not claim a person will contact the customer until the customer has reviewed 
         phone: clean(enquiry.phone) || null,
         current_site: clean(enquiry.current_site) || null,
         package: humanHandoffActive
-          ? "Not sure — human consultation"
+          ? "Not sure — recommend one"
           : clean(enquiry.package),
         care_plan: humanHandoffActive
           ? "No care plan"
@@ -873,7 +873,7 @@ Do not claim a person will contact the customer until the customer has reviewed 
         "Starter — £249",
         "Business — £399",
         "Pro — £599",
-        "Not sure — human consultation",
+        "Not sure — recommend one",
       ];
 
       if (
@@ -906,7 +906,7 @@ Do not claim a person will contact the customer until the customer has reviewed 
       }
 
       const isHumanHandoff =
-        enquiry.package === "Not sure — human consultation";
+        enquiry.package === "Not sure — recommend one";
 
       const reply = isHumanHandoff
         ? "I’ve prepared your request to speak with someone from GD Studio 360. Please check the details below. Nothing will be sent until you press Request human contact."

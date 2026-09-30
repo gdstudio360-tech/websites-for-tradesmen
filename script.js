@@ -739,7 +739,9 @@ if (form) {
         submit.disabled = !checkbox.checked;
         submit.textContent = "Request human contact";
         status.textContent =
-          "Could not send the request. Please try again.";
+          error instanceof Error
+            ? error.message
+            : "Could not send the request. Please try again.";
       }
     });
 
@@ -764,7 +766,7 @@ if (form) {
       .forEach((card) => card.remove());
 
     const isHumanHandoff =
-      enquiry.package === "Not sure — human consultation";
+      enquiry.package === "Not sure — recommend one";
 
     const card = document.createElement("div");
     card.className = "gd-enquiry-card";
