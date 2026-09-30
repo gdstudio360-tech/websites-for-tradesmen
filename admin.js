@@ -44,9 +44,7 @@ function cleanCustomerReply(value) {
       .replace(/\r\n/g, "\n")
       .trim();
 
-  if (!text) {
-    return "";
-  }
+  if (!text) return "";
 
   const lines = text.split("\n");
   let cutAt = lines.length;
@@ -54,13 +52,22 @@ function cleanCustomerReply(value) {
   for (let i = 1; i < lines.length; i += 1) {
     const line = lines[i].trim();
 
-    const quotedReplyStart =
-      /^On .+ wrote:$/i.test(line) ||
-      /rašė:\s*$/iu.test(line) ||
-      /^[-_]{2,}\s*Original Message\s*[-_]{2,}$/i.test(line) ||
-      /^(From|Nuo|Sent|Išsiųsta|Subject|Tema):\s+/iu.test(line);
+    const normalised =
+      line
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .toLowerCase();
 
-    if (quotedReplyStart) {
+    const isQuotedStart =
+      line.startsWith(">") ||
+      normalised.endsWith("rase:") ||
+      normalised.endsWith("wrote:") ||
+      /^on .+ wrote:$/i.test(line) ||
+      /<[^<>@\s]+@[^<>@\s]+>.*:$/.test(line) ||
+      /^(from|nuo|sent|issiusta|subject|tema):\s+/i.test(normalised) ||
+      /^[-_]{2,}\s*original message\s*[-_]{2,}$/i.test(normalised);
+
+    if (isQuotedStart) {
       cutAt = i;
       break;
     }
@@ -71,6 +78,7 @@ function cleanCustomerReply(value) {
     .join("\n")
     .trim();
 }
+
 
 const ADMIN_PACKAGES = [
   "Not sure — recommend one",
