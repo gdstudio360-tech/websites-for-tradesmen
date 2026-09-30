@@ -30,7 +30,7 @@
 
 
 
-  <link rel="stylesheet" href="styles.css?v=gd-premium-1">
+  <link rel="stylesheet" href="styles.css?v=gd-ai-chat-1">
 
 <script type="application/ld+json">
 {
@@ -808,8 +808,85 @@
     </div>
   </footer>
 
+
+  <!-- GD STUDIO 360 AI ASSISTANT -->
+  <div class="gd-chat" id="gd-chat">
+    <button
+      class="gd-chat-launcher"
+      id="gd-chat-launcher"
+      type="button"
+      aria-label="Open GD Studio 360 AI Assistant"
+      aria-expanded="false"
+    >
+      <span class="gd-chat-launcher-icon">✦</span>
+      <span class="gd-chat-launcher-copy">
+        <strong>Need help?</strong>
+        <small>Ask our AI assistant</small>
+      </span>
+    </button>
+
+    <section
+      class="gd-chat-panel"
+      id="gd-chat-panel"
+      aria-label="GD Studio 360 AI Assistant"
+      hidden
+    >
+      <header class="gd-chat-header">
+        <div class="gd-chat-avatar">GD</div>
+
+        <div>
+          <strong>GD Studio 360 Assistant</strong>
+          <span><i></i> AI assistant</span>
+        </div>
+
+        <button
+          class="gd-chat-close"
+          id="gd-chat-close"
+          type="button"
+          aria-label="Close assistant"
+        >×</button>
+      </header>
+
+      <div class="gd-chat-messages" id="gd-chat-messages" aria-live="polite">
+        <div class="gd-chat-message assistant">
+          <div>
+            <p>Hi 👋 I’m the GD Studio 360 AI Assistant.</p>
+            <p>I can explain our packages, help you choose one or answer questions about your website project.</p>
+          </div>
+        </div>
+
+        <div class="gd-chat-quick" id="gd-chat-quick">
+          <button type="button" data-chat-prompt="Help me choose the right website package.">Help me choose a package</button>
+          <button type="button" data-chat-prompt="I have a question about GD Studio 360.">Ask a question</button>
+          <button type="button" data-chat-prompt="I would like to discuss starting a website project.">Start a project</button>
+        </div>
+      </div>
+
+      <form class="gd-chat-form" id="gd-chat-form">
+        <textarea
+          id="gd-chat-input"
+          maxlength="1500"
+          rows="1"
+          placeholder="Type your message..."
+          aria-label="Message"
+          required
+        ></textarea>
+
+        <button id="gd-chat-send" type="submit" aria-label="Send message">
+          ↑
+        </button>
+      </form>
+
+      <div class="gd-chat-privacy">
+        You’re chatting with an AI assistant. Messages may be stored to help with your enquiry.
+        <a href="privacy.html" target="_blank" rel="noopener">Privacy Notice</a>
+      </div>
+    </section>
+  </div>
+
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="site-config.js"></script>
-  <script src="script.js?v=gd-premium-1"></script>
+  <script src="script.js?v=gd-ai-chat-1"></script>
 </body>
 </html>

@@ -448,3 +448,194 @@ if (form) {
 
   items.forEach((item) => observer.observe(item));
 })();
+
+
+/* =======================================================
+   GD STUDIO 360 AI ASSISTANT
+======================================================= */
+
+(() => {
+  const root = document.getElementById("gd-chat");
+  const launcher = document.getElementById("gd-chat-launcher");
+  const panel = document.getElementById("gd-chat-panel");
+  const closeButton = document.getElementById("gd-chat-close");
+  const messages = document.getElementById("gd-chat-messages");
+  const form = document.getElementById("gd-chat-form");
+  const input = document.getElementById("gd-chat-input");
+  const sendButton = document.getElementById("gd-chat-send");
+  const quick = document.getElementById("gd-chat-quick");
+
+  if (!root || !launcher || !panel || !messages || !form || !input) return;
+
+  const endpoint =
+    `${window.GD_CONFIG?.SUPABASE_URL}/functions/v1/ai-assistant`;
+
+  const conversationStorageKey =
+    "gd360_ai_conversation_id_v1";
+
+  let conversationId =
+    localStorage.getItem(conversationStorageKey) || null;
+
+  let busy = false;
+
+  function openChat() {
+    panel.hidden = false;
+    launcher.setAttribute("aria-expanded", "true");
+
+    window.setTimeout(() => {
+      input.focus();
+      messages.scrollTop = messages.scrollHeight;
+    }, 50);
+  }
+
+  function closeChat() {
+    panel.hidden = true;
+    launcher.setAttribute("aria-expanded", "false");
+  }
+
+  function addMessage(role, text, extraClass = "") {
+    const wrapper = document.createElement("div");
+    wrapper.className =
+      `gd-chat-message ${role} ${extraClass}`.trim();
+
+    const bubble = document.createElement("div");
+
+    String(text || "")
+      .split(/\n{2,}/)
+      .filter(Boolean)
+      .forEach((paragraph) => {
+        const p = document.createElement("p");
+        p.textContent = paragraph.trim();
+        bubble.appendChild(p);
+      });
+
+    wrapper.appendChild(bubble);
+    messages.appendChild(wrapper);
+    messages.scrollTop = messages.scrollHeight;
+
+    return wrapper;
+  }
+
+  function setBusy(state) {
+    busy = state;
+    input.disabled = state;
+    sendButton.disabled = state;
+
+    if (!state) {
+      input.focus();
+    }
+  }
+
+  async function sendMessage(rawMessage) {
+    const message = String(rawMessage || "").trim();
+
+    if (!message || busy) return;
+
+    openChat();
+
+    quick?.remove();
+    addMessage("customer", message);
+
+    input.value = "";
+    input.style.height = "auto";
+
+    setBusy(true);
+
+    const typing = addMessage(
+      "assistant",
+      "Thinking…",
+      "typing"
+    );
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          message,
+          conversation_id: conversationId
+        })
+      });
+
+      let data = {};
+
+      try {
+        data = await response.json();
+      } catch (_) {}
+
+      typing.remove();
+
+      if (!response.ok || !data?.ok) {
+        throw new Error(
+          data?.error || "The assistant is temporarily unavailable."
+        );
+      }
+
+      if (data.conversation_id) {
+        conversationId = data.conversation_id;
+
+        localStorage.setItem(
+          conversationStorageKey,
+          conversationId
+        );
+      }
+
+      addMessage("assistant", data.reply);
+
+    } catch (error) {
+      typing.remove();
+
+      console.error("GD Studio 360 assistant:", error);
+
+      addMessage(
+        "assistant",
+        "I’m having trouble replying right now. You can still send us an enquiry, WhatsApp message or email and we’ll get back to you."
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  launcher.addEventListener("click", () => {
+    if (panel.hidden) {
+      openChat();
+    } else {
+      closeChat();
+    }
+  });
+
+  closeButton?.addEventListener("click", closeChat);
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    sendMessage(input.value);
+  });
+
+  input.addEventListener("keydown", (event) => {
+    if (
+      event.key === "Enter" &&
+      !event.shiftKey
+    ) {
+      event.preventDefault();
+      form.requestSubmit();
+    }
+  });
+
+  input.addEventListener("input", () => {
+    input.style.height = "auto";
+    input.style.height =
+      `${Math.min(input.scrollHeight, 110)}px`;
+  });
+
+  document
+    .querySelectorAll("[data-chat-prompt]")
+    .forEach((button) => {
+      button.addEventListener("click", () => {
+        sendMessage(button.dataset.chatPrompt);
+      });
+    });
+})();
+
+/* GD STUDIO 360 AI ASSISTANT END */
