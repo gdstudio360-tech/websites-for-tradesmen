@@ -38,6 +38,40 @@ function prettyStatus(status) {
   return String(status || "new").replaceAll("_", " ");
 }
 
+function cleanCustomerReply(value) {
+  const text =
+    String(value || "")
+      .replace(/\r\n/g, "\n")
+      .trim();
+
+  if (!text) {
+    return "";
+  }
+
+  const lines = text.split("\n");
+  let cutAt = lines.length;
+
+  for (let i = 1; i < lines.length; i += 1) {
+    const line = lines[i].trim();
+
+    const quotedReplyStart =
+      /^On .+ wrote:$/i.test(line) ||
+      /rašė:\s*$/iu.test(line) ||
+      /^[-_]{2,}\s*Original Message\s*[-_]{2,}$/i.test(line) ||
+      /^(From|Nuo|Sent|Išsiųsta|Subject|Tema):\s+/iu.test(line);
+
+    if (quotedReplyStart) {
+      cutAt = i;
+      break;
+    }
+  }
+
+  return lines
+    .slice(0, cutAt)
+    .join("\n")
+    .trim();
+}
+
 const ADMIN_PACKAGES = [
   "Not sure — recommend one",
   "Starter — £249",
@@ -337,8 +371,13 @@ function renderLeads() {
       const content =
         document.createElement("p");
 
-      content.textContent =
+      const rawContent =
         message.content || "";
+
+      content.textContent =
+        message.role === "customer"
+          ? cleanCustomerReply(rawContent)
+          : rawContent;
 
       const channel =
         document.createElement("small");
