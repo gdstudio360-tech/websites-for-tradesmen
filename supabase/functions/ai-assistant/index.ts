@@ -188,8 +188,37 @@ A human should review the enquiry when:
 - you are uncertain about what GD Studio 360 can provide;
 - the customer specifically asks to speak to a person.
 
-In these situations, do not guess.
-Say briefly that the requirement needs human review.
+An explicit request to speak to a person ALWAYS takes priority over
+package recommendation.
+
+Examples:
+- "I want to speak to someone."
+- "Can a person contact me?"
+- "I don't know which package I need, I want to talk to someone."
+- "I'd rather discuss this with a human."
+- equivalent requests in another language.
+
+When this happens:
+
+1. STOP trying to recommend a package.
+2. Do NOT suggest Starter, Business or Pro unless the customer later
+   explicitly asks you to continue package selection.
+3. Tell the customer they do not need to choose a package now.
+4. Say that you can prepare a human consultation request.
+5. Collect the missing enquiry information ONE item at a time.
+6. If no package has already been clearly chosen, use:
+   "Not sure — human consultation"
+7. Do not claim that a person will contact them until they have reviewed
+   and submitted the confirmation card.
+
+A good first response is similar to:
+"Of course — you don't need to choose a package now. I can prepare a
+request for someone from GD Studio 360 to contact you. What's your name?"
+
+If the customer already clearly chose Starter, Business or Pro before
+requesting a person, keep their chosen package instead of changing it.
+
+Do not guess missing personal or business information.
 
 
 GOOD CONVERSATION EXAMPLE
@@ -231,7 +260,7 @@ Required information:
 - trade / type of business;
 - town or service area;
 - email address;
-- recommended website package;
+- recommended website package OR "Not sure — human consultation";
 - a short summary of what they want.
 
 Optional:
@@ -278,7 +307,8 @@ const PREPARE_ENQUIRY_TOOL = {
         enum: [
           "Starter — £249",
           "Business — £399",
-          "Pro — £599"
+          "Pro — £599",
+          "Not sure — human consultation"
         ]
       },
       care_plan: {
@@ -624,6 +654,7 @@ Deno.serve(async (req) => {
         "Starter — £249",
         "Business — £399",
         "Pro — £599",
+        "Not sure — human consultation",
       ];
 
       if (
@@ -655,9 +686,12 @@ Deno.serve(async (req) => {
         throw pendingError;
       }
 
-      const reply =
-        "I’ve prepared your project enquiry. Please check the details below. " +
-        "Nothing will be submitted until you press Submit enquiry.";
+      const isHumanHandoff =
+        enquiry.package === "Not sure — human consultation";
+
+      const reply = isHumanHandoff
+        ? "I’ve prepared your request to speak with someone from GD Studio 360. Please check the details below. Nothing will be sent until you press Request human contact."
+        : "I’ve prepared your project enquiry. Please check the details below. Nothing will be submitted until you press Submit enquiry.";
 
       const { error: messageError } = await db
         .from("messages")

@@ -558,16 +558,22 @@ if (form) {
       .querySelectorAll(".gd-enquiry-card")
       .forEach((card) => card.remove());
 
+    const isHumanHandoff =
+      enquiry.package === "Not sure — human consultation";
+
     const card = document.createElement("div");
     card.className = "gd-enquiry-card";
 
     const title = document.createElement("h4");
-    title.textContent = "Your enquiry details";
+    title.textContent = isHumanHandoff
+      ? "Human consultation request"
+      : "Your enquiry details";
 
     const intro = document.createElement("p");
     intro.className = "gd-enquiry-card-intro";
-    intro.textContent =
-      "Please check these details before submitting them to GD Studio 360.";
+    intro.textContent = isHumanHandoff
+      ? "Please check your details before asking GD Studio 360 to contact you."
+      : "Please check these details before submitting them to GD Studio 360.";
 
     const details = document.createElement("div");
     details.className = "gd-enquiry-details";
@@ -636,13 +642,16 @@ if (form) {
     const submit = document.createElement("button");
     submit.type = "button";
     submit.className = "gd-enquiry-submit";
-    submit.textContent = "Submit enquiry";
+    submit.textContent = isHumanHandoff
+      ? "Request human contact"
+      : "Submit enquiry";
     submit.disabled = true;
 
     const status = document.createElement("div");
     status.className = "gd-enquiry-status";
-    status.textContent =
-      "Nothing has been submitted yet.";
+    status.textContent = isHumanHandoff
+      ? "Your request has not been sent yet."
+      : "Nothing has been submitted yet.";
 
     checkbox.addEventListener("change", () => {
       submit.disabled = !checkbox.checked;
@@ -653,9 +662,12 @@ if (form) {
 
       submit.disabled = true;
       checkbox.disabled = true;
-      submit.textContent = "Submitting…";
-      status.textContent =
-        "Sending your enquiry securely…";
+      submit.textContent = isHumanHandoff
+        ? "Sending request…"
+        : "Submitting…";
+      status.textContent = isHumanHandoff
+        ? "Sending your contact request securely…"
+        : "Sending your enquiry securely…";
 
       try {
         const response = await fetch(submitEndpoint, {
@@ -682,9 +694,12 @@ if (form) {
         }
 
         card.classList.add("submitted");
-        submit.textContent = "Enquiry submitted";
-        status.textContent =
-          "Sent to GD Studio 360 for review.";
+        submit.textContent = isHumanHandoff
+          ? "Contact request sent"
+          : "Enquiry submitted";
+        status.textContent = isHumanHandoff
+          ? "GD Studio 360 will review your request and contact you."
+          : "Sent to GD Studio 360 for review.";
 
         localStorage.removeItem(
           pendingEnquiryStorageKey
@@ -706,9 +721,12 @@ if (form) {
 
         checkbox.disabled = false;
         submit.disabled = !checkbox.checked;
-        submit.textContent = "Submit enquiry";
-        status.textContent =
-          "Submission failed. Please try again.";
+        submit.textContent = isHumanHandoff
+          ? "Request human contact"
+          : "Submit enquiry";
+        status.textContent = isHumanHandoff
+          ? "Could not send the contact request. Please try again."
+          : "Submission failed. Please try again.";
       }
     });
 

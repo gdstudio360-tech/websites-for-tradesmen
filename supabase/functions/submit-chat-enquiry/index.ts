@@ -196,7 +196,10 @@ Deno.serve(async (req) => {
       .insert({
         tenant_id: tenant.id,
         contact_id: lead.contact_id,
-        purpose: "website_project_enquiry",
+        purpose:
+          e.package === "Not sure — human consultation"
+            ? "human_consultation_request"
+            : "website_project_enquiry",
         consent_given: true,
         source: "website_ai_chat",
         privacy_policy_version: "2026-09",
@@ -217,10 +220,12 @@ Deno.serve(async (req) => {
         },
       });
 
-    const reply =
-      "Thanks — your enquiry has been submitted to GD Studio 360. " +
-      "We’ll review your project and contact you using the details you provided. " +
-      "No payment has been taken.";
+    const isHumanHandoff =
+      e.package === "Not sure — human consultation";
+
+    const reply = isHumanHandoff
+      ? "Thanks — your request has been sent to GD Studio 360. A person will review it and contact you using the details you provided. No payment has been taken."
+      : "Thanks — your enquiry has been submitted to GD Studio 360. We’ll review your project and contact you using the details you provided. No payment has been taken.";
 
     await db
       .from("messages")
