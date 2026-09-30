@@ -801,6 +801,16 @@ if (form) {
 
       addMessage("assistant", data.reply);
 
+      if (data.human_handoff) {
+        localStorage.removeItem(
+          pendingEnquiryStorageKey
+        );
+
+        document
+          .querySelectorAll(".gd-enquiry-card")
+          .forEach((card) => card.remove());
+      }
+
       if (
         data.requires_confirmation &&
         data.pending_enquiry

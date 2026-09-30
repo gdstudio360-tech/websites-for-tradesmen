@@ -393,6 +393,46 @@ function extractFunctionCall(payload: any, name: string) {
   return null;
 }
 
+
+function isHumanHandoffRequest(message: string): boolean {
+  const text = message.toLowerCase();
+
+  const patterns = [
+    /noriu.{0,25}(žmog|zmog)/i,
+    /(pakalbėti|pasikalbėti|kalbėti|pakalbeti|pasikalbeti|kalbeti).{0,30}(žmog|zmog)/i,
+    /(žmog|zmog).{0,30}(susisiek|paskamb|pakalb|kontakt)/i,
+
+    /(speak|talk|chat).{0,30}(human|person|someone|somebody|real person)/i,
+    /(human|real person|someone|somebody).{0,30}(contact|call|speak|talk)/i,
+    /want.{0,20}(human|person|someone).{0,20}(contact|call|speak|talk)?/i,
+
+    /(поговорить|говорить|связаться).{0,30}(человек|менеджер|сотрудник)/i,
+    /(человек|менеджер|сотрудник).{0,30}(связаться|позвонить|поговорить)/i,
+  ];
+
+  return patterns.some((pattern) => pattern.test(text));
+}
+
+function humanHandoffReply(message: string): string {
+  const text = message.toLowerCase();
+
+  const looksLithuanian =
+    /žmog|zmog|pakalb|pasikalb|noriu|susisiekt|konsultacij/i.test(text);
+
+  const looksRussian =
+    /человек|менеджер|сотрудник|поговор|связат|позвон/i.test(text);
+
+  if (looksLithuanian) {
+    return "Žinoma — paketo dabar rinktis nereikia. Galiu paruošti užklausą, kad su jumis susisiektų žmogus iš GD Studio 360. Koks jūsų vardas?";
+  }
+
+  if (looksRussian) {
+    return "Конечно — сейчас вам не нужно выбирать пакет. Я могу подготовить запрос, чтобы с вами связался человек из GD Studio 360. Как вас зовут?";
+  }
+
+  return "Of course — you don't need to choose a package now. I can prepare a request for someone from GD Studio 360 to contact you. What's your name?";
+}
+
 Deno.serve(async (req) => {
   const origin = req.headers.get("origin") || "";
 
@@ -480,11 +520,12 @@ Deno.serve(async (req) => {
     }
 
     let conversationId = requestedConversationId;
+    let humanHandoffActive = false;
 
     if (conversationId) {
       const { data: existing, error: existingError } = await db
         .from("conversations")
-        .select("id, tenant_id, channel, status, ai_enabled")
+        .select("id, tenant_id, channel, status, ai_enabled, human_attention_required")
         .eq("id", conversationId)
         .eq("tenant_id", tenant.id)
         .eq("channel", "website")
@@ -517,6 +558,10 @@ Deno.serve(async (req) => {
           origin,
         );
       }
+
+      humanHandoffActive =
+        existing.human_attention_required === true;
+
     } else {
       const { data: created, error: createError } = await db
         .from("conversations")
@@ -550,6 +595,53 @@ Deno.serve(async (req) => {
       throw customerMessageError;
     }
 
+    if (isHumanHandoffRequest(message)) {
+      humanHandoffActive = true;
+
+      const handoffReply =
+        humanHandoffReply(message);
+
+      const { error: handoffConversationError } =
+        await db
+          .from("conversations")
+          .update({
+            human_attention_required: true,
+            pending_enquiry: null,
+            pending_enquiry_at: null,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", conversationId);
+
+      if (handoffConversationError) {
+        throw handoffConversationError;
+      }
+
+      const { error: handoffMessageError } =
+        await db
+          .from("messages")
+          .insert({
+            conversation_id: conversationId,
+            role: "assistant",
+            channel: "website",
+            content: handoffReply,
+          });
+
+      if (handoffMessageError) {
+        throw handoffMessageError;
+      }
+
+      return jsonResponse(
+        {
+          ok: true,
+          conversation_id: conversationId,
+          reply: handoffReply,
+          human_handoff: true,
+        },
+        200,
+        origin,
+      );
+    }
+
     const { data: recentMessages, error: historyError } = await db
       .from("messages")
       .select("role, content, created_at")
@@ -579,6 +671,32 @@ Deno.serve(async (req) => {
       })
       .join("\n\n");
 
+    const effectiveInstructions =
+      humanHandoffActive
+        ? `${SYSTEM_PROMPT}
+
+ACTIVE HUMAN HANDOFF MODE
+
+The customer has explicitly requested to speak with a human.
+
+This overrides any earlier package discussion.
+
+Do NOT recommend Starter, Business or Pro.
+Do NOT ask the customer to choose a package.
+Do NOT continue any earlier package recommendation.
+
+Your only job now is to gather the information needed for a human consultation request.
+
+Ask for ONE missing item at a time.
+
+When enough information is available, prepare the enquiry using:
+package = "Not sure — human consultation"
+care_plan = "No care plan"
+
+Do not claim a person will contact the customer until the customer has reviewed and submitted the confirmation card.
+`
+        : SYSTEM_PROMPT;
+
     const openaiResponse = await fetch(
       "https://api.openai.com/v1/responses",
       {
@@ -589,7 +707,7 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           model: openaiModel,
-          instructions: SYSTEM_PROMPT,
+          instructions: effectiveInstructions,
           input: transcript,
           reasoning: {
             effort: "minimal",
@@ -645,8 +763,12 @@ Deno.serve(async (req) => {
         email: clean(enquiry.email).toLowerCase(),
         phone: clean(enquiry.phone) || null,
         current_site: clean(enquiry.current_site) || null,
-        package: clean(enquiry.package),
-        care_plan: clean(enquiry.care_plan) || "No care plan",
+        package: humanHandoffActive
+          ? "Not sure — human consultation"
+          : clean(enquiry.package),
+        care_plan: humanHandoffActive
+          ? "No care plan"
+          : clean(enquiry.care_plan) || "No care plan",
         project_summary: clean(enquiry.project_summary),
       };
 
