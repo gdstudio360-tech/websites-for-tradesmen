@@ -413,7 +413,32 @@ function renderLeads() {
         conversationHistory.scrollHeight;
     }
 
-    conversationButton.addEventListener(
+    
+let conversationRefreshBusy = false;
+
+setInterval(async () => {
+  if (
+    conversationPanel.hidden ||
+    conversationRefreshBusy
+  ) {
+    return;
+  }
+
+  conversationRefreshBusy = true;
+
+  try {
+    await loadConversation();
+  } catch (error) {
+    console.error(
+      "Conversation auto-refresh failed:",
+      error
+    );
+  } finally {
+    conversationRefreshBusy = false;
+  }
+}, 3000);
+
+conversationButton.addEventListener(
       "click",
       async () => {
         conversationPanel.hidden = false;
