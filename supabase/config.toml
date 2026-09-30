@@ -12,3 +12,6 @@ verify_jwt = false
 
 [functions.submit-chat-enquiry]
 verify_jwt = false
+
+[functions.admin-inbox]
+verify_jwt = false

@@ -191,6 +191,308 @@ function renderLeads() {
     const building = fragment.querySelector(".building-button");
     const complete = fragment.querySelector(".complete-button");
     const result = fragment.querySelector(".deposit-result");
+    const actions = fragment.querySelector(".lead-actions");
+
+    const conversationButton =
+      document.createElement("button");
+
+    conversationButton.type = "button";
+    conversationButton.className =
+      "secondary-button conversation-button";
+
+    conversationButton.textContent =
+      lead.conversation_id
+        ? "Open conversation"
+        : "Reply";
+
+    actions.prepend(conversationButton);
+
+    const conversationPanel =
+      document.createElement("section");
+
+    conversationPanel.className =
+      "admin-conversation";
+
+    conversationPanel.hidden = true;
+
+    conversationPanel.innerHTML = `
+      <div class="admin-conversation-head">
+        <div>
+          <strong>Conversation</strong>
+          <small>
+            Replies are sent by GD Studio 360 via email.
+          </small>
+        </div>
+        <button
+          type="button"
+          class="conversation-close"
+          aria-label="Close conversation"
+        >×</button>
+      </div>
+
+      <div class="conversation-history"></div>
+
+      <form class="admin-reply-form">
+        <label>
+          Reply
+          <textarea
+            class="admin-reply-text"
+            rows="4"
+            maxlength="5000"
+            placeholder="Write your reply..."
+            required
+          ></textarea>
+        </label>
+
+        <div class="admin-reply-actions">
+          <button
+            type="submit"
+            class="approve-button admin-send-reply"
+          >
+            Send reply
+          </button>
+
+          <span class="admin-reply-status"></span>
+        </div>
+      </form>
+    `;
+
+    fragment
+      .querySelector(".lead-message")
+      .after(conversationPanel);
+
+    const conversationHistory =
+      conversationPanel.querySelector(
+        ".conversation-history"
+      );
+
+    const replyForm =
+      conversationPanel.querySelector(
+        ".admin-reply-form"
+      );
+
+    const replyText =
+      conversationPanel.querySelector(
+        ".admin-reply-text"
+      );
+
+    const replyStatus =
+      conversationPanel.querySelector(
+        ".admin-reply-status"
+      );
+
+    const sendReplyButton =
+      conversationPanel.querySelector(
+        ".admin-send-reply"
+      );
+
+    const closeConversation =
+      conversationPanel.querySelector(
+        ".conversation-close"
+      );
+
+    async function loadConversation() {
+      conversationHistory.innerHTML =
+        '<p class="conversation-loading">Loading conversation…</p>';
+
+      const { data, error } =
+        await client.functions.invoke(
+          "admin-inbox",
+          {
+            body: {
+              action: "history",
+              lead_id: lead.id
+            }
+          }
+        );
+
+      if (error || !data?.ok) {
+        conversationHistory.textContent =
+          data?.error ||
+          error?.message ||
+          "Could not load conversation.";
+
+        return;
+      }
+
+      if (data.conversation_id) {
+        lead.conversation_id =
+          data.conversation_id;
+
+        conversationButton.textContent =
+          "Open conversation";
+      }
+
+      const items =
+        Array.isArray(data.messages)
+          ? data.messages
+          : [];
+
+      conversationHistory.innerHTML = "";
+
+      if (!items.length) {
+        const empty =
+          document.createElement("p");
+
+        empty.className =
+          "conversation-empty";
+
+        empty.textContent =
+          "No conversation history yet. Write a reply below to start one.";
+
+        conversationHistory.appendChild(
+          empty
+        );
+
+        return;
+      }
+
+      for (const message of items) {
+        const bubble =
+          document.createElement("div");
+
+        bubble.className =
+          `conversation-message role-${message.role}`;
+
+        const top =
+          document.createElement("div");
+
+        top.className =
+          "conversation-message-meta";
+
+        const role =
+          document.createElement("strong");
+
+        const names = {
+          customer: "Customer",
+          assistant: "AI Assistant",
+          human: "You",
+          system: "System"
+        };
+
+        role.textContent =
+          names[message.role] ||
+          message.role;
+
+        const time =
+          document.createElement("span");
+
+        time.textContent =
+          message.created_at
+            ? new Date(
+                message.created_at
+              ).toLocaleString("en-GB")
+            : "";
+
+        top.append(role, time);
+
+        const content =
+          document.createElement("p");
+
+        content.textContent =
+          message.content || "";
+
+        const channel =
+          document.createElement("small");
+
+        channel.textContent =
+          message.channel || "";
+
+        bubble.append(
+          top,
+          content,
+          channel
+        );
+
+        conversationHistory.appendChild(
+          bubble
+        );
+      }
+
+      conversationHistory.scrollTop =
+        conversationHistory.scrollHeight;
+    }
+
+    conversationButton.addEventListener(
+      "click",
+      async () => {
+        conversationPanel.hidden = false;
+        conversationButton.hidden = true;
+        await loadConversation();
+        replyText.focus();
+      }
+    );
+
+    closeConversation.addEventListener(
+      "click",
+      () => {
+        conversationPanel.hidden = true;
+        conversationButton.hidden = false;
+      }
+    );
+
+    replyForm.addEventListener(
+      "submit",
+      async (event) => {
+        event.preventDefault();
+
+        const message =
+          replyText.value.trim();
+
+        if (!message) {
+          replyStatus.textContent =
+            "Write a reply first.";
+          return;
+        }
+
+        sendReplyButton.disabled = true;
+        sendReplyButton.textContent =
+          "Sending…";
+
+        replyStatus.textContent =
+          `Sending to ${lead.email || "customer"}…`;
+
+        const { data, error } =
+          await client.functions.invoke(
+            "admin-inbox",
+            {
+              body: {
+                action: "send",
+                lead_id: lead.id,
+                message
+              }
+            }
+          );
+
+        if (error || !data?.ok) {
+          replyStatus.textContent =
+            data?.error ||
+            error?.message ||
+            "Could not send reply.";
+
+          sendReplyButton.disabled = false;
+          sendReplyButton.textContent =
+            "Send reply";
+
+          return;
+        }
+
+        if (data.conversation_id) {
+          lead.conversation_id =
+            data.conversation_id;
+        }
+
+        replyText.value = "";
+        replyStatus.textContent =
+          "Reply sent.";
+
+        sendReplyButton.disabled = false;
+        sendReplyButton.textContent =
+          "Send reply";
+
+        await loadConversation();
+      }
+    );
 
     let packageEditor = null;
     let careEditor = null;
