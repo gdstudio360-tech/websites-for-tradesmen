@@ -9,3 +9,6 @@ verify_jwt = false
 
 [functions.ai-assistant]
 verify_jwt = false
+
+[functions.submit-chat-enquiry]
+verify_jwt = false

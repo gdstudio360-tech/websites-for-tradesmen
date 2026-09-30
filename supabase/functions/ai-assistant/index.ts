@@ -218,7 +218,91 @@ Do not ask:
 all in one reply.
 
 Ask the next most useful question instead.
+
+
+ENQUIRY PREPARATION
+
+Once a suitable package has been identified and the customer appears
+interested in proceeding, collect the information needed for an enquiry.
+
+Required information:
+- customer name;
+- business name;
+- trade / type of business;
+- town or service area;
+- email address;
+- recommended website package;
+- a short summary of what they want.
+
+Optional:
+- WhatsApp / phone number;
+- existing website or social page;
+- Website Care.
+
+Ask for ONE missing item at a time.
+
+Do not ask for payment information.
+
+When all required information is known, call the
+prepare_project_enquiry tool.
+
+Calling this tool DOES NOT submit the enquiry.
+It only prepares the details for the customer to review.
+
+The customer must explicitly press the Submit enquiry confirmation
+before GD Studio 360 stores it as a new project enquiry.
+
+Never claim that an enquiry has been submitted merely because it
+has been prepared.
 `;
+
+
+const PREPARE_ENQUIRY_TOOL = {
+  type: "function",
+  name: "prepare_project_enquiry",
+  description:
+    "Prepare project enquiry details for customer review. This does not submit or create a lead.",
+  strict: false,
+  parameters: {
+    type: "object",
+    properties: {
+      name: { type: "string" },
+      business: { type: "string" },
+      trade: { type: "string" },
+      area: { type: "string" },
+      email: { type: "string" },
+      phone: { type: "string" },
+      current_site: { type: "string" },
+      package: {
+        type: "string",
+        enum: [
+          "Starter — £249",
+          "Business — £399",
+          "Pro — £599"
+        ]
+      },
+      care_plan: {
+        type: "string",
+        enum: [
+          "No care plan",
+          "Website Care — £29/month",
+          "Business Care — £59/month",
+          "Pro Care — £99/month"
+        ]
+      },
+      project_summary: { type: "string" }
+    },
+    required: [
+      "name",
+      "business",
+      "trade",
+      "area",
+      "email",
+      "package",
+      "project_summary"
+    ]
+  }
+};
 
 function getCorsHeaders(origin: string) {
   return {
@@ -263,6 +347,20 @@ function extractOpenAIText(payload: any): string {
   }
 
   return "";
+}
+
+
+function extractFunctionCall(payload: any, name: string) {
+  for (const item of payload?.output || []) {
+    if (
+      item?.type === "function_call" &&
+      item?.name === name
+    ) {
+      return item;
+    }
+  }
+
+  return null;
 }
 
 Deno.serve(async (req) => {
@@ -469,6 +567,8 @@ Deno.serve(async (req) => {
           text: {
             verbosity: "low",
           },
+          tools: [PREPARE_ENQUIRY_TOOL],
+          tool_choice: "auto",
           max_output_tokens: 600,
           store: false,
         }),
@@ -487,6 +587,101 @@ Deno.serve(async (req) => {
       throw new Error(
         openaiPayload?.error?.message ||
         "AI service could not generate a response.",
+      );
+    }
+
+    const prepareCall = extractFunctionCall(
+      openaiPayload,
+      "prepare_project_enquiry",
+    );
+
+    if (prepareCall) {
+      let enquiry: any = {};
+
+      try {
+        enquiry = JSON.parse(prepareCall.arguments || "{}");
+      } catch (_) {
+        throw new Error("AI returned invalid enquiry data.");
+      }
+
+      const clean = (value: unknown) =>
+        String(value ?? "").trim();
+
+      enquiry = {
+        name: clean(enquiry.name),
+        business: clean(enquiry.business),
+        trade: clean(enquiry.trade),
+        area: clean(enquiry.area),
+        email: clean(enquiry.email).toLowerCase(),
+        phone: clean(enquiry.phone) || null,
+        current_site: clean(enquiry.current_site) || null,
+        package: clean(enquiry.package),
+        care_plan: clean(enquiry.care_plan) || "No care plan",
+        project_summary: clean(enquiry.project_summary),
+      };
+
+      const allowedPackages = [
+        "Starter — £249",
+        "Business — £399",
+        "Pro — £599",
+      ];
+
+      if (
+        !enquiry.name ||
+        !enquiry.business ||
+        !enquiry.trade ||
+        !enquiry.area ||
+        !enquiry.email ||
+        !enquiry.project_summary ||
+        !allowedPackages.includes(enquiry.package)
+      ) {
+        throw new Error("Prepared enquiry is incomplete.");
+      }
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(enquiry.email)) {
+        throw new Error("Prepared enquiry contains an invalid email address.");
+      }
+
+      const { error: pendingError } = await db
+        .from("conversations")
+        .update({
+          pending_enquiry: enquiry,
+          pending_enquiry_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", conversationId);
+
+      if (pendingError) {
+        throw pendingError;
+      }
+
+      const reply =
+        "I’ve prepared your project enquiry. Please check the details below. " +
+        "Nothing will be submitted until you press Submit enquiry.";
+
+      const { error: messageError } = await db
+        .from("messages")
+        .insert({
+          conversation_id: conversationId,
+          role: "assistant",
+          channel: "website",
+          content: reply,
+        });
+
+      if (messageError) {
+        throw messageError;
+      }
+
+      return jsonResponse(
+        {
+          ok: true,
+          conversation_id: conversationId,
+          reply,
+          requires_confirmation: true,
+          pending_enquiry: enquiry,
+        },
+        200,
+        origin,
       );
     }
 
