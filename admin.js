@@ -291,130 +291,196 @@ function renderLeads() {
         ".conversation-close"
       );
 
-    async function loadConversation() {
-      conversationHistory.innerHTML =
-        '<p class="conversation-loading">Loading conversation…</p>';
+    const renderedMessageIds = new Set();
+    let conversationRequestBusy = false;
+    let conversationInitialised = false;
 
-      const { data, error } =
-        await client.functions.invoke(
-          "admin-inbox",
-          {
-            body: {
-              action: "history",
-              lead_id: lead.id
-            }
-          }
-        );
+    function appendConversationMessage(message) {
+      const bubble =
+        document.createElement("div");
 
-      if (error || !data?.ok) {
-        conversationHistory.textContent =
-          data?.error ||
-          error?.message ||
-          "Could not load conversation.";
+      bubble.className =
+        `conversation-message role-${message.role}`;
 
-        return;
-      }
+      const top =
+        document.createElement("div");
 
-      if (data.conversation_id) {
-        lead.conversation_id =
-          data.conversation_id;
+      top.className =
+        "conversation-message-meta";
 
-        conversationButton.textContent =
-          "Open conversation";
-      }
+      const role =
+        document.createElement("strong");
 
-      const items =
-        Array.isArray(data.messages)
-          ? data.messages
-          : [];
+      const names = {
+        customer: "Customer",
+        assistant: "AI Assistant",
+        human: "You",
+        system: "System"
+      };
 
-      conversationHistory.innerHTML = "";
+      role.textContent =
+        names[message.role] ||
+        message.role;
 
-      if (!items.length) {
-        const empty =
-          document.createElement("p");
+      const time =
+        document.createElement("span");
 
-        empty.className =
-          "conversation-empty";
+      time.textContent =
+        message.created_at
+          ? new Date(
+              message.created_at
+            ).toLocaleString("en-GB")
+          : "";
 
-        empty.textContent =
-          "No conversation history yet. Write a reply below to start one.";
+      top.append(role, time);
 
-        conversationHistory.appendChild(
-          empty
-        );
+      const content =
+        document.createElement("p");
 
-        return;
-      }
+      content.textContent =
+        message.content || "";
 
-      for (const message of items) {
-        const bubble =
-          document.createElement("div");
+      const channel =
+        document.createElement("small");
 
-        bubble.className =
-          `conversation-message role-${message.role}`;
+      channel.textContent =
+        message.channel || "";
 
-        const top =
-          document.createElement("div");
+      bubble.append(
+        top,
+        content,
+        channel
+      );
 
-        top.className =
-          "conversation-message-meta";
+      conversationHistory.appendChild(
+        bubble
+      );
 
-        const role =
-          document.createElement("strong");
-
-        const names = {
-          customer: "Customer",
-          assistant: "AI Assistant",
-          human: "You",
-          system: "System"
-        };
-
-        role.textContent =
-          names[message.role] ||
-          message.role;
-
-        const time =
-          document.createElement("span");
-
-        time.textContent =
-          message.created_at
-            ? new Date(
-                message.created_at
-              ).toLocaleString("en-GB")
-            : "";
-
-        top.append(role, time);
-
-        const content =
-          document.createElement("p");
-
-        content.textContent =
-          message.content || "";
-
-        const channel =
-          document.createElement("small");
-
-        channel.textContent =
-          message.channel || "";
-
-        bubble.append(
-          top,
-          content,
-          channel
-        );
-
-        conversationHistory.appendChild(
-          bubble
+      if (message.id) {
+        renderedMessageIds.add(
+          String(message.id)
         );
       }
-
-      conversationHistory.scrollTop =
-        conversationHistory.scrollHeight;
     }
 
-    
-let conversationRefreshBusy = false;
+    async function loadConversation() {
+      if (conversationRequestBusy) {
+        return;
+      }
+
+      conversationRequestBusy = true;
+
+      const wasNearBottom =
+        !conversationInitialised ||
+        (
+          conversationHistory.scrollHeight -
+          conversationHistory.scrollTop -
+          conversationHistory.clientHeight
+        ) < 80;
+
+      try {
+        const { data, error } =
+          await client.functions.invoke(
+            "admin-inbox",
+            {
+              body: {
+                action: "history",
+                lead_id: lead.id
+              }
+            }
+          );
+
+        if (error || !data?.ok) {
+          if (!conversationInitialised) {
+            conversationHistory.textContent =
+              data?.error ||
+              error?.message ||
+              "Could not load conversation.";
+          }
+          return;
+        }
+
+        if (data.conversation_id) {
+          lead.conversation_id =
+            data.conversation_id;
+
+          conversationButton.textContent =
+            "Open conversation";
+        }
+
+        const items =
+          Array.isArray(data.messages)
+            ? data.messages
+            : [];
+
+        if (!conversationInitialised) {
+          conversationHistory.innerHTML = "";
+          renderedMessageIds.clear();
+
+          if (!items.length) {
+            const empty =
+              document.createElement("p");
+
+            empty.className =
+              "conversation-empty";
+
+            empty.textContent =
+              "No conversation history yet. Write a reply below to start one.";
+
+            conversationHistory.appendChild(
+              empty
+            );
+          } else {
+            for (const message of items) {
+              appendConversationMessage(
+                message
+              );
+            }
+          }
+
+          conversationInitialised = true;
+
+          conversationHistory.scrollTop =
+            conversationHistory.scrollHeight;
+
+          return;
+        }
+
+        const newItems =
+          items.filter(
+            (message) =>
+              !renderedMessageIds.has(
+                String(message.id)
+              )
+          );
+
+        if (!newItems.length) {
+          return;
+        }
+
+        conversationHistory
+          .querySelector(
+            ".conversation-empty"
+          )
+          ?.remove();
+
+        for (const message of newItems) {
+          appendConversationMessage(
+            message
+          );
+        }
+
+        if (wasNearBottom) {
+          conversationHistory.scrollTop =
+            conversationHistory.scrollHeight;
+        }
+
+      } finally {
+        conversationRequestBusy = false;
+      }
+    }
+
+    let conversationRefreshBusy = false;
 
 setInterval(async () => {
   if (
