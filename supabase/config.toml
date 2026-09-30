@@ -6,3 +6,6 @@ verify_jwt = false
 
 [functions.payment-request-info]
 verify_jwt = false
+
+[functions.ai-assistant]
+verify_jwt = false
