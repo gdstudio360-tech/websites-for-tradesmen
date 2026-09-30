@@ -2369,3 +2369,117 @@ header, section, footer, main{
 }
 
 /* GD STUDIO 360 AI ASSISTANT END */
+
+
+/* AI ENQUIRY REVIEW CARD */
+
+.gd-enquiry-card{
+  margin:12px 0 16px;
+  padding:14px;
+  border:1px solid rgba(255,216,61,.3);
+  border-radius:16px;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,216,61,.08),
+      rgba(255,255,255,.025)
+    );
+}
+
+.gd-enquiry-card h4{
+  margin:0 0 5px;
+  color:#fff;
+  font-size:.92rem;
+}
+
+.gd-enquiry-card-intro{
+  margin:0 0 13px;
+  color:#91a2b5;
+  font-size:.72rem;
+  line-height:1.45;
+}
+
+.gd-enquiry-details{
+  display:grid;
+  gap:8px;
+  margin-bottom:13px;
+}
+
+.gd-enquiry-row{
+  display:grid;
+  grid-template-columns:92px 1fr;
+  gap:8px;
+  font-size:.73rem;
+  line-height:1.4;
+}
+
+.gd-enquiry-row span{
+  color:#75889a;
+}
+
+.gd-enquiry-row strong{
+  color:#edf4fa;
+  font-weight:650;
+  overflow-wrap:anywhere;
+}
+
+.gd-enquiry-summary{
+  display:block;
+  margin-top:3px;
+}
+
+.gd-enquiry-consent{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  padding:11px 0;
+  border-top:1px solid rgba(255,255,255,.07);
+  color:#aebbc7;
+  font-size:.68rem;
+  line-height:1.45;
+}
+
+.gd-enquiry-consent input{
+  width:15px;
+  height:15px;
+  flex:0 0 15px;
+  margin-top:2px;
+  accent-color:#ffd83d;
+}
+
+.gd-enquiry-consent a{
+  color:#f0d85e;
+}
+
+.gd-enquiry-submit{
+  width:100%;
+  min-height:42px;
+  margin-top:2px;
+  border:0;
+  border-radius:11px;
+  background:#ffd83d;
+  color:#07111c;
+  font-weight:850;
+  font-size:.78rem;
+  cursor:pointer;
+}
+
+.gd-enquiry-submit:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+.gd-enquiry-status{
+  margin-top:9px;
+  color:#8da0b2;
+  font-size:.67rem;
+  line-height:1.4;
+}
+
+.gd-enquiry-card.submitted{
+  border-color:rgba(84,211,138,.3);
+}
+
+.gd-enquiry-card.submitted .gd-enquiry-status{
+  color:#72dfa0;
+}

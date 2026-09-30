@@ -470,8 +470,14 @@ if (form) {
   const endpoint =
     `${window.GD_CONFIG?.SUPABASE_URL}/functions/v1/ai-assistant`;
 
+  const submitEndpoint =
+    `${window.GD_CONFIG?.SUPABASE_URL}/functions/v1/submit-chat-enquiry`;
+
   const conversationStorageKey =
     "gd360_ai_conversation_id_v1";
+
+  const pendingEnquiryStorageKey =
+    "gd360_ai_pending_enquiry_v1";
 
   let conversationId =
     localStorage.getItem(conversationStorageKey) || null;
@@ -524,6 +530,199 @@ if (form) {
     if (!state) {
       input.focus();
     }
+  }
+
+  function enquiryValue(value) {
+    const text = String(value || "").trim();
+    return text || "Not supplied";
+  }
+
+  function addEnquiryRow(container, label, value) {
+    const row = document.createElement("div");
+    row.className = "gd-enquiry-row";
+
+    const key = document.createElement("span");
+    key.textContent = label;
+
+    const val = document.createElement("strong");
+    val.textContent = enquiryValue(value);
+
+    row.append(key, val);
+    container.appendChild(row);
+  }
+
+  function renderEnquiryCard(enquiry) {
+    if (!enquiry || !conversationId) return;
+
+    document
+      .querySelectorAll(".gd-enquiry-card")
+      .forEach((card) => card.remove());
+
+    const card = document.createElement("div");
+    card.className = "gd-enquiry-card";
+
+    const title = document.createElement("h4");
+    title.textContent = "Your enquiry details";
+
+    const intro = document.createElement("p");
+    intro.className = "gd-enquiry-card-intro";
+    intro.textContent =
+      "Please check these details before submitting them to GD Studio 360.";
+
+    const details = document.createElement("div");
+    details.className = "gd-enquiry-details";
+
+    addEnquiryRow(details, "Name", enquiry.name);
+    addEnquiryRow(details, "Business", enquiry.business);
+    addEnquiryRow(details, "Trade", enquiry.trade);
+    addEnquiryRow(details, "Area", enquiry.area);
+    addEnquiryRow(details, "Email", enquiry.email);
+
+    if (enquiry.phone) {
+      addEnquiryRow(details, "WhatsApp", enquiry.phone);
+    }
+
+    addEnquiryRow(details, "Package", enquiry.package);
+
+    if (
+      enquiry.care_plan &&
+      enquiry.care_plan !== "No care plan"
+    ) {
+      addEnquiryRow(details, "Care", enquiry.care_plan);
+    }
+
+    addEnquiryRow(
+      details,
+      "Project",
+      enquiry.project_summary
+    );
+
+    const consentLabel = document.createElement("label");
+    consentLabel.className = "gd-enquiry-consent";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+
+    const consentText = document.createElement("span");
+    consentText.append(
+      "I agree to the "
+    );
+
+    const terms = document.createElement("a");
+    terms.href = "terms.html";
+    terms.target = "_blank";
+    terms.rel = "noopener";
+    terms.textContent = "Enquiry Terms";
+
+    const andText = document.createTextNode(" and ");
+
+    const privacy = document.createElement("a");
+    privacy.href = "privacy.html";
+    privacy.target = "_blank";
+    privacy.rel = "noopener";
+    privacy.textContent = "Privacy Notice";
+
+    consentText.append(
+      terms,
+      andText,
+      privacy,
+      document.createTextNode(
+        " and want GD Studio 360 to receive these details."
+      )
+    );
+
+    consentLabel.append(checkbox, consentText);
+
+    const submit = document.createElement("button");
+    submit.type = "button";
+    submit.className = "gd-enquiry-submit";
+    submit.textContent = "Submit enquiry";
+    submit.disabled = true;
+
+    const status = document.createElement("div");
+    status.className = "gd-enquiry-status";
+    status.textContent =
+      "Nothing has been submitted yet.";
+
+    checkbox.addEventListener("change", () => {
+      submit.disabled = !checkbox.checked;
+    });
+
+    submit.addEventListener("click", async () => {
+      if (!checkbox.checked || busy) return;
+
+      submit.disabled = true;
+      checkbox.disabled = true;
+      submit.textContent = "Submitting…";
+      status.textContent =
+        "Sending your enquiry securely…";
+
+      try {
+        const response = await fetch(submitEndpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            conversation_id: conversationId,
+            accepted_terms: true
+          })
+        });
+
+        let data = {};
+
+        try {
+          data = await response.json();
+        } catch (_) {}
+
+        if (!response.ok || !data?.ok) {
+          throw new Error(
+            data?.error || "Could not submit the enquiry."
+          );
+        }
+
+        card.classList.add("submitted");
+        submit.textContent = "Enquiry submitted";
+        status.textContent =
+          "Sent to GD Studio 360 for review.";
+
+        localStorage.removeItem(
+          pendingEnquiryStorageKey
+        );
+
+        addMessage(
+          "assistant",
+          data.reply ||
+            "Thanks — your enquiry has been submitted."
+        );
+
+        messages.scrollTop = messages.scrollHeight;
+
+      } catch (error) {
+        console.error(
+          "GD Studio 360 enquiry submit:",
+          error
+        );
+
+        checkbox.disabled = false;
+        submit.disabled = !checkbox.checked;
+        submit.textContent = "Submit enquiry";
+        status.textContent =
+          "Submission failed. Please try again.";
+      }
+    });
+
+    card.append(
+      title,
+      intro,
+      details,
+      consentLabel,
+      submit,
+      status
+    );
+
+    messages.appendChild(card);
+    messages.scrollTop = messages.scrollHeight;
   }
 
   async function sendMessage(rawMessage) {
@@ -584,6 +783,20 @@ if (form) {
 
       addMessage("assistant", data.reply);
 
+      if (
+        data.requires_confirmation &&
+        data.pending_enquiry
+      ) {
+        localStorage.setItem(
+          pendingEnquiryStorageKey,
+          JSON.stringify(data.pending_enquiry)
+        );
+
+        renderEnquiryCard(
+          data.pending_enquiry
+        );
+      }
+
     } catch (error) {
       typing.remove();
 
@@ -636,6 +849,23 @@ if (form) {
         sendMessage(button.dataset.chatPrompt);
       });
     });
+
+  try {
+    const savedPending =
+      JSON.parse(
+        localStorage.getItem(
+          pendingEnquiryStorageKey
+        ) || "null"
+      );
+
+    if (savedPending && conversationId) {
+      renderEnquiryCard(savedPending);
+    }
+  } catch (_) {
+    localStorage.removeItem(
+      pendingEnquiryStorageKey
+    );
+  }
 })();
 
 /* GD STUDIO 360 AI ASSISTANT END */
