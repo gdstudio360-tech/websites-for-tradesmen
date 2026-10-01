@@ -227,3 +227,29 @@ form button,.approve-button{min-height:46px;border:0;border-radius:10px;backgrou
     width:100%;
   }
 }
+
+
+/* LIVE ENQUIRY NOTICE */
+
+.pending-enquiry-banner[hidden]{
+  display:none !important;
+}
+
+.pending-enquiry-banner{
+  width:100%;
+  margin:0 0 14px;
+  padding:13px 16px;
+  border:1px solid #e5c642;
+  border-radius:12px;
+  background:#fff6c8;
+  color:#332900;
+  font-weight:900;
+  text-align:left;
+  box-shadow:0 8px 22px rgba(8,17,31,.05);
+}
+
+.pending-enquiry-banner:hover{
+  background:#ffef9b;
+}
+
+/* LIVE ENQUIRY NOTICE END */

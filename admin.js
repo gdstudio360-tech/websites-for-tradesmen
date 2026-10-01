@@ -6,6 +6,8 @@ const dashboardView = document.getElementById("dashboard-view");
 const loginForm = document.getElementById("login-form");
 const loginStatus = document.getElementById("login-status");
 const dashboardStatus = document.getElementById("dashboard-status");
+const pendingEnquiryBanner =
+  document.getElementById("pending-enquiry-banner");
 const logoutButton = document.getElementById("logout-button");
 const refreshButton = document.getElementById("refresh-button");
 const statusFilter = document.getElementById("status-filter");
@@ -20,6 +22,7 @@ let leadsSnapshot = "";
 let leadRefreshBusy = false;
 let leadRefreshPending = false;
 let leadsRealtimeChannel = null;
+let pendingNewEnquiries = 0;
 
 if (configured && window.supabase) {
   client = window.supabase.createClient(
@@ -206,7 +209,38 @@ async function loadLeads(options = {}) {
     !background
   ) {
     renderLeads();
+    clearPendingEnquiryNotice();
   }
+}
+
+
+
+function updatePendingEnquiryNotice() {
+  if (!pendingEnquiryBanner) {
+    return;
+  }
+
+  if (pendingNewEnquiries < 1) {
+    pendingEnquiryBanner.hidden = true;
+    pendingEnquiryBanner.textContent = "";
+    return;
+  }
+
+  const label =
+    pendingNewEnquiries === 1
+      ? "1 new enquiry received"
+      : `${pendingNewEnquiries} new enquiries received`;
+
+  pendingEnquiryBanner.textContent =
+    `${label} — Show now`;
+
+  pendingEnquiryBanner.hidden = false;
+}
+
+
+function clearPendingEnquiryNotice() {
+  pendingNewEnquiries = 0;
+  updatePendingEnquiryNotice();
 }
 
 
@@ -319,14 +353,41 @@ function startLeadsRealtime() {
         (payload) => {
           leadRefreshPending = true;
 
-          if (adminIsBusy()) {
-            const eventName =
-              payload?.eventType === "INSERT"
-                ? "New enquiry received"
-                : "Enquiry updated";
+          const isNewLead =
+            payload?.eventType === "INSERT";
 
-            dashboardStatus.textContent =
-              `${eventName} • it will appear automatically when you close the conversation`;
+          if (
+            isNewLead &&
+            payload?.new?.status === "new"
+          ) {
+            pendingNewEnquiries += 1;
+
+            const statNew =
+              document.getElementById(
+                "stat-new"
+              );
+
+            if (statNew) {
+              const current =
+                Number(
+                  statNew.textContent
+                ) || 0;
+
+              statNew.textContent =
+                String(current + 1);
+            }
+
+            updatePendingEnquiryNotice();
+          }
+
+          if (adminIsBusy()) {
+            if (isNewLead) {
+              dashboardStatus.textContent =
+                "New enquiry received • your current conversation remains open";
+            } else {
+              dashboardStatus.textContent =
+                "Enquiry updated • changes will appear when the conversation is closed";
+            }
 
             return;
           }
@@ -341,6 +402,51 @@ function startLeadsRealtime() {
         }
       });
 }
+
+
+
+pendingEnquiryBanner?.addEventListener(
+  "click",
+  () => {
+    const openConversation =
+      document.querySelector(
+        ".admin-conversation:not([hidden])"
+      );
+
+    if (openConversation) {
+      const reply =
+        openConversation.querySelector(
+          ".admin-reply-text"
+        );
+
+      /*
+       * Never destroy a typed draft.
+       */
+      if (
+        reply &&
+        reply.value.trim()
+      ) {
+        dashboardStatus.textContent =
+          "Your reply draft is protected. Close the conversation when you are ready to show the new enquiry.";
+
+        reply.focus();
+        return;
+      }
+
+      const closeButton =
+        openConversation.querySelector(
+          ".conversation-close"
+        );
+
+      if (closeButton) {
+        closeButton.click();
+        return;
+      }
+    }
+
+    requestLeadRefresh();
+  }
+);
 
 
 function stopLeadsRealtime() {
