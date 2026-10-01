@@ -1,4 +1,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import {
+  ensureLeadConversation,
+  logClientSystemMessage,
+} from "../_shared/conversation-log.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -272,6 +276,12 @@ Deno.serve(async (req) => {
       const formattedDeposit =
         money(depositAmount);
 
+      const conversationId =
+        await ensureLeadConversation(
+          serviceClient,
+          lead,
+        );
+
       const emailResponse =
         await fetch(
           "https://api.resend.com/emails",
@@ -286,7 +296,7 @@ Deno.serve(async (req) => {
             body: JSON.stringify({
               from: emailFrom,
               reply_to: [
-                "gdstudio360@gmail.com",
+                `reply+${conversationId}@gdstudio360.co.uk`,
               ],
               to: [
                 lead.email,
@@ -367,6 +377,19 @@ Deno.serve(async (req) => {
             "id",
             lead.id,
           );
+
+        await logClientSystemMessage(
+          serviceClient,
+          conversationId,
+          [
+            "Deposit request email sent to client.",
+            "",
+            `Project total: ${formattedTotal}`,
+            `Deposit requested: ${formattedDeposit}`,
+            `Payment link: ${paymentPageUrl}`,
+            `Terms: ${termsUrl}`,
+          ].join("\n"),
+        );
       } else {
         await serviceClient
           .from("leads")

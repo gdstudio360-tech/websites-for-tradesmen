@@ -1,4 +1,8 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import {
+  ensureLeadConversation,
+  logClientSystemMessage,
+} from "../_shared/conversation-log.ts";
 
 Deno.serve(async (req) => {
   try {
@@ -188,6 +192,7 @@ Deno.serve(async (req) => {
       }
 
       await sendDepositEmails(
+        supabase,
         paidLead,
       );
 
@@ -284,6 +289,7 @@ Deno.serve(async (req) => {
     }
 
     await sendFinalEmails(
+      supabase,
       completedLead,
     );
 
@@ -309,6 +315,7 @@ Deno.serve(async (req) => {
 
 
 async function sendDepositEmails(
+  db: any,
   lead: any,
 ) {
   const resendKey =
@@ -407,42 +414,71 @@ async function sendDepositEmails(
     </div>
   `;
 
-  await Promise.all([
-    sendEmail(
-      resendKey,
-      {
-        from: emailFrom,
-        reply_to: [
-          adminEmail,
-        ],
-        to: [
-          lead.email,
-        ],
-        subject:
-          "GD Studio 360 — deposit received",
-        html:
-          clientHtml,
-      },
-    ),
+  const conversationId =
+    await ensureLeadConversation(
+      db,
+      lead,
+    );
 
-    sendEmail(
-      resendKey,
-      {
-        from: emailFrom,
-        to: [
-          adminEmail,
-        ],
-        subject:
-          `Deposit received — ${lead.business} — ${deposit}`,
-        html:
-          adminHtml,
-      },
-    ),
-  ]);
+  const [
+    clientSent,
+    adminSent,
+  ] =
+    await Promise.all([
+      sendEmail(
+        resendKey,
+        {
+          from: emailFrom,
+          reply_to: [
+            `reply+${conversationId}@gdstudio360.co.uk`,
+          ],
+          to: [
+            lead.email,
+          ],
+          subject:
+            "GD Studio 360 — deposit received",
+          html:
+            clientHtml,
+        },
+      ),
+
+      sendEmail(
+        resendKey,
+        {
+          from: emailFrom,
+          to: [
+            adminEmail,
+          ],
+          subject:
+            `Deposit received — ${lead.business} — ${deposit}`,
+          html:
+            adminHtml,
+        },
+      ),
+    ]);
+
+  if (clientSent) {
+    await logClientSystemMessage(
+      db,
+      conversationId,
+      [
+        "Deposit payment confirmation email sent to client.",
+        "",
+        `Deposit received: ${deposit}`,
+        `Package: ${lead.package || "Not specified"}`,
+      ].join("\n"),
+    );
+  }
+
+  return {
+    clientSent,
+    adminSent,
+  };
 }
 
 
 async function sendFinalEmails(
+  db: any,
   lead: any,
 ) {
   const resendKey =
@@ -560,40 +596,84 @@ async function sendFinalEmails(
     </div>
   `;
 
-  await Promise.all([
-    sendEmail(
-      resendKey,
-      {
-        from:
-          emailFrom,
-        reply_to: [
-          adminEmail,
-        ],
-        to: [
-          lead.email,
-        ],
-        subject:
-          "GD Studio 360 — project paid in full",
-        html:
-          clientHtml,
-      },
-    ),
+  const conversationId =
+    await ensureLeadConversation(
+      db,
+      lead,
+    );
 
-    sendEmail(
-      resendKey,
-      {
-        from:
-          emailFrom,
-        to: [
-          adminEmail,
-        ],
-        subject:
-          `Project paid in full — ${lead.business}`,
-        html:
-          adminHtml,
-      },
-    ),
-  ]);
+  const [
+    clientSent,
+    adminSent,
+  ] =
+    await Promise.all([
+      sendEmail(
+        resendKey,
+        {
+          from:
+            emailFrom,
+
+          reply_to: [
+            `reply+${conversationId}@gdstudio360.co.uk`,
+          ],
+
+          to: [
+            lead.email,
+          ],
+
+          subject:
+            "GD Studio 360 — project paid in full",
+
+          html:
+            clientHtml,
+        },
+      ),
+
+      sendEmail(
+        resendKey,
+        {
+          from:
+            emailFrom,
+
+          to: [
+            adminEmail,
+          ],
+
+          subject:
+            `Project paid in full — ${lead.business}`,
+
+          html:
+            adminHtml,
+        },
+      ),
+    ]);
+
+  if (clientSent) {
+    const lines = [
+      "Final payment confirmation email sent to client.",
+      "",
+      `Final payment received: ${balance}`,
+      `Project total: ${total}`,
+      "Project marked as completed.",
+    ];
+
+    if (lead.live_url) {
+      lines.push(
+        `Live website: ${lead.live_url}`,
+      );
+    }
+
+    await logClientSystemMessage(
+      db,
+      conversationId,
+      lines.join("\n"),
+    );
+  }
+
+  return {
+    clientSent,
+    adminSent,
+  };
 }
 
 

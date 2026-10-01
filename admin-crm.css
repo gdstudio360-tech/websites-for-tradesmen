@@ -996,3 +996,26 @@ form button{
 }
 
 /* CRM CLIENT QUICK INFO V3 END */
+
+
+/* CRM SYSTEM COMMUNICATION V7 */
+
+.conversation-message.role-system{
+  width:min(92%,760px);
+  justify-self:center;
+  background:#f4f6f8;
+  border:1px dashed #c9d1da;
+  color:#445063;
+}
+
+.conversation-message.role-system
+.conversation-message-meta strong{
+  color:#526071;
+}
+
+.conversation-message.role-system
+small{
+  color:#8b96a5;
+}
+
+/* CRM SYSTEM COMMUNICATION V7 END */
