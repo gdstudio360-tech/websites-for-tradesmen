@@ -1,4 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
+import {
+  getSumupTestMode,
+} from "../_shared/payment-mode.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -40,12 +43,7 @@ Deno.serve(async (req) => {
       )!;
 
     const testMode =
-      (
-        Deno.env.get(
-          "SUMUP_TEST_MODE",
-        ) || ""
-      ).toLowerCase() ===
-      "true";
+      await getSumupTestMode();
 
     const sumupKey =
       testMode

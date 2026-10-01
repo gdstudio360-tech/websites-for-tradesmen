@@ -3,6 +3,9 @@ import {
   ensureLeadConversation,
   logClientSystemMessage,
 } from "../_shared/conversation-log.ts";
+import {
+  getSumupTestMode,
+} from "../_shared/payment-mode.ts";
 
 Deno.serve(async (req) => {
   try {
@@ -21,12 +24,7 @@ Deno.serve(async (req) => {
     }
 
     const testMode =
-      (
-        Deno.env.get(
-          "SUMUP_TEST_MODE",
-        ) || ""
-      ).toLowerCase() ===
-      "true";
+      await getSumupTestMode();
 
     const sumupKey =
       testMode

@@ -1075,3 +1075,34 @@ small{
 }
 
 /* PAYMENT MODE INDICATOR V8 END */
+
+
+/* PAYMENT MODE SWITCH V10 */
+
+.payment-mode-switch{
+  min-height:34px;
+  padding:0 12px;
+  border-radius:999px;
+  font-size:.64rem;
+  font-weight:950;
+  cursor:pointer;
+}
+
+.payment-mode-switch.to-live{
+  border:1px solid #e7a29b;
+  background:#fff5f4;
+  color:#a72b25;
+}
+
+.payment-mode-switch.to-test{
+  border:1px solid #d9b91c;
+  background:#fff8d7;
+  color:#725900;
+}
+
+.payment-mode-switch:disabled{
+  opacity:.55;
+  cursor:wait;
+}
+
+/* PAYMENT MODE SWITCH V10 END */

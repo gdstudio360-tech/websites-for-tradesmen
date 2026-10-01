@@ -42,6 +42,11 @@ const paymentModeBadge =
     "payment-mode-badge"
   );
 
+const paymentModeSwitch =
+  document.getElementById(
+    "payment-mode-switch"
+  );
+
 const refreshButton =
   document.getElementById(
     "refresh-button"
@@ -474,6 +479,11 @@ async function loadPaymentMode() {
   paymentModeBadge.textContent =
     "CHECKING PAYMENTS…";
 
+  if (paymentModeSwitch) {
+    paymentModeSwitch.hidden =
+      true;
+  }
+
   const {
     data,
     error
@@ -502,40 +512,138 @@ async function loadPaymentMode() {
     return;
   }
 
-  if (
-    data.sumup_test_mode ===
-    true
-  ) {
-    sumupTestMode =
-      true;
-
-    paymentModeBadge.className =
-      "payment-mode-badge test";
-
-    paymentModeBadge.textContent =
-      "SUMUP TEST MODE";
-
-    if (selectedLeadId) {
-      renderSelectedLead();
-    }
-
-    return;
-  }
-
   sumupTestMode =
-    false;
+    data.sumup_test_mode ===
+    true;
 
   paymentModeBadge.className =
-    "payment-mode-badge live";
+    sumupTestMode
+      ? "payment-mode-badge test"
+      : "payment-mode-badge live";
 
   paymentModeBadge.textContent =
-    "SUMUP LIVE PAYMENTS";
+    sumupTestMode
+      ? "SUMUP TEST MODE"
+      : "SUMUP LIVE PAYMENTS";
+
+  if (paymentModeSwitch) {
+    paymentModeSwitch.hidden =
+      false;
+
+    paymentModeSwitch.className =
+      sumupTestMode
+        ? "payment-mode-switch to-live"
+        : "payment-mode-switch to-test";
+
+    paymentModeSwitch.textContent =
+      sumupTestMode
+        ? "Switch to LIVE"
+        : "Switch to TEST";
+  }
 
   if (selectedLeadId) {
     renderSelectedLead();
   }
 }
 
+
+paymentModeSwitch
+  ?.addEventListener(
+    "click",
+    async () => {
+      if (
+        typeof sumupTestMode !==
+        "boolean"
+      ) {
+        return;
+      }
+
+      const targetTestMode =
+        !sumupTestMode;
+
+      const word =
+        targetTestMode
+          ? "TEST"
+          : "LIVE";
+
+      const message =
+        targetTestMode
+          ? (
+              "Switch SumUp to TEST mode?\n\n" +
+              "New payments will use sandbox money.\n\n" +
+              "Type TEST to confirm."
+            )
+          : (
+              "Switch SumUp to LIVE mode?\n\n" +
+              "NEW PAYMENTS WILL USE REAL MONEY.\n\n" +
+              "Type LIVE to confirm."
+            );
+
+      const confirmation =
+        prompt(message);
+
+      if (
+        String(
+          confirmation || ""
+        )
+          .trim()
+          .toUpperCase() !==
+        word
+      ) {
+        return;
+      }
+
+      paymentModeSwitch.disabled =
+        true;
+
+      paymentModeSwitch.textContent =
+        "Switching…";
+
+      const {
+        data,
+        error
+      } =
+        await client.functions
+          .invoke(
+            "admin-payment-mode",
+            {
+              body: {
+                test_mode:
+                  targetTestMode,
+                confirmation:
+                  word
+              }
+            }
+          );
+
+      if (
+        error ||
+        !data?.ok
+      ) {
+        dashboardStatus.textContent =
+          data?.error ||
+          error?.message ||
+          "Could not change payment mode.";
+
+        paymentModeSwitch.disabled =
+          false;
+
+        await loadPaymentMode();
+
+        return;
+      }
+
+      await loadPaymentMode();
+
+      paymentModeSwitch.disabled =
+        false;
+
+      dashboardStatus.textContent =
+        targetTestMode
+          ? "SumUp TEST mode is active."
+          : "SumUp LIVE payments are active.";
+    }
+  );
 
 function showLogin() {
   loginView.hidden = false;
