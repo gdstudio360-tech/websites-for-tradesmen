@@ -37,6 +37,11 @@ const logoutButton =
     "logout-button"
   );
 
+const paymentModeBadge =
+  document.getElementById(
+    "payment-mode-badge"
+  );
+
 const refreshButton =
   document.getElementById(
     "refresh-button"
@@ -450,6 +455,70 @@ function cleanCustomerReply(
 }
 
 
+
+async function loadPaymentMode() {
+  if (
+    !client ||
+    !paymentModeBadge
+  ) {
+    return;
+  }
+
+  paymentModeBadge.hidden =
+    false;
+
+  paymentModeBadge.className =
+    "payment-mode-badge checking";
+
+  paymentModeBadge.textContent =
+    "CHECKING PAYMENTS…";
+
+  const {
+    data,
+    error
+  } =
+    await client.functions
+      .invoke(
+        "admin-system-status",
+        {
+          body: {}
+        }
+      );
+
+  if (
+    error ||
+    !data?.ok
+  ) {
+    paymentModeBadge.className =
+      "payment-mode-badge unknown";
+
+    paymentModeBadge.textContent =
+      "PAYMENT MODE UNKNOWN";
+
+    return;
+  }
+
+  if (
+    data.sumup_test_mode ===
+    true
+  ) {
+    paymentModeBadge.className =
+      "payment-mode-badge test";
+
+    paymentModeBadge.textContent =
+      "SUMUP TEST MODE";
+
+    return;
+  }
+
+  paymentModeBadge.className =
+    "payment-mode-badge live";
+
+  paymentModeBadge.textContent =
+    "SUMUP LIVE PAYMENTS";
+}
+
+
 function showLogin() {
   loginView.hidden = false;
   dashboardView.hidden = true;
@@ -479,9 +548,12 @@ async function ensureSession() {
   ) {
     showDashboard();
 
-    await loadLeads({
-      refreshDetail: true
-    });
+    await Promise.all([
+      loadLeads({
+        refreshDetail: true
+      }),
+      loadPaymentMode()
+    ]);
 
     startRealtime();
 
@@ -538,9 +610,12 @@ loginForm
 
       showDashboard();
 
-      await loadLeads({
-        refreshDetail: true
-      });
+      await Promise.all([
+        loadLeads({
+          refreshDetail: true
+        }),
+        loadPaymentMode()
+      ]);
 
       startRealtime();
     }

@@ -22,7 +22,7 @@
 
   <link
     rel="stylesheet"
-    href="admin-crm.css?v=client-comms-v7"
+    href="admin-crm.css?v=payment-mode-v8"
   >
 </head>
 
@@ -43,14 +43,26 @@
       </div>
     </a>
 
-    <button
-      id="logout-button"
-      class="ghost-button"
-      type="button"
-      hidden
-    >
-      Log out
-    </button>
+    <div class="admin-nav-actions">
+
+      <span
+        id="payment-mode-badge"
+        class="payment-mode-badge"
+        hidden
+      >
+        CHECKING PAYMENTS…
+      </span>
+
+      <button
+        id="logout-button"
+        class="ghost-button"
+        type="button"
+        hidden
+      >
+        Log out
+      </button>
+
+    </div>
 
   </div>
 </header>
@@ -285,7 +297,7 @@
 <script src="site-config.js"></script>
 
 <script
-  src="admin-crm.js?v=preview-email-v5"
+  src="admin-crm.js?v=payment-mode-v8"
 ></script>
 
 </body>

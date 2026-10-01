@@ -1019,3 +1019,59 @@ small{
 }
 
 /* CRM SYSTEM COMMUNICATION V7 END */
+
+
+/* PAYMENT MODE INDICATOR V8 */
+
+.admin-nav-actions{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.payment-mode-badge{
+  display:inline-flex;
+  align-items:center;
+  min-height:32px;
+  padding:0 11px;
+  border:1px solid transparent;
+  border-radius:999px;
+  font-size:.64rem;
+  font-weight:950;
+  letter-spacing:.07em;
+  white-space:nowrap;
+}
+
+.payment-mode-badge.test{
+  border-color:#d9b91c;
+  background:#ffd83d;
+  color:#17130a;
+}
+
+.payment-mode-badge.live{
+  border-color:#58a879;
+  background:#e8f7ee;
+  color:#13673d;
+}
+
+.payment-mode-badge.unknown,
+.payment-mode-badge.checking{
+  border-color:#8190a4;
+  background:#172235;
+  color:#dce4ee;
+}
+
+@media(max-width:620px){
+
+  .admin-nav-actions{
+    gap:6px;
+  }
+
+  .payment-mode-badge{
+    padding:0 8px;
+    font-size:.56rem;
+  }
+
+}
+
+/* PAYMENT MODE INDICATOR V8 END */
