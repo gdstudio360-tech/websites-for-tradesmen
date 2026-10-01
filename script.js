@@ -48,7 +48,7 @@ if (emailButton) {
 if (whatsappButton) {
   const whatsappNumber = contact.phone.replace(/\D/g, "");
   const message = encodeURIComponent(
-    "Hi, I’m interested in a website for my trade business. I’d like to know more."
+    "Hi, I’m interested in a website for my business. I’d like to know more."
   );
   // This opens a WhatsApp text chat with a pre-filled message. It does not initiate a WhatsApp call.
   whatsappButton.href = `https://wa.me/${whatsappNumber}?text=${message}`;
@@ -787,7 +787,7 @@ if (form) {
 
     addEnquiryRow(details, "Name", enquiry.name);
     addEnquiryRow(details, "Business", enquiry.business);
-    addEnquiryRow(details, "Trade", enquiry.trade);
+    addEnquiryRow(details, "Business type", enquiry.trade);
     addEnquiryRow(details, "Area", enquiry.area);
     addEnquiryRow(details, "Email", enquiry.email);
 

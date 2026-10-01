@@ -209,7 +209,7 @@ function renderLeads() {
 
     fragment.querySelector(".lead-status").textContent = prettyStatus(lead.status);
     fragment.querySelector(".lead-business").textContent = lead.business || "Unnamed business";
-    fragment.querySelector(".lead-person").textContent = `${lead.name || ""} • ${lead.trade || "Trade not supplied"}`;
+    fragment.querySelector(".lead-person").textContent = `${lead.name || ""} • ${lead.trade || "Business type not supplied"}`;
     fragment.querySelector(".lead-package").textContent =
       `${lead.package || "Package not selected"} • Care: ${lead.care_plan || "No care plan"}`;
 
