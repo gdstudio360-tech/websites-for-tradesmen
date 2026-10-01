@@ -74,6 +74,10 @@ let activeDetailTab = "overview";
 let selectedLeadId = null;
 let realtimeChannel = null;
 
+let conversationTimer = null;
+let conversationLeadId = null;
+let conversationMessageIds = new Set();
+
 
 if (
   config.SUPABASE_URL &&
@@ -193,6 +197,397 @@ function normaliseUrl(value) {
 }
 
 
+
+function cleanCustomerReply(value) {
+  const text =
+    String(value || "")
+      .replace(/\r\n/g, "\n")
+      .trim();
+
+  if (!text) {
+    return "";
+  }
+
+  const lines = text.split("\n");
+  let cutAt = lines.length;
+
+  for (
+    let i = 1;
+    i < lines.length;
+    i += 1
+  ) {
+    const line =
+      lines[i].trim();
+
+    const normalised =
+      line
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .toLowerCase();
+
+    const quoted =
+      line.startsWith(">") ||
+      normalised.endsWith("rase:") ||
+      normalised.endsWith("wrote:") ||
+      /^on .+ wrote:$/i.test(line) ||
+      /^(from|nuo|sent|issiusta|subject|tema):\s+/i
+        .test(normalised);
+
+    if (quoted) {
+      cutAt = i;
+      break;
+    }
+  }
+
+  return lines
+    .slice(0, cutAt)
+    .join("\n")
+    .trim();
+}
+
+
+function stopConversationPolling() {
+  if (conversationTimer) {
+    clearInterval(conversationTimer);
+    conversationTimer = null;
+  }
+
+  conversationLeadId = null;
+  conversationMessageIds =
+    new Set();
+}
+
+
+function appendConversationMessage(message) {
+  const history =
+    document.getElementById(
+      "mobile-conversation-history"
+    );
+
+  if (!history) {
+    return;
+  }
+
+  history
+    .querySelector(
+      ".conversation-empty"
+    )
+    ?.remove();
+
+  const bubble =
+    document.createElement("div");
+
+  const role =
+    message.role || "customer";
+
+  bubble.className =
+    `mobile-message role-${role}`;
+
+  const labels = {
+    customer: "Customer",
+    assistant: "AI Assistant",
+    human: "You",
+    system: "System"
+  };
+
+  const content =
+    role === "customer"
+      ? cleanCustomerReply(
+          message.content
+        )
+      : String(
+          message.content || ""
+        );
+
+  bubble.innerHTML = `
+    <div class="mobile-message-meta">
+
+      <strong>
+        ${
+          escapeHtml(
+            labels[role] || role
+          )
+        }
+      </strong>
+
+      <span>
+        ${
+          message.created_at
+            ? escapeHtml(
+                new Date(
+                  message.created_at
+                ).toLocaleString(
+                  "en-GB"
+                )
+              )
+            : ""
+        }
+      </span>
+
+    </div>
+
+    <div class="mobile-message-text">
+      ${escapeHtml(content)}
+    </div>
+
+    ${
+      message.channel
+        ? `
+          <small>
+            ${escapeHtml(message.channel)}
+          </small>
+        `
+        : ""
+    }
+  `;
+
+  history.appendChild(bubble);
+
+  if (message.id) {
+    conversationMessageIds.add(
+      String(message.id)
+    );
+  }
+}
+
+
+async function loadConversation(lead) {
+  if (
+    !lead ||
+    activeDetailTab !== "chat" ||
+    String(selectedLeadId) !==
+      String(lead.id)
+  ) {
+    return;
+  }
+
+  const history =
+    document.getElementById(
+      "mobile-conversation-history"
+    );
+
+  if (!history) {
+    return;
+  }
+
+  const {
+    data,
+    error
+  } =
+    await supabaseClient.functions.invoke(
+      "admin-inbox",
+      {
+        body: {
+          action: "history",
+          lead_id: lead.id
+        }
+      }
+    );
+
+  if (
+    error ||
+    !data?.ok
+  ) {
+    history.innerHTML = `
+      <p class="conversation-empty">
+        ${
+          escapeHtml(
+            data?.error ||
+            error?.message ||
+            "Could not load conversation."
+          )
+        }
+      </p>
+    `;
+
+    return;
+  }
+
+  const items =
+    Array.isArray(data.messages)
+      ? data.messages
+      : [];
+
+  if (
+    String(conversationLeadId) !==
+    String(lead.id)
+  ) {
+    conversationLeadId =
+      lead.id;
+
+    conversationMessageIds =
+      new Set();
+
+    history.innerHTML = "";
+  }
+
+  if (
+    !items.length &&
+    !history.children.length
+  ) {
+    history.innerHTML = `
+      <p class="conversation-empty">
+        No conversation history yet.
+      </p>
+    `;
+
+    return;
+  }
+
+  const nearBottom =
+    (
+      history.scrollHeight -
+      history.scrollTop -
+      history.clientHeight
+    ) < 100;
+
+  const newItems =
+    items.filter(
+      message =>
+        !conversationMessageIds.has(
+          String(message.id)
+        )
+    );
+
+  for (const message of newItems) {
+    appendConversationMessage(
+      message
+    );
+  }
+
+  if (
+    nearBottom ||
+    newItems.length === items.length
+  ) {
+    history.scrollTop =
+      history.scrollHeight;
+  }
+}
+
+
+function startConversationPolling(lead) {
+  stopConversationPolling();
+
+  conversationLeadId =
+    lead.id;
+
+  conversationMessageIds =
+    new Set();
+
+  loadConversation(lead);
+
+  const form =
+    document.getElementById(
+      "mobile-reply-form"
+    );
+
+  const textarea =
+    document.getElementById(
+      "mobile-reply-text"
+    );
+
+  const sendButton =
+    document.getElementById(
+      "mobile-send-reply"
+    );
+
+  const status =
+    document.getElementById(
+      "mobile-reply-status"
+    );
+
+  form?.addEventListener(
+    "submit",
+    async event => {
+      event.preventDefault();
+
+      const message =
+        textarea.value.trim();
+
+      if (!message) {
+        return;
+      }
+
+      sendButton.disabled = true;
+      sendButton.textContent =
+        "Sending…";
+
+      status.textContent =
+        "Sending…";
+
+      const {
+        data,
+        error
+      } =
+        await supabaseClient.functions.invoke(
+          "admin-inbox",
+          {
+            body: {
+              action: "send",
+              lead_id: lead.id,
+              message
+            }
+          }
+        );
+
+      if (
+        error ||
+        !data?.ok
+      ) {
+        status.textContent =
+          data?.error ||
+          error?.message ||
+          "Could not send reply.";
+
+        sendButton.disabled = false;
+        sendButton.textContent =
+          "Send";
+
+        return;
+      }
+
+      textarea.value = "";
+
+      status.textContent =
+        "Sent";
+
+      sendButton.disabled = false;
+      sendButton.textContent =
+        "Send";
+
+      await loadConversation(
+        lead
+      );
+
+      setTimeout(
+        () => {
+          if (status) {
+            status.textContent = "";
+          }
+        },
+        1800
+      );
+    }
+  );
+
+  conversationTimer =
+    setInterval(
+      () => {
+        if (
+          !document.hidden &&
+          activeDetailTab === "chat" &&
+          String(selectedLeadId) ===
+            String(lead.id)
+        ) {
+          loadConversation(lead);
+        }
+      },
+      3000
+    );
+}
+
+
+
 function getSelectedLead() {
   return leads.find(
     lead =>
@@ -215,6 +610,8 @@ function showDashboard() {
 
 
 function showClients() {
+  stopConversationPolling();
+
   selectedLeadId = null;
   detailScreen.hidden = true;
   clientsScreen.hidden = false;
@@ -222,6 +619,8 @@ function showClients() {
 
 
 function showDetail(leadId) {
+  stopConversationPolling();
+
   selectedLeadId = leadId;
   activeDetailTab = "overview";
 
@@ -823,28 +1222,78 @@ function renderPayments(lead) {
 
 function renderChat(lead) {
   detailContent.innerHTML = `
-    <section class="mobile-card">
+    <section class="mobile-card chat-card">
 
-      <h3>Conversation</h3>
+      <div class="chat-title-row">
+        <div>
+          <h3>Conversation</h3>
 
-      <div class="readonly-note">
-        Conversation view and replies will
-        be connected in the next stage.
+          <span>
+            ${escapeHtml(lead.email || "")}
+          </span>
+        </div>
 
-        <br><br>
-
-        Client:
-        <strong>
-          ${escapeHtml(lead.name || "—")}
-        </strong>
+        <span class="chat-live-dot">
+          Live
+        </span>
       </div>
+
+      <div
+        id="mobile-conversation-history"
+        class="mobile-conversation-history"
+      >
+        <p class="conversation-empty">
+          Loading conversation…
+        </p>
+      </div>
+
+      <form
+        id="mobile-reply-form"
+        class="mobile-reply-form"
+      >
+
+        <textarea
+          id="mobile-reply-text"
+          rows="3"
+          maxlength="5000"
+          placeholder="Write your reply..."
+          required
+        ></textarea>
+
+        <div class="mobile-reply-actions">
+
+          <span
+            id="mobile-reply-status"
+            class="mobile-reply-status"
+          ></span>
+
+          <button
+            id="mobile-send-reply"
+            class="primary-button"
+            type="submit"
+          >
+            Send
+          </button>
+
+        </div>
+
+      </form>
 
     </section>
   `;
+
+  startConversationPolling(
+    lead
+  );
 }
 
-
 function renderDetail() {
+  if (
+    activeDetailTab !== "chat"
+  ) {
+    stopConversationPolling();
+  }
+
   const lead =
     getSelectedLead();
 
@@ -1029,6 +1478,7 @@ logoutButton.addEventListener(
   "click",
   async () => {
     stopRealtime();
+    stopConversationPolling();
 
     if (supabaseClient) {
       await supabaseClient.auth
@@ -1096,6 +1546,8 @@ document
       button.addEventListener(
         "click",
         () => {
+          stopConversationPolling();
+
           activeDetailTab =
             button.dataset.tab;
 
