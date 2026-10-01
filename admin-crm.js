@@ -109,6 +109,7 @@ let client = null;
 let leads = [];
 let activeView = "new";
 let selectedLeadId = null;
+let sumupTestMode = null;
 
 let realtimeChannel = null;
 let pendingNewCount = 0;
@@ -489,6 +490,9 @@ async function loadPaymentMode() {
     error ||
     !data?.ok
   ) {
+    sumupTestMode =
+      null;
+
     paymentModeBadge.className =
       "payment-mode-badge unknown";
 
@@ -502,20 +506,34 @@ async function loadPaymentMode() {
     data.sumup_test_mode ===
     true
   ) {
+    sumupTestMode =
+      true;
+
     paymentModeBadge.className =
       "payment-mode-badge test";
 
     paymentModeBadge.textContent =
       "SUMUP TEST MODE";
 
+    if (selectedLeadId) {
+      renderSelectedLead();
+    }
+
     return;
   }
+
+  sumupTestMode =
+    false;
 
   paymentModeBadge.className =
     "payment-mode-badge live";
 
   paymentModeBadge.textContent =
     "SUMUP LIVE PAYMENTS";
+
+  if (selectedLeadId) {
+    renderSelectedLead();
+  }
 }
 
 
@@ -2213,6 +2231,22 @@ function renderSelectedLead() {
                 : ""
             }
 
+
+            ${
+              sumupTestMode ===
+              true
+                ? `
+                  <button
+                    class="danger-button"
+                    id="delete-test-client"
+                    type="button"
+                  >
+                    Delete test client
+                  </button>
+                `
+                : ""
+            }
+
           </div>
 
         </section>
@@ -3016,6 +3050,111 @@ function bindProjectControls(
           lead.id,
           "rejected"
         );
+      }
+    );
+
+
+  document
+    .getElementById(
+      "delete-test-client"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        if (
+          sumupTestMode !==
+          true
+        ) {
+          dashboardStatus.textContent =
+            "Test client deletion is only available in SUMUP TEST MODE.";
+
+          return;
+        }
+
+        const business =
+          lead.business ||
+          lead.name ||
+          "this client";
+
+        const confirmation =
+          prompt(
+            `Permanently delete test client "${business}" and its conversation?\n\nType DELETE to confirm.`
+          );
+
+        if (
+          confirmation !==
+          "DELETE"
+        ) {
+          return;
+        }
+
+        const button =
+          document.getElementById(
+            "delete-test-client"
+          );
+
+        if (button) {
+          button.disabled =
+            true;
+
+          button.textContent =
+            "Deleting…";
+        }
+
+        dashboardStatus.textContent =
+          `Deleting test client ${business}…`;
+
+        stopConversationPolling();
+
+        const {
+          data,
+          error
+        } =
+          await client.functions
+            .invoke(
+              "delete-test-client",
+              {
+                body: {
+                  lead_id:
+                    lead.id
+                }
+              }
+            );
+
+        if (
+          error ||
+          !data?.ok
+        ) {
+          dashboardStatus.textContent =
+            data?.error ||
+            error?.message ||
+            "Could not delete test client.";
+
+          if (button) {
+            button.disabled =
+              false;
+
+            button.textContent =
+              "Delete test client";
+          }
+
+          startConversationPolling(
+            lead
+          );
+
+          return;
+        }
+
+        selectedLeadId =
+          null;
+
+        dashboardStatus.textContent =
+          `Test client ${business} deleted.`;
+
+        await loadLeads({
+          refreshDetail:
+            true
+        });
       }
     );
 }
