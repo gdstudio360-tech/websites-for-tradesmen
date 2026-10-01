@@ -1118,7 +1118,9 @@ if (form) {
 /* GD STUDIO 360 AI ASSISTANT END */
 
 
-/* GD SMALL BUSINESS HERO SCENES V1 */
+
+
+/* GD INNER SCREEN SCROLL V2 */
 
 (() => {
   if (!document.body.classList.contains("gd-premium")) return;
@@ -1126,116 +1128,188 @@ if (form) {
   const reduced =
     window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  const browser = document.querySelector(".hero-preview .browser");
-  const address = browser?.querySelector(".browser-address");
-  const logo = browser?.querySelector(".mock-logo b");
-  const heading = browser?.querySelector(".mock-left h3");
+  function createVerticalLoop({
+    viewport,
+    track,
+    interval = 4800,
+    transitionMs = 1200,
+    onScene = null
+  }) {
+    if (!viewport || !track || reduced) return;
 
-  const scenes = [
-    {
-      domain: "yourbusiness.co.uk",
-      logo: "YOUR BUSINESS",
-      first: "Professional business.",
-      second: "Professional website."
-    },
-    {
-      domain: "thebarberstudio.co.uk",
-      logo: "BARBER STUDIO",
-      first: "Look established.",
-      second: "Make booking easy."
-    },
-    {
-      domain: "localautocare.co.uk",
-      logo: "AUTO CARE",
-      first: "Show your services.",
-      second: "Win more enquiries."
-    },
-    {
-      domain: "brightcleaning.co.uk",
-      logo: "BRIGHT CLEANING",
-      first: "Build customer trust.",
-      second: "Be easy to contact."
-    },
-    {
-      domain: "creativestudio.co.uk",
-      logo: "CREATIVE STUDIO",
-      first: "Show your work.",
-      second: "Grow your presence."
+    const originals = Array.from(track.children);
+
+    if (originals.length < 2) return;
+
+    const firstClone = originals[0].cloneNode(true);
+    firstClone.setAttribute("aria-hidden", "true");
+    track.appendChild(firstClone);
+
+    let index = 0;
+    let timer = null;
+    let resetTimer = null;
+
+    function sceneHeight() {
+      return viewport.clientHeight;
     }
-  ];
 
-  let sceneIndex = 0;
-  let sceneTimer = null;
+    function moveTo(nextIndex, animate = true) {
+      const height = sceneHeight();
+      if (!height) return;
 
-  function applyScene(scene) {
-    if (!browser || !address || !logo || !heading) return;
+      track.classList.toggle(
+        "gd-no-transition",
+        !animate
+      );
 
-    browser.classList.add("gd-scene-changing");
+      track.style.transform =
+        `translate3d(0, -${nextIndex * height}px, 0)`;
 
-    window.setTimeout(() => {
-      address.textContent = scene.domain;
-      logo.textContent = scene.logo;
+      if (onScene) {
+        const scene =
+          nextIndex >= originals.length
+            ? originals[0]
+            : originals[nextIndex];
 
-      heading.textContent = scene.first;
-      heading.appendChild(document.createElement("br"));
+        onScene(scene, nextIndex);
+      }
+    }
 
-      const accent = document.createElement("em");
-      accent.textContent = scene.second;
-      heading.appendChild(accent);
+    function next() {
+      index += 1;
+      moveTo(index, true);
 
-      browser.classList.remove("gd-scene-changing");
-    }, 220);
-  }
+      if (index === originals.length) {
+        clearTimeout(resetTimer);
 
-  if (
-    browser &&
-    address &&
-    logo &&
-    heading &&
-    !reduced
-  ) {
-    sceneTimer = window.setInterval(() => {
-      sceneIndex = (sceneIndex + 1) % scenes.length;
-      applyScene(scenes[sceneIndex]);
-    }, 3900);
+        resetTimer = window.setTimeout(() => {
+          index = 0;
+          moveTo(0, false);
+
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              track.classList.remove("gd-no-transition");
+            });
+          });
+        }, transitionMs + 80);
+      }
+    }
+
+    function start() {
+      if (timer) return;
+      timer = window.setInterval(next, interval);
+    }
+
+    function stop() {
+      if (!timer) return;
+      window.clearInterval(timer);
+      timer = null;
+    }
+
+    window.addEventListener("resize", () => {
+      moveTo(index, false);
+
+      requestAnimationFrame(() => {
+        track.classList.remove("gd-no-transition");
+      });
+    });
 
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden && sceneTimer) {
-        clearInterval(sceneTimer);
-        sceneTimer = null;
-      } else if (!document.hidden && !sceneTimer) {
-        sceneTimer = window.setInterval(() => {
-          sceneIndex = (sceneIndex + 1) % scenes.length;
-          applyScene(scenes[sceneIndex]);
-        }, 3900);
+      if (document.hidden) {
+        stop();
+      } else {
+        start();
       }
     });
+
+    moveTo(0, false);
+
+    requestAnimationFrame(() => {
+      track.classList.remove("gd-no-transition");
+    });
+
+    start();
   }
 
-  const steps = document.querySelector(".steps");
+
+  /* HERO */
+  const browserWindow =
+    document.querySelector(".gd-browser-window");
+
+  const browserTrack =
+    document.querySelector(".gd-browser-track");
+
+  const browserAddress =
+    document.querySelector(".hero-preview .browser-address");
+
+  createVerticalLoop({
+    viewport: browserWindow,
+    track: browserTrack,
+    interval: 4700,
+    transitionMs: 1150,
+    onScene: (scene) => {
+      if (!browserAddress || !scene) return;
+
+      const domain =
+        scene.getAttribute("data-domain");
+
+      if (domain) {
+        browserAddress.textContent = domain;
+      }
+    }
+  });
+
+
+  /* PHONE */
+  const phoneWindow =
+    document.querySelector(".gd-phone-window");
+
+  const phoneTrack =
+    document.querySelector(".gd-phone-track");
+
+  createVerticalLoop({
+    viewport: phoneWindow,
+    track: phoneTrack,
+    interval: 4300,
+    transitionMs: 1250
+  });
+
+
+  /* HOW IT WORKS */
+  const steps =
+    document.querySelector(".steps");
 
   if (!steps) return;
 
-  if (reduced || !("IntersectionObserver" in window)) {
+  if (
+    reduced ||
+    !("IntersectionObserver" in window)
+  ) {
     steps.classList.add("gd-process-live");
     return;
   }
 
-  const processObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
+  const processObserver =
+    new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
 
-        entry.target.classList.add("gd-process-live");
-        processObserver.unobserve(entry.target);
-      });
-    },
-    {
-      threshold: .28
-    }
-  );
+          entry.target.classList.add(
+            "gd-process-live"
+          );
+
+          processObserver.unobserve(
+            entry.target
+          );
+        });
+      },
+      {
+        threshold: .28
+      }
+    );
 
   processObserver.observe(steps);
 })();
 
-/* GD SMALL BUSINESS HERO SCENES V1 END */
+/* GD INNER SCREEN SCROLL V2 END */

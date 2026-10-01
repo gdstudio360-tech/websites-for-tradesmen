@@ -2707,3 +2707,97 @@ header, section, footer, main{
 }
 
 /* GD SMALL BUSINESS MOTION V1 END */
+
+
+/* GD INNER SCREEN SCROLL V2 */
+
+/* HERO BROWSER */
+.gd-premium .gd-browser-window{
+  height:469px;
+  overflow:hidden;
+  position:relative;
+}
+
+.gd-premium .gd-browser-track{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  will-change:transform;
+  transform:translate3d(0,0,0);
+  transition:
+    transform 1.15s cubic-bezier(.22,.72,.18,1);
+}
+
+.gd-premium .gd-browser-track.gd-no-transition{
+  transition:none !important;
+}
+
+.gd-premium .gd-browser-scene{
+  flex:0 0 100%;
+  min-height:100%;
+  height:100%;
+  overflow:hidden;
+}
+
+.gd-premium .gd-browser-scene .mock-nav,
+.gd-premium .gd-browser-scene .mock-hero,
+.gd-premium .gd-browser-scene .mock-services{
+  width:100%;
+}
+
+/* Remove old blank/fade style completely from the new version */
+.gd-premium .browser.gd-scene-changing .browser-page,
+.gd-premium .browser.gd-scene-changing .browser-address,
+.gd-premium .browser.gd-scene-changing .mock-logo b,
+.gd-premium .browser.gd-scene-changing .mock-left h3{
+  opacity:1 !important;
+  filter:none !important;
+  transform:none !important;
+}
+
+/* PHONE */
+.gd-premium .gd-phone-window{
+  height:570px;
+  min-height:570px;
+  overflow:hidden;
+  position:relative;
+}
+
+.gd-premium .gd-phone-track{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  will-change:transform;
+  transform:translate3d(0,0,0);
+  transition:
+    transform 1.25s cubic-bezier(.22,.72,.18,1);
+}
+
+.gd-premium .gd-phone-track.gd-no-transition{
+  transition:none !important;
+}
+
+.gd-premium .gd-phone-scene{
+  flex:0 0 100%;
+  min-height:100%;
+  height:100%;
+  overflow:hidden;
+  background:#f7f9fb;
+}
+
+/* subtle sense of movement inside mock pages */
+.gd-premium .gd-browser-scene .mock-services,
+.gd-premium .gd-phone-scene .screen-card{
+  transition:transform .35s ease;
+}
+
+/* On reduced-motion devices keep first frame static */
+@media(prefers-reduced-motion:reduce){
+  .gd-premium .gd-browser-track,
+  .gd-premium .gd-phone-track{
+    transform:none !important;
+    transition:none !important;
+  }
+}
+
+/* GD INNER SCREEN SCROLL V2 END */
