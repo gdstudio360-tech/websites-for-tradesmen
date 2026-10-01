@@ -18,6 +18,8 @@ let leads = [];
 
 let leadsSnapshot = "";
 let leadRefreshBusy = false;
+let leadRefreshPending = false;
+let leadsRealtimeChannel = null;
 
 if (configured && window.supabase) {
   client = window.supabase.createClient(
@@ -114,6 +116,7 @@ async function ensureSession() {
   if (data.session) {
     showDashboard();
     await loadLeads();
+    startLeadsRealtime();
   } else {
     showLogin();
   }
@@ -136,11 +139,18 @@ loginForm?.addEventListener("submit", async (event) => {
   loginStatus.textContent = "";
   showDashboard();
   await loadLeads();
+  startLeadsRealtime();
 });
 
 logoutButton?.addEventListener("click", async () => {
-  if (client) await client.auth.signOut();
+  stopLeadsRealtime();
+
+  if (client) {
+    await client.auth.signOut();
+  }
+
   leads = [];
+  leadsSnapshot = "";
   renderLeads();
   showLogin();
 });
@@ -227,18 +237,25 @@ function adminIsBusy() {
 }
 
 
-setInterval(async () => {
+async function requestLeadRefresh() {
   if (
     !client ||
-    document.hidden ||
-    dashboardView.hidden ||
-    leadRefreshBusy ||
-    adminIsBusy()
+    dashboardView.hidden
   ) {
     return;
   }
 
+  if (
+    document.hidden ||
+    leadRefreshBusy ||
+    adminIsBusy()
+  ) {
+    leadRefreshPending = true;
+    return;
+  }
+
   leadRefreshBusy = true;
+  leadRefreshPending = false;
 
   try {
     await loadLeads({
@@ -246,13 +263,103 @@ setInterval(async () => {
     });
   } catch (error) {
     console.error(
-      "Lead auto-refresh failed:",
+      "Lead refresh failed:",
       error
     );
   } finally {
     leadRefreshBusy = false;
+
+    if (
+      leadRefreshPending &&
+      !document.hidden &&
+      !adminIsBusy()
+    ) {
+      window.setTimeout(
+        requestLeadRefresh,
+        250
+      );
+    }
   }
-}, 5000);
+}
+
+
+function startLeadsRealtime() {
+  if (
+    !client ||
+    leadsRealtimeChannel
+  ) {
+    return;
+  }
+
+  leadsRealtimeChannel =
+    client
+      .channel("admin-leads-live")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "leads"
+        },
+        () => {
+          leadRefreshPending = true;
+          requestLeadRefresh();
+        }
+      )
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED") {
+          dashboardStatus.textContent =
+            `${leads.length} enquiries • Live`;
+        }
+      });
+}
+
+
+function stopLeadsRealtime() {
+  if (
+    !client ||
+    !leadsRealtimeChannel
+  ) {
+    return;
+  }
+
+  client.removeChannel(
+    leadsRealtimeChannel
+  );
+
+  leadsRealtimeChannel = null;
+}
+
+
+/*
+ * Fallback only.
+ * Realtime should normally update immediately.
+ */
+setInterval(() => {
+  requestLeadRefresh();
+}, 10000);
+
+
+/*
+ * Safari may throttle timers while another tab
+ * is active. Refresh immediately when Admin
+ * becomes visible again.
+ */
+document.addEventListener(
+  "visibilitychange",
+  () => {
+    if (!document.hidden) {
+      requestLeadRefresh();
+    }
+  }
+);
+
+window.addEventListener(
+  "focus",
+  () => {
+    requestLeadRefresh();
+  }
+);
 
 
 function renderStats() {
