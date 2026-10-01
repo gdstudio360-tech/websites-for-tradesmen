@@ -262,6 +262,442 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (action === "send_preview") {
+      const email =
+        String(lead.email || "").trim();
+
+      if (
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+      ) {
+        throw new Error(
+          "This customer does not have a valid email address."
+        );
+      }
+
+      if (!lead.deposit_paid_at) {
+        return Response.json(
+          {
+            ok: false,
+            error:
+              "The deposit must be paid before sending the project preview.",
+          },
+          {
+            status: 409,
+            headers: corsHeaders,
+          },
+        );
+      }
+
+      const rawPreviewUrl =
+        String(
+          lead.preview_url || ""
+        ).trim();
+
+      if (!rawPreviewUrl) {
+        return Response.json(
+          {
+            ok: false,
+            error:
+              "Add and save the Preview URL before sending it to the client.",
+          },
+          {
+            status: 400,
+            headers: corsHeaders,
+          },
+        );
+      }
+
+      let previewUrl = "";
+
+      try {
+        const parsed =
+          new URL(rawPreviewUrl);
+
+        if (
+          ![
+            "http:",
+            "https:",
+          ].includes(
+            parsed.protocol
+          )
+        ) {
+          throw new Error();
+        }
+
+        previewUrl =
+          parsed.toString();
+
+      } catch (_) {
+        return Response.json(
+          {
+            ok: false,
+            error:
+              "The saved Preview URL is not valid.",
+          },
+          {
+            status: 400,
+            headers: corsHeaders,
+          },
+        );
+      }
+
+      let conversationId =
+        lead.conversation_id ||
+        null;
+
+      if (!conversationId) {
+        const {
+          data: conversation,
+          error: conversationError,
+        } =
+          await serviceClient
+            .from("conversations")
+            .insert({
+              tenant_id:
+                lead.tenant_id,
+
+              contact_id:
+                lead.contact_id ||
+                null,
+
+              channel:
+                "email",
+
+              status:
+                "open",
+
+              ai_enabled:
+                false,
+
+              human_attention_required:
+                true,
+            })
+            .select("id")
+            .single();
+
+        if (
+          conversationError ||
+          !conversation
+        ) {
+          throw (
+            conversationError ||
+            new Error(
+              "Could not create conversation."
+            )
+          );
+        }
+
+        conversationId =
+          conversation.id;
+
+        const {
+          error: leadUpdateError,
+        } =
+          await serviceClient
+            .from("leads")
+            .update({
+              conversation_id:
+                conversationId,
+            })
+            .eq(
+              "id",
+              lead.id
+            );
+
+        if (leadUpdateError) {
+          throw leadUpdateError;
+        }
+
+        const initialMessage =
+          String(
+            lead.message || ""
+          ).trim();
+
+        if (initialMessage) {
+          const {
+            error: initialMessageError,
+          } =
+            await serviceClient
+              .from("messages")
+              .insert({
+                conversation_id:
+                  conversationId,
+
+                role:
+                  "customer",
+
+                channel:
+                  "website",
+
+                content:
+                  initialMessage,
+              });
+
+          if (
+            initialMessageError
+          ) {
+            console.error(
+              "PREVIEW_INITIAL_MESSAGE_ERROR",
+              initialMessageError
+            );
+          }
+        }
+      }
+
+      const resendKey =
+        Deno.env.get(
+          "RESEND_API_KEY"
+        );
+
+      const emailFrom =
+        Deno.env.get(
+          "EMAIL_FROM"
+        );
+
+      if (!resendKey) {
+        throw new Error(
+          "RESEND_API_KEY is not configured."
+        );
+      }
+
+      if (!emailFrom) {
+        throw new Error(
+          "EMAIL_FROM is not configured."
+        );
+      }
+
+      const business =
+        String(
+          lead.business ||
+          lead.name ||
+          "your website"
+        ).trim();
+
+      const customerName =
+        String(
+          lead.name || ""
+        ).trim();
+
+      const conversationText =
+        `Your website preview is ready.\n\n` +
+        `Preview: ${previewUrl}\n\n` +
+        `Please review the website and reply with any changes, ` +
+        `or confirm that you are happy to proceed.`;
+
+      const resendResponse =
+        await fetch(
+          "https://api.resend.com/emails",
+          {
+            method: "POST",
+
+            headers: {
+              Authorization:
+                `Bearer ${resendKey}`,
+
+              "Content-Type":
+                "application/json",
+            },
+
+            body:
+              JSON.stringify({
+                from:
+                  emailFrom,
+
+                to: [
+                  email,
+                ],
+
+                reply_to: [
+                  `reply+${conversationId}@gdstudio360.co.uk`,
+                ],
+
+                subject:
+                  `GD Studio 360 — ${business} website preview`,
+
+                text:
+                  `Hi ${customerName},\n\n` +
+                  `${conversationText}\n\n` +
+                  `GD Studio 360`,
+
+                html: `
+                  <div style="
+                    max-width:640px;
+                    margin:auto;
+                    font-family:Arial,sans-serif;
+                    color:#172033;
+                    line-height:1.65
+                  ">
+
+                    <h2 style="
+                      margin-bottom:18px
+                    ">
+                      Your website preview is ready
+                    </h2>
+
+                    <p>
+                      Hi ${escapeHtml(customerName)},
+                    </p>
+
+                    <p>
+                      Your website is ready for review.
+                      Please take a look and reply with
+                      any changes you would like,
+                      or confirm that you are happy
+                      to proceed.
+                    </p>
+
+                    <p style="
+                      margin:28px 0
+                    ">
+                      <a
+                        href="${escapeHtml(previewUrl)}"
+                        style="
+                          display:inline-block;
+                          padding:14px 20px;
+                          border-radius:9px;
+                          background:#ffd83d;
+                          color:#111;
+                          text-decoration:none;
+                          font-weight:700
+                        "
+                      >
+                        Open website preview
+                      </a>
+                    </p>
+
+                    <p style="
+                      font-size:13px;
+                      color:#687386
+                    ">
+                      Preview link:
+                      <br>
+                      <a href="${escapeHtml(previewUrl)}">
+                        ${escapeHtml(previewUrl)}
+                      </a>
+                    </p>
+
+                    <p style="
+                      margin-top:28px
+                    ">
+                      GD Studio 360
+                    </p>
+
+                  </div>
+                `,
+              }),
+          },
+        );
+
+      if (!resendResponse.ok) {
+        const resendError =
+          await resendResponse
+            .text();
+
+        console.error(
+          "RESEND_PREVIEW_ERROR",
+          resendError
+        );
+
+        throw new Error(
+          "The preview email could not be sent."
+        );
+      }
+
+      const {
+        error: messageError,
+      } =
+        await serviceClient
+          .from("messages")
+          .insert({
+            conversation_id:
+              conversationId,
+
+            role:
+              "human",
+
+            channel:
+              "email",
+
+            content:
+              conversationText,
+          });
+
+      if (messageError) {
+        console.error(
+          "PREVIEW_CONVERSATION_MESSAGE_ERROR",
+          messageError
+        );
+      }
+
+      const {
+        error: statusError,
+      } =
+        await serviceClient
+          .from("leads")
+          .update({
+            status:
+              "review",
+          })
+          .eq(
+            "id",
+            lead.id
+          );
+
+      if (statusError) {
+        throw statusError;
+      }
+
+      await serviceClient
+        .from("audit_log")
+        .insert({
+          tenant_id:
+            lead.tenant_id,
+
+          actor_user_id:
+            userData.user.id,
+
+          actor_type:
+            "user",
+
+          action:
+            "website_preview_sent",
+
+          entity_type:
+            "conversation",
+
+          entity_id:
+            conversationId,
+
+          details: {
+            lead_id:
+              lead.id,
+
+            to:
+              email,
+
+            preview_url:
+              previewUrl,
+          },
+        });
+
+      return Response.json(
+        {
+          ok: true,
+          preview_sent: true,
+          status: "review",
+          preview_url:
+            previewUrl,
+          conversation_id:
+            conversationId,
+        },
+        {
+          headers:
+            corsHeaders,
+        },
+      );
+    }
+
+
     if (action !== "send") {
       throw new Error("Unknown action.");
     }

@@ -2080,7 +2080,7 @@ function renderSelectedLead() {
                     id="mark-review"
                     type="button"
                   >
-                    Send to review
+                    Send preview to client
                   </button>
                 `
                 : ""
@@ -2807,11 +2807,79 @@ function bindProjectControls(
     )
     ?.addEventListener(
       "click",
-      () =>
-        updateLeadStatus(
-          lead.id,
-          "review"
-        )
+      async () => {
+        const saved =
+          await saveProject(
+            lead
+          );
+
+        if (!saved) {
+          return;
+        }
+
+        const freshLead =
+          getLeadById(
+            lead.id
+          ) || lead;
+
+        if (
+          !freshLead.preview_url
+        ) {
+          dashboardStatus.textContent =
+            "Add the Preview URL before sending it to the client.";
+
+          return;
+        }
+
+        const ok =
+          confirm(
+            `Send the website preview to ${freshLead.email}?`
+          );
+
+        if (!ok) {
+          return;
+        }
+
+        dashboardStatus.textContent =
+          "Sending website preview…";
+
+        const {
+          data,
+          error
+        } =
+          await client.functions
+            .invoke(
+              "admin-inbox",
+              {
+                body: {
+                  action:
+                    "send_preview",
+
+                  lead_id:
+                    lead.id
+                }
+              }
+            );
+
+        if (
+          error ||
+          !data?.ok
+        ) {
+          dashboardStatus.textContent =
+            data?.error ||
+            error?.message ||
+            "Could not send website preview.";
+
+          return;
+        }
+
+        dashboardStatus.textContent =
+          "Website preview sent to client.";
+
+        await loadLeads({
+          refreshDetail: true
+        });
+      }
     );
 
 
