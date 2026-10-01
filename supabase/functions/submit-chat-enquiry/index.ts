@@ -54,6 +54,20 @@ Deno.serve(async (req) => {
     const acceptedTerms =
       body?.accepted_terms === true;
 
+    const attributionSource =
+      String(
+        body?.attribution_source || ""
+      )
+        .trim()
+        .slice(0, 120) || null;
+
+    const attributionCampaign =
+      String(
+        body?.attribution_campaign || ""
+      )
+        .trim()
+        .slice(0, 120) || null;
+
     const humanContact =
       body?.human_contact &&
       typeof body.human_contact === "object"
@@ -206,6 +220,8 @@ Deno.serve(async (req) => {
           care_plan:
             e.care_plan || "No care plan",
           message: e.project_summary,
+          attribution_source: attributionSource,
+          attribution_campaign: attributionCampaign,
           terms_accepted: true,
           source: "website",
           status: "new",

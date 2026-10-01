@@ -198,9 +198,88 @@ const gdSupabase =
   gdConfig.SUPABASE_PUBLISHABLE_KEY
     ? window.supabase.createClient(
         gdConfig.SUPABASE_URL,
-        gdConfig.SUPABASE_PUBLISHABLE_KEY
+        gdConfig.SUPABASE_PUBLISHABLE_KEY,
+        {
+          auth: {
+            persistSession: false,
+            autoRefreshToken: false,
+            detectSessionInUrl: false
+          }
+        }
       )
     : null;
+
+
+function cleanAttributionValue(value) {
+  return String(value || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .slice(0, 120);
+}
+
+function detectLeadAttribution() {
+  const params = new URLSearchParams(window.location.search);
+
+  let source = cleanAttributionValue(
+    params.get("source") ||
+    params.get("utm_source")
+  );
+
+  const campaign = cleanAttributionValue(
+    params.get("campaign") ||
+    params.get("utm_campaign")
+  );
+
+  if (!source) {
+    try {
+      const referrer = document.referrer
+        ? new URL(document.referrer)
+        : null;
+
+      const host =
+        referrer?.hostname?.toLowerCase() || "";
+
+      if (host.includes("google.")) {
+        source = "Google organic";
+      } else if (
+        host === "bing.com" ||
+        host.endsWith(".bing.com")
+      ) {
+        source = "Bing organic";
+      } else if (host) {
+        source = `Referral: ${host}`;
+      }
+    } catch (_) {}
+  }
+
+  if (!source) {
+    source = "Direct / unknown";
+  }
+
+  return {
+    source,
+    campaign
+  };
+}
+
+const leadAttribution = detectLeadAttribution();
+
+const attributionSourceField =
+  document.getElementById("lead-attribution-source");
+
+const attributionCampaignField =
+  document.getElementById("lead-attribution-campaign");
+
+if (attributionSourceField) {
+  attributionSourceField.value =
+    leadAttribution.source;
+}
+
+if (attributionCampaignField) {
+  attributionCampaignField.value =
+    leadAttribution.campaign;
+}
+
 
 async function saveLeadToDashboard(formData) {
   if (!gdSupabase) return { skipped: true };
@@ -217,6 +296,10 @@ async function saveLeadToDashboard(formData) {
     package: packageValue,
     care_plan: String(formData.get("care_plan") || "No care plan"),
     message: String(formData.get("message") || "").trim() || null,
+    attribution_source:
+      String(formData.get("attribution_source") || "").trim() || null,
+    attribution_campaign:
+      String(formData.get("attribution_campaign") || "").trim() || null,
     terms_accepted: formData.get("termsAccepted") === "on",
     status: "new"
   };
@@ -480,12 +563,44 @@ if (form) {
   const pendingEnquiryStorageKey =
     "gd360_ai_pending_enquiry_v1";
 
-  let conversationId =
-    localStorage.getItem(conversationStorageKey) || null;
+  let conversationId = null;
+  let chatStorageLoaded = false;
+
+  function loadChatStorage() {
+    if (chatStorageLoaded) return;
+
+    chatStorageLoaded = true;
+
+    try {
+      conversationId =
+        localStorage.getItem(
+          conversationStorageKey
+        ) || null;
+
+      const savedPending =
+        JSON.parse(
+          localStorage.getItem(
+            pendingEnquiryStorageKey
+          ) || "null"
+        );
+
+      if (savedPending && conversationId) {
+        renderEnquiryCard(savedPending);
+      }
+    } catch (_) {
+      conversationId = null;
+
+      localStorage.removeItem(
+        pendingEnquiryStorageKey
+      );
+    }
+  }
 
   let busy = false;
 
   function openChat() {
+    loadChatStorage();
+
     panel.hidden = false;
     launcher.hidden = true;
     launcher.setAttribute("aria-expanded", "true");
@@ -693,6 +808,8 @@ if (form) {
           body: JSON.stringify({
             conversation_id: conversationId,
             accepted_terms: true,
+            attribution_source: leadAttribution.source,
+            attribution_campaign: leadAttribution.campaign,
             human_contact: {
               name: nameValue,
               business: business.value.trim(),
@@ -886,7 +1003,9 @@ if (form) {
           },
           body: JSON.stringify({
             conversation_id: conversationId,
-            accepted_terms: true
+            accepted_terms: true,
+            attribution_source: leadAttribution.source,
+            attribution_campaign: leadAttribution.campaign
           })
         });
 
@@ -1097,22 +1216,6 @@ if (form) {
       });
     });
 
-  try {
-    const savedPending =
-      JSON.parse(
-        localStorage.getItem(
-          pendingEnquiryStorageKey
-        ) || "null"
-      );
-
-    if (savedPending && conversationId) {
-      renderEnquiryCard(savedPending);
-    }
-  } catch (_) {
-    localStorage.removeItem(
-      pendingEnquiryStorageKey
-    );
-  }
 })();
 
 /* GD STUDIO 360 AI ASSISTANT END */

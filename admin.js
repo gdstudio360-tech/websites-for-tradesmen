@@ -190,7 +190,9 @@ function renderLeads() {
       lead.trade,
       lead.area,
       lead.package,
-      lead.care_plan
+      lead.care_plan,
+      lead.attribution_source,
+      lead.attribution_campaign
     ].join(" ").toLowerCase();
     const matchesSearch = !query || haystack.includes(query);
     return matchesStatus && matchesSearch;
@@ -222,6 +224,26 @@ function renderLeads() {
       lead.created_at ? new Date(lead.created_at).toLocaleString("en-GB") : ""
     ].filter(Boolean);
     meta.innerHTML = parts.map((item) => `<span>${item}</span>`).join("");
+
+    if (
+      lead.attribution_source ||
+      lead.attribution_campaign
+    ) {
+      const attribution =
+        document.createElement("span");
+
+      attribution.textContent =
+        `Source: ${
+          lead.attribution_source ||
+          "Direct / unknown"
+        }${
+          lead.attribution_campaign
+            ? ` • Campaign: ${lead.attribution_campaign}`
+            : ""
+        }`;
+
+      meta.appendChild(attribution);
+    }
 
     fragment.querySelector(".lead-message").textContent =
       lead.message || "No additional message.";
