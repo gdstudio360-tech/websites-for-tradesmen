@@ -487,6 +487,7 @@ if (form) {
 
   function openChat() {
     panel.hidden = false;
+    launcher.hidden = true;
     launcher.setAttribute("aria-expanded", "true");
 
     window.setTimeout(() => {
@@ -497,6 +498,7 @@ if (form) {
 
   function closeChat() {
     panel.hidden = true;
+    launcher.hidden = false;
     launcher.setAttribute("aria-expanded", "false");
   }
 

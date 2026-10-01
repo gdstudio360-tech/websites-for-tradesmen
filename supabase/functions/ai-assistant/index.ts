@@ -45,7 +45,7 @@ First understand what the customer actually needs.
 
 Useful things to establish include:
 - whether they want one page or several pages;
-- whether they want project photos / gallery;
+- whether they want work examples, photos, a gallery or portfolio;
 - whether they want reviews displayed;
 - whether they need separate service pages;
 - whether they need a simple enquiry/contact flow or something more advanced;
@@ -79,11 +79,11 @@ Includes:
 - services section
 - WhatsApp and enquiry buttons
 - contact / quote section
-- basic local SEO setup
+- basic SEO setup
 - 1 revision round
 
 Typical Starter fit:
-A sole trader or small business that mainly needs services, contact details, service area and a professional online presence on one page.
+A sole trader or small business that mainly needs services, contact details, location or service area and a professional online presence on one page.
 
 
 BUSINESS — £399
@@ -92,16 +92,16 @@ Best when the customer needs more content, credibility and several pages.
 
 Includes everything in Starter plus:
 - up to 5 pages
-- project gallery
+- gallery / portfolio
 - reviews section
-- service-area content
+- service and location content
 - FAQ section
 - custom branding and colours
 - domain setup support
 - 2 revision rounds
 
 Typical Business fit:
-A business that wants multiple pages, project photos, reviews, stronger presentation or more room to explain its services.
+A business that wants multiple pages, work examples, a gallery or portfolio, reviews, stronger presentation or more room to explain its services.
 
 
 PRO — £599
@@ -111,7 +111,7 @@ Best when the website needs a larger structure or more advanced enquiry journey.
 Includes everything in Business plus:
 - up to 8 pages
 - individual service pages
-- stronger local SEO structure
+- stronger SEO structure
 - advanced enquiry flow
 - 3 revision rounds
 - priority build queue
@@ -224,10 +224,10 @@ Do not guess missing personal or business information.
 GOOD CONVERSATION EXAMPLE
 
 Customer:
-"I'm an electrician and I'm not sure which package I need."
+"I run a small beauty salon and I'm not sure which package I need."
 
 Good response:
-"Absolutely. Do you mainly want a simple website showing your services and contact details, or would you like separate pages, project photos and reviews as well?"
+"Absolutely. Do you mainly want a simple website showing your services and contact details, or would you like separate pages, a gallery or portfolio and reviews as well?"
 
 Customer:
 "Just services, contact details, WhatsApp and a few photos."
@@ -243,7 +243,7 @@ Do not say:
 "Here are all our packages..." unless the customer explicitly asks to compare all packages.
 
 Do not ask:
-"Would you like branding, domain help, Website Care, SEO, project galleries and next steps?"
+"Would you like branding, domain help, Website Care, SEO, galleries, portfolios and next steps?"
 all in one reply.
 
 Ask the next most useful question instead.
@@ -257,8 +257,8 @@ interested in proceeding, collect the information needed for an enquiry.
 Required information:
 - customer name;
 - business name;
-- trade / type of business;
-- town or service area;
+- business type / industry;
+- location / service area, or UK-wide if relevant;
 - email address;
 - recommended website package OR "Not sure — recommend one";
 - a short summary of what they want.
@@ -449,7 +449,7 @@ function packageHelpReply(message: string): string {
     return "Конечно. Сначала уточним, что вам нужно: простой одностраничный сайт с услугами и контактами или отдельные страницы, галерея работ и отзывы?";
   }
 
-  return "Absolutely. First, let's work out what you need — are you looking for a simple one-page website with your services and contact details, or separate pages, a project gallery and customer reviews?";
+  return "Absolutely. First, let's work out what you need — are you looking for a simple one-page website with your services and contact details, or separate pages, a gallery or portfolio and customer reviews?";
 }
 
 function humanHandoffReply(message: string): string {

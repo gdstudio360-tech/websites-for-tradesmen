@@ -2077,6 +2077,10 @@ header, section, footer, main{
   cursor:pointer;
 }
 
+.gd-chat-launcher[hidden]{
+  display:none !important;
+}
+
 .gd-chat-launcher:hover{
   transform:translateY(-2px);
 }
