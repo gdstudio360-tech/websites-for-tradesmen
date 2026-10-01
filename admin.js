@@ -301,8 +301,21 @@ function startLeadsRealtime() {
           schema: "public",
           table: "leads"
         },
-        () => {
+        (payload) => {
           leadRefreshPending = true;
+
+          if (adminIsBusy()) {
+            const eventName =
+              payload?.eventType === "INSERT"
+                ? "New enquiry received"
+                : "Enquiry updated";
+
+            dashboardStatus.textContent =
+              `${eventName} • it will appear automatically when you close the conversation`;
+
+            return;
+          }
+
           requestLeadRefresh();
         }
       )
@@ -790,6 +803,13 @@ conversationButton.addEventListener(
       () => {
         conversationPanel.hidden = true;
         conversationButton.hidden = false;
+
+        if (leadRefreshPending) {
+          window.setTimeout(
+            requestLeadRefresh,
+            50
+          );
+        }
       }
     );
 
