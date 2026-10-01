@@ -3504,6 +3504,57 @@ document.addEventListener(
 );
 
 
+
+function crmDetailHasUnsavedWork() {
+  const reply =
+    document.getElementById(
+      "reply-text"
+    );
+
+  if (
+    reply &&
+    reply.value.trim()
+  ) {
+    return true;
+  }
+
+  const projectForm =
+    document.getElementById(
+      "project-form"
+    );
+
+  if (
+    projectForm &&
+    projectForm.contains(
+      document.activeElement
+    )
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+
+function refreshSelectedDetailIfSafe() {
+  if (
+    !selectedLeadId
+  ) {
+    return;
+  }
+
+  if (
+    crmDetailHasUnsavedWork()
+  ) {
+    dashboardStatus.textContent =
+      "Client updated in the background. Finish or save your current edit to refresh the details.";
+
+    return;
+  }
+
+  renderSelectedLead();
+}
+
 function startRealtime() {
   if (
     !client ||
@@ -3541,9 +3592,22 @@ function startRealtime() {
             updatePendingBanner();
           }
 
+          const changedLeadId =
+            payload?.new?.id ||
+            payload?.old?.id ||
+            null;
+
           await loadLeads({
             background: true
           });
+
+          if (
+            changedLeadId &&
+            String(changedLeadId) ===
+            String(selectedLeadId)
+          ) {
+            refreshSelectedDetailIfSafe();
+          }
         }
       )
       .subscribe(
@@ -3586,6 +3650,8 @@ document
       ) {
         loadLeads({
           background: true
+        }).then(() => {
+          refreshSelectedDetailIfSafe();
         });
       }
     }
