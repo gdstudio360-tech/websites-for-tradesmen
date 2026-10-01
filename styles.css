@@ -2558,3 +2558,152 @@ header, section, footer, main{
 .gd-human-card .gd-enquiry-submit{
   margin-top:4px;
 }
+
+
+/* GD SMALL BUSINESS MOTION V1 */
+
+/* Smooth scene change inside the hero browser preview */
+.gd-premium .browser-page,
+.gd-premium .browser-address,
+.gd-premium .mock-logo b,
+.gd-premium .mock-left h3{
+  transition:
+    opacity .22s ease,
+    transform .22s ease,
+    filter .22s ease;
+}
+
+.gd-premium .browser.gd-scene-changing .browser-page{
+  opacity:.56;
+  transform:scale(.992);
+  filter:blur(1.2px);
+}
+
+.gd-premium .browser.gd-scene-changing .browser-address,
+.gd-premium .browser.gd-scene-changing .mock-logo b,
+.gd-premium .browser.gd-scene-changing .mock-left h3{
+  opacity:.25;
+  transform:translateY(4px);
+}
+
+/* Small activity shimmer inside the mock website */
+.gd-premium .mock-left .mock-label,
+.gd-premium .mock-left p,
+.gd-premium .mock-services i{
+  position:relative;
+  overflow:hidden;
+}
+
+.gd-premium .mock-left .mock-label::after,
+.gd-premium .mock-left p::after,
+.gd-premium .mock-services i::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  transform:translateX(-130%);
+  background:linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,.26),
+    transparent
+  );
+  animation:gdMockSweep 4.8s ease-in-out infinite;
+}
+
+.gd-premium .mock-left p::after{
+  animation-delay:.35s;
+}
+
+.gd-premium .mock-services i::after{
+  animation-delay:.7s;
+}
+
+/* Animated How it works progress line */
+.gd-premium .steps{
+  position:relative;
+}
+
+.gd-premium .steps::before{
+  content:"";
+  position:absolute;
+  left:36px;
+  top:18px;
+  bottom:18px;
+  width:2px;
+  border-radius:999px;
+  background:rgba(57,201,255,.10);
+  pointer-events:none;
+}
+
+.gd-premium .steps::after{
+  content:"";
+  position:absolute;
+  left:36px;
+  top:18px;
+  width:2px;
+  height:0;
+  border-radius:999px;
+  background:linear-gradient(
+    180deg,
+    var(--gd-yellow),
+    var(--gd-cyan)
+  );
+  box-shadow:0 0 16px rgba(57,201,255,.28);
+  pointer-events:none;
+}
+
+.gd-premium .steps.gd-process-live::after{
+  animation:gdProcessFlow 2.4s
+    cubic-bezier(.2,.75,.25,1) forwards;
+}
+
+.gd-premium .steps li{
+  position:relative;
+  z-index:1;
+}
+
+.gd-premium .steps>li>span{
+  position:relative;
+  z-index:2;
+}
+
+@keyframes gdMockSweep{
+  0%,55%{
+    transform:translateX(-130%);
+    opacity:0;
+  }
+  65%{
+    opacity:1;
+  }
+  88%,100%{
+    transform:translateX(150%);
+    opacity:0;
+  }
+}
+
+@keyframes gdProcessFlow{
+  from{height:0}
+  to{height:calc(100% - 36px)}
+}
+
+@media(max-width:680px){
+  .gd-premium .steps::before,
+  .gd-premium .steps::after{
+    left:25px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .gd-premium .steps::after{
+    height:calc(100% - 36px);
+    animation:none !important;
+  }
+
+  .gd-premium .mock-left .mock-label::after,
+  .gd-premium .mock-left p::after,
+  .gd-premium .mock-services i::after{
+    display:none;
+  }
+}
+
+/* GD SMALL BUSINESS MOTION V1 END */

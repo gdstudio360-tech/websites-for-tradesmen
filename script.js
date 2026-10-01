@@ -1116,3 +1116,126 @@ if (form) {
 })();
 
 /* GD STUDIO 360 AI ASSISTANT END */
+
+
+/* GD SMALL BUSINESS HERO SCENES V1 */
+
+(() => {
+  if (!document.body.classList.contains("gd-premium")) return;
+
+  const reduced =
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  const browser = document.querySelector(".hero-preview .browser");
+  const address = browser?.querySelector(".browser-address");
+  const logo = browser?.querySelector(".mock-logo b");
+  const heading = browser?.querySelector(".mock-left h3");
+
+  const scenes = [
+    {
+      domain: "yourbusiness.co.uk",
+      logo: "YOUR BUSINESS",
+      first: "Professional business.",
+      second: "Professional website."
+    },
+    {
+      domain: "thebarberstudio.co.uk",
+      logo: "BARBER STUDIO",
+      first: "Look established.",
+      second: "Make booking easy."
+    },
+    {
+      domain: "localautocare.co.uk",
+      logo: "AUTO CARE",
+      first: "Show your services.",
+      second: "Win more enquiries."
+    },
+    {
+      domain: "brightcleaning.co.uk",
+      logo: "BRIGHT CLEANING",
+      first: "Build customer trust.",
+      second: "Be easy to contact."
+    },
+    {
+      domain: "creativestudio.co.uk",
+      logo: "CREATIVE STUDIO",
+      first: "Show your work.",
+      second: "Grow your presence."
+    }
+  ];
+
+  let sceneIndex = 0;
+  let sceneTimer = null;
+
+  function applyScene(scene) {
+    if (!browser || !address || !logo || !heading) return;
+
+    browser.classList.add("gd-scene-changing");
+
+    window.setTimeout(() => {
+      address.textContent = scene.domain;
+      logo.textContent = scene.logo;
+
+      heading.textContent = scene.first;
+      heading.appendChild(document.createElement("br"));
+
+      const accent = document.createElement("em");
+      accent.textContent = scene.second;
+      heading.appendChild(accent);
+
+      browser.classList.remove("gd-scene-changing");
+    }, 220);
+  }
+
+  if (
+    browser &&
+    address &&
+    logo &&
+    heading &&
+    !reduced
+  ) {
+    sceneTimer = window.setInterval(() => {
+      sceneIndex = (sceneIndex + 1) % scenes.length;
+      applyScene(scenes[sceneIndex]);
+    }, 3900);
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden && sceneTimer) {
+        clearInterval(sceneTimer);
+        sceneTimer = null;
+      } else if (!document.hidden && !sceneTimer) {
+        sceneTimer = window.setInterval(() => {
+          sceneIndex = (sceneIndex + 1) % scenes.length;
+          applyScene(scenes[sceneIndex]);
+        }, 3900);
+      }
+    });
+  }
+
+  const steps = document.querySelector(".steps");
+
+  if (!steps) return;
+
+  if (reduced || !("IntersectionObserver" in window)) {
+    steps.classList.add("gd-process-live");
+    return;
+  }
+
+  const processObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+
+        entry.target.classList.add("gd-process-live");
+        processObserver.unobserve(entry.target);
+      });
+    },
+    {
+      threshold: .28
+    }
+  );
+
+  processObserver.observe(steps);
+})();
+
+/* GD SMALL BUSINESS HERO SCENES V1 END */
