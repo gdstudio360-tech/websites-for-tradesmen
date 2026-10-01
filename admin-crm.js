@@ -883,6 +883,78 @@ function renderCounts() {
 }
 
 
+function clientPaymentState(
+  lead
+) {
+  if (
+    lead.balance_paid_at ||
+    lead.status ===
+      "completed"
+  ) {
+    return {
+      label: "✓ Paid in full",
+      className: "paid"
+    };
+  }
+
+  if (
+    lead.balance_sent_at ||
+    lead.status ===
+      "balance_due"
+  ) {
+    return {
+      label: "Balance due",
+      className: "due"
+    };
+  }
+
+  if (
+    lead.deposit_paid_at
+  ) {
+    return {
+      label: "✓ Deposit paid",
+      className: "paid"
+    };
+  }
+
+  if (
+    lead.deposit_url ||
+    lead.status ===
+      "deposit_sent"
+  ) {
+    return {
+      label: "Deposit sent",
+      className: "waiting"
+    };
+  }
+
+  if (
+    lead.status ===
+      "approved"
+  ) {
+    return {
+      label: "Approved",
+      className: "waiting"
+    };
+  }
+
+  if (
+    lead.status ===
+      "rejected"
+  ) {
+    return {
+      label: "Rejected",
+      className: "rejected"
+    };
+  }
+
+  return {
+    label: "New enquiry",
+    className: "new"
+  };
+}
+
+
 function renderClientList() {
   if (!clientList) {
     return;
@@ -915,16 +987,13 @@ function renderClientList() {
   for (
     const lead of rows
   ) {
-    const button =
+    const wrapper =
       document.createElement(
-        "button"
+        "div"
       );
 
-    button.type =
-      "button";
-
-    button.className =
-      "client-row";
+    wrapper.className =
+      "client-row-card";
 
     if (
       String(
@@ -934,9 +1003,21 @@ function renderClientList() {
         selectedLeadId
       )
     ) {
-      button.classList
+      wrapper.classList
         .add("active");
     }
+
+    const button =
+      document.createElement(
+        "button"
+      );
+
+    button.type =
+      "button";
+
+    button.className =
+      "client-row-main";
+
 
     const date =
       lead.created_at
@@ -946,6 +1027,24 @@ function renderClientList() {
             "en-GB"
           )
         : "";
+
+
+    const paymentState =
+      clientPaymentState(
+        lead
+      );
+
+
+    const preview =
+      safeUrl(
+        lead.preview_url
+      );
+
+    const live =
+      safeUrl(
+        lead.live_url
+      );
+
 
     button.innerHTML =
       `
@@ -980,6 +1079,7 @@ function renderClientList() {
 
         </div>
 
+
         <span class="client-row-person">
           ${
             escapeHtml(
@@ -987,6 +1087,7 @@ function renderClientList() {
             )
           }
         </span>
+
 
         <span class="client-row-bottom">
 
@@ -1005,6 +1106,7 @@ function renderClientList() {
 
         </span>
       `;
+
 
     button
       .addEventListener(
@@ -1063,9 +1165,110 @@ function renderClientList() {
         }
       );
 
+
+    const quick =
+      document.createElement(
+        "div"
+      );
+
+    quick.className =
+      "client-row-quick";
+
+
+    const payment =
+      document.createElement(
+        "span"
+      );
+
+    payment.className =
+      `client-payment-state ${
+        paymentState.className
+      }`;
+
+    payment.textContent =
+      paymentState.label;
+
+    quick.appendChild(
+      payment
+    );
+
+
+    const links =
+      document.createElement(
+        "div"
+      );
+
+    links.className =
+      "client-row-links";
+
+
+    if (preview) {
+      const previewLink =
+        document.createElement(
+          "a"
+        );
+
+      previewLink.href =
+        preview;
+
+      previewLink.target =
+        "_blank";
+
+      previewLink.rel =
+        "noopener";
+
+      previewLink.textContent =
+        "Preview ↗";
+
+      previewLink.title =
+        "Open website preview";
+
+      links.appendChild(
+        previewLink
+      );
+    }
+
+
+    if (live) {
+      const liveLink =
+        document.createElement(
+          "a"
+        );
+
+      liveLink.href =
+        live;
+
+      liveLink.target =
+        "_blank";
+
+      liveLink.rel =
+        "noopener";
+
+      liveLink.textContent =
+        "Live ↗";
+
+      liveLink.title =
+        "Open live website";
+
+      links.appendChild(
+        liveLink
+      );
+    }
+
+
+    quick.appendChild(
+      links
+    );
+
+
+    wrapper.append(
+      button,
+      quick
+    );
+
     clientList
       .appendChild(
-        button
+        wrapper
       );
   }
 }

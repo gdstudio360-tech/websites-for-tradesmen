@@ -892,3 +892,107 @@ form button{
 }
 
 /* CRM WORKFLOW V2 END */
+
+
+/* CRM CLIENT QUICK INFO V3 */
+
+.client-row-card{
+  border-bottom:
+    1px solid #edf0f3;
+  background:#fff;
+}
+
+.client-row-card:hover{
+  background:#f8fafc;
+}
+
+.client-row-card.active{
+  background:#fff8d9;
+  box-shadow:
+    inset 4px 0 0
+    var(--yellow);
+}
+
+.client-row-main{
+  width:100%;
+  padding:14px 15px 9px;
+  border:0;
+  background:transparent;
+  color:var(--ink);
+  text-align:left;
+}
+
+.client-row-card.active
+.client-row-main{
+  padding-left:17px;
+}
+
+.client-row-quick{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:
+    0 15px 11px;
+}
+
+.client-row-card.active
+.client-row-quick{
+  padding-left:17px;
+}
+
+.client-payment-state{
+  font-size:.63rem;
+  font-weight:900;
+}
+
+.client-payment-state.paid{
+  color:var(--green);
+}
+
+.client-payment-state.due{
+  color:#9a6500;
+}
+
+.client-payment-state.waiting{
+  color:#5a6677;
+}
+
+.client-payment-state.new{
+  color:#8a6900;
+}
+
+.client-payment-state.rejected{
+  color:var(--red);
+}
+
+.client-row-links{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+}
+
+.client-row-links a{
+  padding:3px 6px;
+  border-radius:6px;
+  color:#2457a5;
+  font-size:.63rem;
+  font-weight:900;
+  text-decoration:none;
+}
+
+.client-row-links a:hover{
+  background:#eaf1ff;
+  text-decoration:underline;
+}
+
+@media(max-width:760px){
+
+  .client-row-quick{
+    align-items:flex-start;
+  }
+
+}
+
+/* CRM CLIENT QUICK INFO V3 END */
