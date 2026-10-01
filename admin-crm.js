@@ -511,7 +511,13 @@ function visibleLeads() {
             lead
           );
 
+        /*
+         * When search is empty, respect the selected CRM list.
+         * When the user types a search, search ALL clients
+         * across New / In Progress / Completed / Rejected.
+         */
         const matchesView =
+          query ||
           activeView === "all" ||
           category === activeView;
 
@@ -2948,7 +2954,46 @@ searchInput
   ?.addEventListener(
     "input",
     () => {
+      const rows =
+        visibleLeads();
+
+      const selectedStillVisible =
+        rows.some(
+          (lead) =>
+            String(lead.id) ===
+            String(selectedLeadId)
+        );
+
+      let selectionChanged =
+        false;
+
+      if (!selectedStillVisible) {
+        selectedLeadId =
+          rows[0]?.id || null;
+
+        selectionChanged =
+          true;
+      }
+
       renderClientList();
+
+      if (selectionChanged) {
+        renderSelectedLead();
+      }
+
+      const query =
+        searchInput.value
+          .trim();
+
+      if (query) {
+        dashboardStatus.textContent =
+          `${rows.length} search result${
+            rows.length === 1 ? "" : "s"
+          } across all client lists`;
+      } else {
+        dashboardStatus.textContent =
+          `${leads.length} clients • Live`;
+      }
     }
   );
 
@@ -2960,6 +3005,44 @@ sortSelect
       renderClientList();
     }
   );
+
+
+document.addEventListener(
+  "keydown",
+  (event) => {
+    if (
+      (event.metaKey || event.ctrlKey) &&
+      event.key.toLowerCase() === "k"
+    ) {
+      event.preventDefault();
+
+      searchInput?.focus();
+      searchInput?.select();
+
+      return;
+    }
+
+    if (
+      event.key === "Escape" &&
+      document.activeElement === searchInput &&
+      searchInput?.value
+    ) {
+      searchInput.value = "";
+
+      const rows =
+        visibleLeads();
+
+      selectedLeadId =
+        rows[0]?.id || null;
+
+      renderClientList();
+      renderSelectedLead();
+
+      dashboardStatus.textContent =
+        `${leads.length} clients • Live`;
+    }
+  }
+);
 
 
 function startRealtime() {
