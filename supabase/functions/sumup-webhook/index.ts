@@ -2,207 +2,625 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 
 Deno.serve(async (req) => {
   try {
-    const payload = await req.json();
+    const payload =
+      await req.json();
 
     if (
-      payload?.event_type !== "CHECKOUT_STATUS_CHANGED" ||
+      payload?.event_type !==
+        "CHECKOUT_STATUS_CHANGED" ||
       !payload?.id
     ) {
-      return new Response("", { status: 204 });
+      return new Response(
+        "",
+        { status: 204 },
+      );
     }
 
     const testMode =
-      (Deno.env.get("SUMUP_TEST_MODE") || "").toLowerCase() === "true";
+      (
+        Deno.env.get(
+          "SUMUP_TEST_MODE",
+        ) || ""
+      ).toLowerCase() ===
+      "true";
 
-    const sumupKey = testMode
-      ? Deno.env.get("SUMUP_SANDBOX_API_KEY")
-      : Deno.env.get("SUMUP_API_KEY");
+    const sumupKey =
+      testMode
+        ? Deno.env.get(
+            "SUMUP_SANDBOX_API_KEY",
+          )
+        : Deno.env.get(
+            "SUMUP_API_KEY",
+          );
 
     if (!sumupKey) {
-      throw new Error("SumUp API key is not configured.");
+      throw new Error(
+        "SumUp API key is not configured.",
+      );
     }
 
-    const verifyResponse = await fetch(
-      `https://api.sumup.com/v0.1/checkouts/${encodeURIComponent(payload.id)}`,
-      {
-        headers: { Authorization: `Bearer ${sumupKey}` },
-      },
-    );
+    const verifyResponse =
+      await fetch(
+        `https://api.sumup.com/v0.1/checkouts/${
+          encodeURIComponent(
+            payload.id,
+          )
+        }`,
+        {
+          headers: {
+            Authorization:
+              `Bearer ${sumupKey}`,
+          },
+        },
+      );
 
-    if (!verifyResponse.ok) {
+    if (
+      !verifyResponse.ok
+    ) {
       console.error(
         "SUMUP_VERIFY_FAILED",
         verifyResponse.status,
         await verifyResponse.text(),
       );
-      throw new Error("Could not verify SumUp checkout.");
+
+      throw new Error(
+        "Could not verify SumUp checkout.",
+      );
     }
 
-    const checkout = await verifyResponse.json();
-
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const serviceKey =
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ||
-      Deno.env.get("SUPABASE_SECRET_KEY")!;
-
-    const supabase = createClient(supabaseUrl, serviceKey, {
-      auth: { persistSession: false },
-    });
-
-    const { data: lead, error: leadError } = await supabase
-      .from("leads")
-      .select("id, name, business, email, package, care_plan, deposit_amount, status")
-      .eq("sumup_checkout_id", checkout.id)
-      .maybeSingle();
-
-    if (leadError || !lead) {
-      return new Response("", { status: 204 });
-    }
-
-    const expectedAmount = Number((lead.deposit_amount / 100).toFixed(2));
-    const amountMatches = Number(checkout.amount) === expectedAmount;
-    const currencyMatches = checkout.currency === "GBP";
+    const checkout =
+      await verifyResponse.json();
 
     if (
-      checkout.status !== "PAID" ||
-      !amountMatches ||
-      !currencyMatches
+      checkout.status !==
+      "PAID" ||
+      checkout.currency !==
+      "GBP"
     ) {
-      return new Response("", { status: 204 });
-    }
-
-    // Claim this payment only once.
-    // Repeated SumUp webhooks will not send duplicate emails.
-    const paidAt = new Date().toISOString();
-
-    const { data: paidLead, error: updateError } = await supabase
-      .from("leads")
-      .update({
-        status: "deposit_paid",
-        deposit_paid_at: paidAt,
-      })
-      .eq("id", lead.id)
-      .neq("status", "deposit_paid")
-      .select("id, name, business, email, package, care_plan, deposit_amount")
-      .maybeSingle();
-
-    if (updateError) {
-      throw updateError;
-    }
-
-    // Already processed before.
-    if (!paidLead) {
-      return new Response("", { status: 204 });
-    }
-
-    const resendKey = Deno.env.get("RESEND_API_KEY");
-    const emailFrom = Deno.env.get("EMAIL_FROM");
-    const adminEmail = Deno.env.get("ADMIN_EMAIL");
-    const siteUrl = (Deno.env.get("SITE_URL") || "").replace(/\/$/, "");
-
-    if (resendKey && emailFrom && adminEmail) {
-      const deposit = `£${(paidLead.deposit_amount / 100).toFixed(2)}`;
-
-      const clientHtml = `
-        <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#172033;line-height:1.6">
-          <h2>Deposit received — your project is confirmed</h2>
-
-          <p>Hi ${escapeHtml(paidLead.name)},</p>
-
-          <p>
-            Thank you. Your project deposit has been received successfully
-            through SumUp.
-          </p>
-
-          <p>
-            <strong>Business:</strong> ${escapeHtml(paidLead.business)}<br>
-            <strong>Package:</strong> ${escapeHtml(paidLead.package)}<br>
-            <strong>Care plan:</strong> ${escapeHtml(paidLead.care_plan || "No care plan")}<br>
-            <strong>Deposit received:</strong> ${deposit}
-          </p>
-
-          <p>
-            Your GD Studio 360 project is now confirmed.
-            I’ll contact you regarding the content, access details and
-            anything else needed to begin the build.
-          </p>
-
-          <p>GD Studio 360</p>
-        </div>
-      `;
-
-      const adminHtml = `
-        <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#172033;line-height:1.6">
-          <h2>Deposit received</h2>
-
-          <p>
-            <strong>Business:</strong> ${escapeHtml(paidLead.business)}<br>
-            <strong>Client:</strong> ${escapeHtml(paidLead.name)}<br>
-            <strong>Email:</strong> ${escapeHtml(paidLead.email)}<br>
-            <strong>Package:</strong> ${escapeHtml(paidLead.package)}<br>
-            <strong>Care plan:</strong> ${escapeHtml(paidLead.care_plan || "No care plan")}<br>
-            <strong>Deposit:</strong> ${deposit}
-          </p>
-
-          ${
-            siteUrl
-              ? `<p><a href="${siteUrl}/admin.html">Open GD Studio 360 Admin</a></p>`
-              : ""
-          }
-        </div>
-      `;
-
-      const results = await Promise.all([
-        sendEmail(resendKey, {
-          from: emailFrom,
-          reply_to: [adminEmail],
-          to: [paidLead.email],
-          subject: "GD Studio 360 — deposit received",
-          html: clientHtml,
-        }),
-
-        sendEmail(resendKey, {
-          from: emailFrom,
-          to: [adminEmail],
-          subject: `Deposit received — ${paidLead.business} — ${deposit}`,
-          html: adminHtml,
-        }),
-      ]);
-
-      console.log(
-        "DEPOSIT_EMAILS",
-        JSON.stringify({
-          client: results[0],
-          admin: results[1],
-        }),
+      return new Response(
+        "",
+        { status: 204 },
       );
-    } else {
-      console.error("DEPOSIT_EMAIL_CONFIG_MISSING");
     }
 
-    return new Response("", { status: 204 });
+    const supabaseUrl =
+      Deno.env.get(
+        "SUPABASE_URL",
+      )!;
+
+    const serviceKey =
+      Deno.env.get(
+        "SUPABASE_SERVICE_ROLE_KEY",
+      ) ||
+      Deno.env.get(
+        "SUPABASE_SECRET_KEY",
+      )!;
+
+    const supabase =
+      createClient(
+        supabaseUrl,
+        serviceKey,
+        {
+          auth: {
+            persistSession:
+              false,
+          },
+        },
+      );
+
+    // -----------------------------------------------------
+    // DEPOSIT PAYMENT
+    // -----------------------------------------------------
+
+    const {
+      data: depositLead,
+    } =
+      await supabase
+        .from("leads")
+        .select("*")
+        .eq(
+          "sumup_checkout_id",
+          checkout.id,
+        )
+        .maybeSingle();
+
+    if (depositLead) {
+      const expectedAmount =
+        Number(
+          (
+            Number(
+              depositLead.deposit_amount ||
+              0,
+            ) /
+            100
+          ).toFixed(2),
+        );
+
+      if (
+        Number(
+          checkout.amount,
+        ) !==
+        expectedAmount
+      ) {
+        return new Response(
+          "",
+          { status: 204 },
+        );
+      }
+
+      const paidAt =
+        new Date()
+          .toISOString();
+
+      const {
+        data: paidLead,
+        error: updateError,
+      } =
+        await supabase
+          .from("leads")
+          .update({
+            status:
+              "deposit_paid",
+
+            deposit_paid_at:
+              paidAt,
+          })
+          .eq(
+            "id",
+            depositLead.id,
+          )
+          .is(
+            "deposit_paid_at",
+            null,
+          )
+          .select("*")
+          .maybeSingle();
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      if (!paidLead) {
+        return new Response(
+          "",
+          { status: 204 },
+        );
+      }
+
+      await sendDepositEmails(
+        paidLead,
+      );
+
+      return new Response(
+        "",
+        { status: 204 },
+      );
+    }
+
+
+    // -----------------------------------------------------
+    // FINAL / BALANCE PAYMENT
+    // -----------------------------------------------------
+
+    const {
+      data: balanceLead,
+    } =
+      await supabase
+        .from("leads")
+        .select("*")
+        .eq(
+          "balance_sumup_checkout_id",
+          checkout.id,
+        )
+        .maybeSingle();
+
+    if (!balanceLead) {
+      return new Response(
+        "",
+        { status: 204 },
+      );
+    }
+
+    const expectedBalance =
+      Number(
+        (
+          Number(
+            balanceLead.balance_amount ||
+            0,
+          ) /
+          100
+        ).toFixed(2),
+      );
+
+    if (
+      Number(
+        checkout.amount,
+      ) !==
+      expectedBalance
+    ) {
+      return new Response(
+        "",
+        { status: 204 },
+      );
+    }
+
+    const paidAt =
+      new Date()
+        .toISOString();
+
+    const {
+      data: completedLead,
+      error: finalUpdateError,
+    } =
+      await supabase
+        .from("leads")
+        .update({
+          status:
+            "completed",
+
+          balance_paid_at:
+            paidAt,
+        })
+        .eq(
+          "id",
+          balanceLead.id,
+        )
+        .is(
+          "balance_paid_at",
+          null,
+        )
+        .select("*")
+        .maybeSingle();
+
+    if (finalUpdateError) {
+      throw finalUpdateError;
+    }
+
+    if (!completedLead) {
+      return new Response(
+        "",
+        { status: 204 },
+      );
+    }
+
+    await sendFinalEmails(
+      completedLead,
+    );
+
+    return new Response(
+      "",
+      { status: 204 },
+    );
+
   } catch (error) {
     console.error(
       "SUMUP_WEBHOOK_ERROR",
-      error instanceof Error ? error.message : error,
+      error instanceof Error
+        ? error.message
+        : error,
     );
 
-    return new Response("", { status: 500 });
+    return new Response(
+      "",
+      { status: 500 },
+    );
   }
 });
 
+
+async function sendDepositEmails(
+  lead: any,
+) {
+  const resendKey =
+    Deno.env.get(
+      "RESEND_API_KEY",
+    );
+
+  const emailFrom =
+    Deno.env.get(
+      "EMAIL_FROM",
+    );
+
+  const adminEmail =
+    Deno.env.get(
+      "ADMIN_EMAIL",
+    );
+
+  const siteUrl =
+    (
+      Deno.env.get(
+        "SITE_URL",
+      ) || ""
+    ).replace(/\/$/, "");
+
+  if (
+    !resendKey ||
+    !emailFrom ||
+    !adminEmail
+  ) {
+    return;
+  }
+
+  const deposit =
+    money(
+      lead.deposit_amount,
+    );
+
+  const clientHtml = `
+    <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#172033;line-height:1.6">
+      <h2>Deposit received — your project is confirmed</h2>
+
+      <p>
+        Hi ${escapeHtml(lead.name)},
+      </p>
+
+      <p>
+        Thank you. Your project deposit
+        has been received successfully
+        through SumUp.
+      </p>
+
+      <p>
+        <strong>Business:</strong>
+        ${escapeHtml(lead.business)}
+        <br>
+
+        <strong>Package:</strong>
+        ${escapeHtml(lead.package)}
+        <br>
+
+        <strong>Deposit received:</strong>
+        ${deposit}
+      </p>
+
+      <p>
+        Your GD Studio 360 project
+        is now confirmed.
+      </p>
+
+      <p>GD Studio 360</p>
+    </div>
+  `;
+
+  const adminHtml = `
+    <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#172033;line-height:1.6">
+      <h2>Deposit received</h2>
+
+      <p>
+        <strong>Business:</strong>
+        ${escapeHtml(lead.business)}
+        <br>
+
+        <strong>Client:</strong>
+        ${escapeHtml(lead.name)}
+        <br>
+
+        <strong>Deposit:</strong>
+        ${deposit}
+      </p>
+
+      ${
+        siteUrl
+          ? `<p><a href="${siteUrl}/admin.html">Open GD Studio 360 Admin</a></p>`
+          : ""
+      }
+    </div>
+  `;
+
+  await Promise.all([
+    sendEmail(
+      resendKey,
+      {
+        from: emailFrom,
+        reply_to: [
+          adminEmail,
+        ],
+        to: [
+          lead.email,
+        ],
+        subject:
+          "GD Studio 360 — deposit received",
+        html:
+          clientHtml,
+      },
+    ),
+
+    sendEmail(
+      resendKey,
+      {
+        from: emailFrom,
+        to: [
+          adminEmail,
+        ],
+        subject:
+          `Deposit received — ${lead.business} — ${deposit}`,
+        html:
+          adminHtml,
+      },
+    ),
+  ]);
+}
+
+
+async function sendFinalEmails(
+  lead: any,
+) {
+  const resendKey =
+    Deno.env.get(
+      "RESEND_API_KEY",
+    );
+
+  const emailFrom =
+    Deno.env.get(
+      "EMAIL_FROM",
+    );
+
+  const adminEmail =
+    Deno.env.get(
+      "ADMIN_EMAIL",
+    );
+
+  const siteUrl =
+    (
+      Deno.env.get(
+        "SITE_URL",
+      ) || ""
+    ).replace(/\/$/, "");
+
+  if (
+    !resendKey ||
+    !emailFrom ||
+    !adminEmail
+  ) {
+    return;
+  }
+
+  const total =
+    money(
+      lead.project_total,
+    );
+
+  const balance =
+    money(
+      lead.balance_amount,
+    );
+
+  const clientHtml = `
+    <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#172033;line-height:1.6">
+      <h2>Final payment received</h2>
+
+      <p>
+        Hi ${escapeHtml(lead.name)},
+      </p>
+
+      <p>
+        Thank you. The remaining project
+        balance has been received successfully.
+      </p>
+
+      <p>
+        <strong>Project total:</strong>
+        ${total}
+        <br>
+
+        <strong>Final payment:</strong>
+        ${balance}
+      </p>
+
+      <p>
+        Your GD Studio 360 website project
+        is now marked as completed.
+      </p>
+
+      ${
+        lead.live_url
+          ? `
+            <p>
+              <a href="${escapeHtml(lead.live_url)}">
+                Open your live website
+              </a>
+            </p>
+          `
+          : ""
+      }
+
+      <p>
+        Thank you for working with
+        GD Studio 360.
+      </p>
+    </div>
+  `;
+
+  const adminHtml = `
+    <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#172033;line-height:1.6">
+      <h2>Project paid in full</h2>
+
+      <p>
+        <strong>Business:</strong>
+        ${escapeHtml(lead.business)}
+        <br>
+
+        <strong>Client:</strong>
+        ${escapeHtml(lead.name)}
+        <br>
+
+        <strong>Final payment:</strong>
+        ${balance}
+        <br>
+
+        <strong>Total project value:</strong>
+        ${total}
+      </p>
+
+      ${
+        siteUrl
+          ? `<p><a href="${siteUrl}/admin.html">Open GD Studio 360 Admin</a></p>`
+          : ""
+      }
+    </div>
+  `;
+
+  await Promise.all([
+    sendEmail(
+      resendKey,
+      {
+        from:
+          emailFrom,
+        reply_to: [
+          adminEmail,
+        ],
+        to: [
+          lead.email,
+        ],
+        subject:
+          "GD Studio 360 — project paid in full",
+        html:
+          clientHtml,
+      },
+    ),
+
+    sendEmail(
+      resendKey,
+      {
+        from:
+          emailFrom,
+        to: [
+          adminEmail,
+        ],
+        subject:
+          `Project paid in full — ${lead.business}`,
+        html:
+          adminHtml,
+      },
+    ),
+  ]);
+}
+
+
 async function sendEmail(
   resendKey: string,
-  body: Record<string, unknown>,
+  body: Record<
+    string,
+    unknown
+  >,
 ) {
-  const response = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${resendKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(body),
-  });
+  const response =
+    await fetch(
+      "https://api.resend.com/emails",
+      {
+        method: "POST",
+        headers: {
+          Authorization:
+            `Bearer ${resendKey}`,
+          "Content-Type":
+            "application/json",
+        },
+        body:
+          JSON.stringify(
+            body,
+          ),
+      },
+    );
 
   if (!response.ok) {
     console.error(
@@ -210,17 +628,44 @@ async function sendEmail(
       response.status,
       await response.text(),
     );
+
     return false;
   }
 
   return true;
 }
 
-function escapeHtml(value: unknown) {
-  return String(value ?? "")
+
+function money(
+  pence: number,
+) {
+  return `£${
+    (
+      Number(
+        pence ||
+        0,
+      ) /
+      100
+    ).toFixed(2)
+  }`;
+}
+
+
+function escapeHtml(
+  value: unknown,
+) {
+  return String(
+    value ?? "",
+  )
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+    .replaceAll(
+      '"',
+      "&quot;",
+    )
+    .replaceAll(
+      "'",
+      "&#039;",
+    );
 }

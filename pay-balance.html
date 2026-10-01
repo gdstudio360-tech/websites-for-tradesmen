@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+  <meta
+    name="robots"
+    content="noindex,nofollow"
+  >
+  <meta
+    name="theme-color"
+    content="#0a1220"
+  >
+
+  <title>
+    Final project payment | GD Studio 360
+  </title>
+
+  <link
+    rel="stylesheet"
+    href="styles.css"
+  >
+</head>
+
+<body>
+
+<header class="site-header">
+  <div class="container nav">
+
+    <a
+      class="brand"
+      href="index.html"
+    >
+      <span class="brand-mark">
+        GD
+      </span>
+
+      <span class="brand-copy">
+        <strong>
+          Studio 360
+        </strong>
+
+        <small>
+          Secure project payment
+        </small>
+      </span>
+    </a>
+
+  </div>
+</header>
+
+
+<main class="privacy-page">
+  <div class="container">
+
+    <article class="privacy-content payment-card">
+
+      <span class="privacy-updated">
+        FINAL PAYMENT
+      </span>
+
+      <h1>
+        Complete your project payment.
+      </h1>
+
+      <p id="payment-intro">
+        Loading your project…
+      </p>
+
+
+      <div
+        class="payment-summary"
+        id="payment-summary"
+        hidden
+      >
+
+        <div>
+          <span>BUSINESS</span>
+          <strong id="payment-business"></strong>
+        </div>
+
+        <div>
+          <span>PACKAGE</span>
+          <strong id="payment-package"></strong>
+        </div>
+
+        <div>
+          <span>PROJECT TOTAL</span>
+          <strong id="payment-total"></strong>
+        </div>
+
+        <div>
+          <span>DEPOSIT RECEIVED</span>
+          <strong id="payment-deposit"></strong>
+        </div>
+
+        <div>
+          <span>REMAINING BALANCE</span>
+          <strong id="payment-balance"></strong>
+        </div>
+
+      </div>
+
+
+      <div class="privacy-callout">
+
+        <strong>
+          Payment is handled by SumUp
+        </strong>
+
+        <p>
+          Your card details are entered
+          on SumUp's hosted checkout page
+          and are not stored by
+          GD Studio 360.
+        </p>
+
+      </div>
+
+
+      <div class="privacy-actions">
+
+        <button
+          class="button button-yellow"
+          id="pay-button"
+          type="button"
+          disabled
+        >
+          Pay remaining balance →
+        </button>
+
+        <a
+          class="button button-dark"
+          href="index.html#contact"
+        >
+          Contact GD Studio 360
+        </a>
+
+      </div>
+
+      <p
+        class="form-note"
+        id="payment-status"
+        role="status"
+        aria-live="polite"
+      ></p>
+
+    </article>
+
+  </div>
+</main>
+
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="site-config.js"></script>
+<script src="pay-balance.js"></script>
+
+</body>
+</html>

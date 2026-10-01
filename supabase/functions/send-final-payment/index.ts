@@ -14,9 +14,10 @@ const PACKAGE_TOTALS: Record<string, number> = {
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", {
-      headers: corsHeaders,
-    });
+    return new Response(
+      "ok",
+      { headers: corsHeaders },
+    );
   }
 
   try {
@@ -53,11 +54,13 @@ Deno.serve(async (req) => {
         {
           global: {
             headers: {
-              Authorization: authHeader,
+              Authorization:
+                authHeader,
             },
           },
           auth: {
-            persistSession: false,
+            persistSession:
+              false,
           },
         },
       );
@@ -68,7 +71,8 @@ Deno.serve(async (req) => {
         serviceKey,
         {
           auth: {
-            persistSession: false,
+            persistSession:
+              false,
           },
         },
       );
@@ -77,7 +81,9 @@ Deno.serve(async (req) => {
       data: userData,
       error: userError,
     } =
-      await userClient.auth.getUser();
+      await userClient
+        .auth
+        .getUser();
 
     if (
       userError ||
@@ -140,20 +146,35 @@ Deno.serve(async (req) => {
       );
     }
 
-    const packageTotal =
-      PACKAGE_TOTALS[
-        lead.package
-      ];
-
-    if (!packageTotal) {
+    if (
+      lead.balance_paid_at ||
+      lead.status ===
+        "completed"
+    ) {
       return Response.json(
         {
           ok: false,
           error:
-            "Choose Starter, Business or Pro before approving this project.",
+            "This project has already been paid in full.",
         },
         {
-          status: 400,
+          status: 409,
+          headers: corsHeaders,
+        },
+      );
+    }
+
+    if (
+      !lead.deposit_paid_at
+    ) {
+      return Response.json(
+        {
+          ok: false,
+          error:
+            "The deposit has not been recorded as paid yet.",
+        },
+        {
+          status: 409,
           headers: corsHeaders,
         },
       );
@@ -162,26 +183,37 @@ Deno.serve(async (req) => {
     const projectTotal =
       Number(
         lead.project_total ||
-        packageTotal,
+        PACKAGE_TOTALS[
+          lead.package
+        ] ||
+        0,
       );
 
+    const depositPaid =
+      Number(
+        lead.deposit_amount ||
+        0,
+      );
+
+    const balanceAmount =
+      projectTotal -
+      depositPaid;
+
     if (
-      !Number.isFinite(
-        projectTotal,
-      ) ||
       projectTotal < 1
     ) {
       throw new Error(
-        "Project total is invalid.",
+        "Project total is missing.",
       );
     }
 
-    // 50% deposit based on the agreed
-    // project total, not just package name.
-    const depositAmount =
-      Math.round(
-        projectTotal / 2,
+    if (
+      balanceAmount < 1
+    ) {
+      throw new Error(
+        "There is no remaining balance to collect.",
       );
+    }
 
     const siteUrl =
       (
@@ -196,19 +228,59 @@ Deno.serve(async (req) => {
       );
     }
 
-    const paymentToken =
-      lead.payment_token ||
+    const token =
+      lead.balance_payment_token ||
       crypto.randomUUID();
 
-    const paymentPageUrl =
-      `${siteUrl}/pay-deposit.html?token=${
+    const paymentUrl =
+      `${siteUrl}/pay-balance.html?token=${
         encodeURIComponent(
-          paymentToken,
+          token,
         )
       }`;
 
     const now =
-      new Date().toISOString();
+      new Date()
+        .toISOString();
+
+    const {
+      error: updateError,
+    } =
+      await serviceClient
+        .from("leads")
+        .update({
+          status:
+            "balance_due",
+
+          project_total:
+            projectTotal,
+
+          balance_amount:
+            balanceAmount,
+
+          balance_url:
+            paymentUrl,
+
+          balance_payment_token:
+            token,
+
+          balance_sumup_checkout_id:
+            null,
+
+          balance_sumup_checkout_created_at:
+            null,
+
+          balance_sent_at:
+            now,
+        })
+        .eq(
+          "id",
+          lead.id,
+        );
+
+    if (updateError) {
+      throw updateError;
+    }
 
     const resendKey =
       Deno.env.get(
@@ -222,57 +294,24 @@ Deno.serve(async (req) => {
 
     let emailSent = false;
 
-    const {
-      error: updateError,
-    } =
-      await serviceClient
-        .from("leads")
-        .update({
-          status:
-            resendKey &&
-            emailFrom
-              ? "deposit_sent"
-              : "approved",
-
-          project_total:
-            projectTotal,
-
-          deposit_amount:
-            depositAmount,
-
-          deposit_url:
-            paymentPageUrl,
-
-          payment_token:
-            paymentToken,
-
-          approved_at:
-            lead.approved_at ||
-            now,
-        })
-        .eq(
-          "id",
-          lead.id,
-        );
-
-    if (updateError) {
-      throw updateError;
-    }
-
     if (
       resendKey &&
       emailFrom
     ) {
-      const termsUrl =
-        `${siteUrl}/terms.html`;
+      const preview =
+        lead.preview_url
+          ? `
+            <p>
+              You can review your website here:
+              <br>
+              <a href="${escapeHtml(lead.preview_url)}">
+                Open website preview
+              </a>
+            </p>
+          `
+          : "";
 
-      const formattedTotal =
-        money(projectTotal);
-
-      const formattedDeposit =
-        money(depositAmount);
-
-      const emailResponse =
+      const response =
         await fetch(
           "https://api.resend.com/emails",
           {
@@ -292,59 +331,50 @@ Deno.serve(async (req) => {
                 lead.email,
               ],
               subject:
-                `GD Studio 360 — ${lead.business} project approved`,
+                `GD Studio 360 — final payment for ${lead.business}`,
               html: `
                 <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#172033;line-height:1.6">
-                  <h2>Your website project has been approved</h2>
-
-                  <p>Hi ${escapeHtml(lead.name)},</p>
+                  <h2>Your website is ready</h2>
 
                   <p>
-                    Thanks for your enquiry.
-                    I’m happy to take on the project.
+                    Hi ${escapeHtml(lead.name)},
                   </p>
 
                   <p>
-                    <strong>Package:</strong>
-                    ${escapeHtml(lead.package)}
-                    <br>
-
-                    <strong>Care plan:</strong>
-                    ${escapeHtml(
-                      lead.care_plan ||
-                      "No care plan",
-                    )}
-                    <br>
-
-                    <strong>Agreed project total:</strong>
-                    ${formattedTotal}
-                    <br>
-
-                    <strong>Deposit:</strong>
-                    ${formattedDeposit}
+                    Thank you for reviewing the website.
+                    The project is now ready for the
+                    final payment.
                   </p>
 
+                  ${preview}
+
                   <p>
-                    Use the secure payment page below
-                    when you are ready.
+                    <strong>Project total:</strong>
+                    ${money(projectTotal)}
+                    <br>
+
+                    <strong>Deposit received:</strong>
+                    ${money(depositPaid)}
+                    <br>
+
+                    <strong>Remaining balance:</strong>
+                    ${money(balanceAmount)}
                   </p>
 
                   <p style="margin:28px 0">
                     <a
-                      href="${paymentPageUrl}"
+                      href="${paymentUrl}"
                       style="background:#ffd83d;color:#111;text-decoration:none;font-weight:700;padding:14px 20px;border-radius:8px"
                     >
-                      Review &amp; pay deposit
+                      Pay remaining balance
                     </a>
                   </p>
 
                   <p>
-                    <a href="${termsUrl}">
-                      Read the project terms
-                    </a>
+                    Thank you,
+                    <br>
+                    GD Studio 360
                   </p>
-
-                  <p>GD Studio 360</p>
                 </div>
               `,
             }),
@@ -352,27 +382,16 @@ Deno.serve(async (req) => {
         );
 
       if (
-        emailResponse.ok
+        response.ok
       ) {
         emailSent = true;
 
         await serviceClient
           .from("leads")
           .update({
-            approval_email_sent_at:
+            final_payment_email_sent_at:
               new Date()
                 .toISOString(),
-          })
-          .eq(
-            "id",
-            lead.id,
-          );
-      } else {
-        await serviceClient
-          .from("leads")
-          .update({
-            status:
-              "approved",
           })
           .eq(
             "id",
@@ -385,16 +404,19 @@ Deno.serve(async (req) => {
       {
         ok: true,
         payment_page_url:
-          paymentPageUrl,
-        email_sent:
-          emailSent,
+          paymentUrl,
         project_total:
           projectTotal,
-        deposit_amount:
-          depositAmount,
+        deposit_paid:
+          depositPaid,
+        balance_amount:
+          balanceAmount,
+        email_sent:
+          emailSent,
       },
       {
-        headers: corsHeaders,
+        headers:
+          corsHeaders,
       },
     );
 
