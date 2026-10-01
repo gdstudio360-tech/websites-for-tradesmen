@@ -125,17 +125,106 @@ Deno.serve(async (req) => {
     }
 
     if (action === "history") {
-      if (!lead.conversation_id) {
-        return Response.json(
-          {
-            ok: true,
-            conversation_id: null,
-            messages: [],
-          },
-          {
-            headers: corsHeaders,
-          },
-        );
+      let conversationId =
+        lead.conversation_id || null;
+
+      /*
+       * A normal website enquiry may exist before a
+       * conversation has been created.
+       *
+       * Opening Reply in Admin starts the email
+       * conversation automatically.
+       */
+      if (!conversationId) {
+        const {
+          data: conversation,
+          error: conversationError,
+        } = await serviceClient
+          .from("conversations")
+          .insert({
+            tenant_id: lead.tenant_id,
+            contact_id:
+              lead.contact_id || null,
+            channel: "email",
+            status: "open",
+            ai_enabled: false,
+            human_attention_required: true,
+          })
+          .select("id")
+          .single();
+
+        if (
+          conversationError ||
+          !conversation
+        ) {
+          throw conversationError ||
+            new Error(
+              "Could not create conversation."
+            );
+        }
+
+        conversationId =
+          conversation.id;
+
+        const {
+          error: leadUpdateError,
+        } = await serviceClient
+          .from("leads")
+          .update({
+            conversation_id:
+              conversationId,
+          })
+          .eq("id", lead.id);
+
+        if (leadUpdateError) {
+          throw leadUpdateError;
+        }
+
+        /*
+         * Put the original website enquiry into
+         * conversation history as the first
+         * customer message.
+         */
+        const initialMessage =
+          String(
+            lead.message || ""
+          ).trim();
+
+        if (initialMessage) {
+          const {
+            error: initialMessageError,
+          } = await serviceClient
+            .from("messages")
+            .insert({
+              conversation_id:
+                conversationId,
+              role: "customer",
+              channel: "website",
+              content: initialMessage,
+            });
+
+          if (initialMessageError) {
+            console.error(
+              "INITIAL_LEAD_MESSAGE_ERROR",
+              initialMessageError,
+            );
+          }
+        }
+
+        await serviceClient
+          .from("audit_log")
+          .insert({
+            tenant_id: lead.tenant_id,
+            actor_type: "system",
+            action:
+              "conversation_created_from_lead",
+            entity_type: "conversation",
+            entity_id: conversationId,
+            details: {
+              lead_id: lead.id,
+              source: "admin_inbox",
+            },
+          });
       }
 
       const {
@@ -148,7 +237,7 @@ Deno.serve(async (req) => {
         )
         .eq(
           "conversation_id",
-          lead.conversation_id
+          conversationId
         )
         .is("deleted_at", null)
         .order(
@@ -164,7 +253,7 @@ Deno.serve(async (req) => {
         {
           ok: true,
           conversation_id:
-            lead.conversation_id,
+            conversationId,
           messages: messages || [],
         },
         {
