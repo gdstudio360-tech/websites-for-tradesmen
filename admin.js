@@ -16,6 +16,9 @@ const leadTemplate = document.getElementById("lead-template");
 let client = null;
 let leads = [];
 
+let leadsSnapshot = "";
+let leadRefreshBusy = false;
+
 if (configured && window.supabase) {
   client = window.supabase.createClient(
     config.SUPABASE_URL,
@@ -146,24 +149,111 @@ refreshButton?.addEventListener("click", loadLeads);
 statusFilter?.addEventListener("change", renderLeads);
 searchInput?.addEventListener("input", renderLeads);
 
-async function loadLeads() {
+async function loadLeads(options = {}) {
   if (!client) return;
-  dashboardStatus.textContent = "Loading enquiries…";
+
+  const background =
+    options.background === true;
+
+  if (!background) {
+    dashboardStatus.textContent =
+      "Loading enquiries…";
+  }
 
   const { data, error } = await client
     .from("leads")
     .select("*")
-    .order("created_at", { ascending: false });
+    .order(
+      "created_at",
+      { ascending: false }
+    );
 
   if (error) {
-    dashboardStatus.textContent = error.message;
+    if (!background) {
+      dashboardStatus.textContent =
+        error.message;
+    }
+
     return;
   }
 
-  leads = data || [];
-  dashboardStatus.textContent = `${leads.length} enquiries`;
-  renderLeads();
+  const nextLeads = data || [];
+
+  const nextSnapshot =
+    JSON.stringify(nextLeads);
+
+  const changed =
+    nextSnapshot !== leadsSnapshot;
+
+  leads = nextLeads;
+  leadsSnapshot = nextSnapshot;
+
+  dashboardStatus.textContent =
+    `${leads.length} enquiries • Live`;
+
+  if (
+    changed ||
+    !background
+  ) {
+    renderLeads();
+  }
 }
+
+
+function adminIsBusy() {
+  const openConversation =
+    document.querySelector(
+      ".admin-conversation:not([hidden])"
+    );
+
+  if (openConversation) {
+    return true;
+  }
+
+  const active =
+    document.activeElement;
+
+  if (!active) {
+    return false;
+  }
+
+  return Boolean(
+    active.matches?.(
+      ".admin-reply-text, " +
+      ".admin-package-select, " +
+      ".admin-care-select"
+    )
+  );
+}
+
+
+setInterval(async () => {
+  if (
+    !client ||
+    document.hidden ||
+    dashboardView.hidden ||
+    leadRefreshBusy ||
+    adminIsBusy()
+  ) {
+    return;
+  }
+
+  leadRefreshBusy = true;
+
+  try {
+    await loadLeads({
+      background: true
+    });
+  } catch (error) {
+    console.error(
+      "Lead auto-refresh failed:",
+      error
+    );
+  } finally {
+    leadRefreshBusy = false;
+  }
+}, 5000);
+
 
 function renderStats() {
   const count = (status) => leads.filter((lead) => lead.status === status).length;
@@ -208,6 +298,11 @@ function renderLeads() {
   for (const lead of visible) {
     const fragment = leadTemplate.content.cloneNode(true);
     const card = fragment.querySelector(".lead-card");
+
+    if (card && lead.id) {
+      card.dataset.leadId =
+        String(lead.id);
+    }
 
     fragment.querySelector(".lead-status").textContent = prettyStatus(lead.status);
     fragment.querySelector(".lead-business").textContent = lead.business || "Unnamed business";
