@@ -227,9 +227,24 @@ function adminIsBusy() {
     return false;
   }
 
+  /*
+   * Safari can keep focus on a textarea even
+   * after its conversation panel is hidden.
+   * Only treat Reply as busy when its panel
+   * is actually visible.
+   */
+  if (
+    active.matches?.(".admin-reply-text")
+  ) {
+    return Boolean(
+      active.closest(
+        ".admin-conversation:not([hidden])"
+      )
+    );
+  }
+
   return Boolean(
     active.matches?.(
-      ".admin-reply-text, " +
       ".admin-package-select, " +
       ".admin-care-select"
     )
@@ -371,6 +386,24 @@ window.addEventListener(
   "focus",
   () => {
     requestLeadRefresh();
+  }
+);
+
+document.addEventListener(
+  "focusout",
+  () => {
+    if (!leadRefreshPending) {
+      return;
+    }
+
+    window.setTimeout(
+      () => {
+        if (!adminIsBusy()) {
+          requestLeadRefresh();
+        }
+      },
+      50
+    );
   }
 );
 
@@ -801,8 +834,16 @@ conversationButton.addEventListener(
     closeConversation.addEventListener(
       "click",
       () => {
+        replyText.blur();
+
         conversationPanel.hidden = true;
         conversationButton.hidden = false;
+
+        try {
+          conversationButton.focus({
+            preventScroll: true
+          });
+        } catch (_) {}
 
         if (leadRefreshPending) {
           window.setTimeout(
