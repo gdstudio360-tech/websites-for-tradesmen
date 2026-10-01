@@ -1,0 +1,346 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta
+    name="robots"
+    content="noindex,nofollow"
+  >
+
+  <meta
+    name="theme-color"
+    content="#07111f"
+  >
+
+  <title>GD Studio 360 Mobile CRM</title>
+
+  <link
+    rel="stylesheet"
+    href="admin-mobile.css?v=mobile-v1"
+  >
+</head>
+
+<body>
+
+<div class="app">
+
+  <section
+    id="login-view"
+    class="login-screen"
+  >
+    <div class="login-card">
+
+      <div class="brand-mark">GD</div>
+
+      <p class="eyebrow">
+        PRIVATE ADMIN
+      </p>
+
+      <h1>Studio 360 CRM</h1>
+
+      <p class="muted">
+        Mobile client management
+      </p>
+
+      <form id="login-form">
+
+        <label>
+          Email
+          <input
+            id="admin-email"
+            type="email"
+            autocomplete="username"
+            required
+          >
+        </label>
+
+        <label>
+          Password
+          <input
+            id="admin-password"
+            type="password"
+            autocomplete="current-password"
+            required
+          >
+        </label>
+
+        <button
+          class="primary-button"
+          type="submit"
+        >
+          Sign in
+        </button>
+
+        <div
+          id="login-status"
+          class="status-text"
+        ></div>
+
+      </form>
+
+    </div>
+  </section>
+
+
+  <section
+    id="dashboard-view"
+    hidden
+  >
+
+    <header class="topbar">
+
+      <div class="brand">
+        <div class="brand-mark small">
+          GD
+        </div>
+
+        <div>
+          <strong>Studio 360</strong>
+          <span>CRM</span>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+
+        <span
+          id="payment-mode"
+          class="mode-badge"
+        >
+          …
+        </span>
+
+        <button
+          id="logout-button"
+          class="icon-button"
+          type="button"
+          aria-label="Log out"
+        >
+          ↪
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <main>
+
+      <section
+        id="clients-screen"
+        class="screen"
+      >
+
+        <div class="screen-heading">
+          <div>
+            <p class="eyebrow">
+              CLIENTS
+            </p>
+
+            <h1>
+              Client CRM
+            </h1>
+          </div>
+
+          <span
+            id="total-count"
+            class="total-count"
+          >
+            0
+          </span>
+        </div>
+
+
+        <div class="search-box">
+          <span>⌕</span>
+
+          <input
+            id="search-input"
+            type="search"
+            placeholder="Search clients..."
+          >
+        </div>
+
+
+        <div
+          class="filter-scroll"
+          id="filter-tabs"
+        >
+
+          <button
+            class="filter-pill active"
+            data-view="new"
+            type="button"
+          >
+            New
+            <strong id="count-new">0</strong>
+          </button>
+
+          <button
+            class="filter-pill"
+            data-view="progress"
+            type="button"
+          >
+            In progress
+            <strong id="count-progress">0</strong>
+          </button>
+
+          <button
+            class="filter-pill"
+            data-view="completed"
+            type="button"
+          >
+            Completed
+            <strong id="count-completed">0</strong>
+          </button>
+
+          <button
+            class="filter-pill"
+            data-view="rejected"
+            type="button"
+          >
+            Rejected
+            <strong id="count-rejected">0</strong>
+          </button>
+
+          <button
+            class="filter-pill"
+            data-view="all"
+            type="button"
+          >
+            All
+            <strong id="count-all">0</strong>
+          </button>
+
+        </div>
+
+
+        <div
+          id="dashboard-status"
+          class="dashboard-status"
+        ></div>
+
+
+        <div
+          id="client-list"
+          class="client-list"
+        ></div>
+
+      </section>
+
+
+      <section
+        id="detail-screen"
+        class="screen detail-screen"
+        hidden
+      >
+
+        <div class="detail-top">
+
+          <button
+            id="back-button"
+            class="back-button"
+            type="button"
+          >
+            ← Clients
+          </button>
+
+          <span
+            id="detail-status"
+            class="status-badge"
+          ></span>
+
+        </div>
+
+
+        <div class="client-hero">
+
+          <div
+            id="client-avatar"
+            class="client-avatar"
+          >
+            G
+          </div>
+
+          <div>
+            <h1 id="detail-business">
+              Client
+            </h1>
+
+            <p id="detail-person"></p>
+          </div>
+
+        </div>
+
+
+        <nav
+          id="detail-tabs"
+          class="detail-tabs"
+        >
+
+          <button
+            class="detail-tab active"
+            data-tab="overview"
+            type="button"
+          >
+            Overview
+          </button>
+
+          <button
+            class="detail-tab"
+            data-tab="project"
+            type="button"
+          >
+            Project
+          </button>
+
+          <button
+            class="detail-tab"
+            data-tab="payments"
+            type="button"
+          >
+            Payments
+          </button>
+
+          <button
+            class="detail-tab"
+            data-tab="chat"
+            type="button"
+          >
+            Chat
+          </button>
+
+        </nav>
+
+
+        <div
+          id="detail-content"
+          class="detail-content"
+        ></div>
+
+      </section>
+
+    </main>
+
+  </section>
+
+</div>
+
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="site-config.js"></script>
+
+<script
+  src="admin-mobile.js?v=mobile-v1"
+></script>
+
+</body>
+</html>
