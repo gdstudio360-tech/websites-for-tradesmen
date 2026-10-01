@@ -236,6 +236,100 @@ function packagePrice(
 }
 
 
+function workflowStepIndex(
+  status
+) {
+  const map = {
+    new: 0,
+    approved: 1,
+    deposit_sent: 1,
+    deposit_paid: 2,
+    building: 2,
+    review: 3,
+    balance_due: 4,
+    completed: 5
+  };
+
+  return map[status] ?? 0;
+}
+
+
+function workflowProgressHtml(
+  lead
+) {
+  if (
+    lead.status ===
+    "rejected"
+  ) {
+    return `
+      <div class="workflow-rejected">
+        <strong>Rejected</strong>
+        <span>
+          This enquiry is currently
+          outside the active workflow.
+        </span>
+      </div>
+    `;
+  }
+
+  const steps = [
+    "Enquiry",
+    "Deposit",
+    "Build",
+    "Review",
+    "Final payment",
+    "Complete"
+  ];
+
+  const current =
+    workflowStepIndex(
+      lead.status
+    );
+
+  return `
+    <div class="workflow-progress">
+      ${
+        steps
+          .map(
+            (label, index) => {
+              let state = "";
+
+              if (
+                index < current
+              ) {
+                state = "done";
+              } else if (
+                index === current
+              ) {
+                state = "current";
+              }
+
+              return `
+                <div
+                  class="workflow-step ${state}"
+                >
+                  <span class="workflow-dot">
+                    ${
+                      index < current
+                        ? "✓"
+                        : index + 1
+                    }
+                  </span>
+
+                  <small>
+                    ${escapeHtml(label)}
+                  </small>
+                </div>
+              `;
+            }
+          )
+          .join("")
+      }
+    </div>
+  `;
+}
+
+
 function normaliseUrl(
   value
 ) {
@@ -644,6 +738,43 @@ async function loadLeads(
   leads =
     data || [];
 
+  /*
+   * When a selected client's status changes
+   * (for example New -> In Progress),
+   * automatically open the correct CRM list.
+   */
+  if (
+    refreshDetail &&
+    selectedLeadId &&
+    activeView !== "all" &&
+    !String(
+      searchInput?.value ||
+      ""
+    ).trim()
+  ) {
+    const selected =
+      getLeadById(
+        selectedLeadId
+      );
+
+    if (selected) {
+      const nextView =
+        categoryForLead(
+          selected
+        );
+
+      if (
+        nextView !==
+        activeView
+      ) {
+        activeView =
+          nextView;
+
+        updateActiveTab();
+      }
+    }
+  }
+
   renderCounts();
   renderClientList();
 
@@ -829,7 +960,15 @@ function renderClientList() {
             }
           </span>
 
-          <span class="client-row-status">
+          <span
+            class="client-row-status status-${
+              escapeAttr(
+                categoryForLead(
+                  lead
+                )
+              )
+            }"
+          >
             ${
               escapeHtml(
                 prettyStatus(
@@ -1084,7 +1223,15 @@ function renderSelectedLead() {
 
         <div>
 
-          <span class="detail-status">
+          <span
+            class="detail-status status-${
+              escapeAttr(
+                categoryForLead(
+                  lead
+                )
+              )
+            }"
+          >
             ${
               escapeHtml(
                 prettyStatus(
@@ -1118,23 +1265,62 @@ function renderSelectedLead() {
 
         </div>
 
-        <span class="eyebrow">
-          ${
-            escapeHtml(
-              categoryForLead(
-                lead
-              ) ===
-                "progress"
-                ? "IN PROGRESS"
-                : categoryForLead(
-                    lead
-                  ).toUpperCase()
-            )
-          }
-        </span>
+        <div class="detail-head-actions">
+
+          <span class="eyebrow">
+            ${
+              escapeHtml(
+                categoryForLead(
+                  lead
+                ) ===
+                  "progress"
+                  ? "IN PROGRESS"
+                  : categoryForLead(
+                      lead
+                    ).toUpperCase()
+              )
+            }
+          </span>
+
+          <div class="detail-quick-links">
+
+            ${
+              preview
+                ? `
+                  <a
+                    class="secondary-button detail-link-button"
+                    href="${escapeAttr(preview)}"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    Preview ↗
+                  </a>
+                `
+                : ""
+            }
+
+            ${
+              live
+                ? `
+                  <a
+                    class="secondary-button detail-link-button"
+                    href="${escapeAttr(live)}"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    Live site ↗
+                  </a>
+                `
+                : ""
+            }
+
+          </div>
+
+        </div>
 
       </div>
 
+      ${workflowProgressHtml(lead)}
 
       <div class="detail-grid">
 
@@ -1696,6 +1882,38 @@ function renderSelectedLead() {
                 `
                 : ""
             }
+
+            ${
+              lead.status ===
+              "review"
+                ? `
+                  <button
+                    class="secondary-button"
+                    id="back-to-building"
+                    type="button"
+                  >
+                    Back to building
+                  </button>
+                `
+                : ""
+            }
+
+
+            ${
+              lead.status ===
+              "rejected"
+                ? `
+                  <button
+                    class="secondary-button"
+                    id="restore-project"
+                    type="button"
+                  >
+                    Restore to New
+                  </button>
+                `
+                : ""
+            }
+
 
             ${
               [
@@ -2391,6 +2609,44 @@ function bindProjectControls(
           lead.id,
           "review"
         )
+    );
+
+
+  document
+    .getElementById(
+      "back-to-building"
+    )
+    ?.addEventListener(
+      "click",
+      () =>
+        updateLeadStatus(
+          lead.id,
+          "building"
+        )
+    );
+
+
+  document
+    .getElementById(
+      "restore-project"
+    )
+    ?.addEventListener(
+      "click",
+      async () => {
+        const ok =
+          confirm(
+            `Restore ${lead.business} to New?`
+          );
+
+        if (!ok) {
+          return;
+        }
+
+        await updateLeadStatus(
+          lead.id,
+          "new"
+        );
+      }
     );
 
 
