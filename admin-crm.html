@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <meta
+    name="robots"
+    content="noindex,nofollow"
+  >
+
+  <meta
+    name="theme-color"
+    content="#08111f"
+  >
+
+  <title>GD Studio 360 CRM</title>
+
+  <link
+    rel="stylesheet"
+    href="admin-crm.css?v=crm-v1"
+  >
+</head>
+
+<body>
+
+<header class="admin-header">
+  <div class="admin-shell admin-nav">
+
+    <a
+      class="admin-brand"
+      href="index.html"
+    >
+      <span>GD</span>
+
+      <div>
+        <strong>Studio 360</strong>
+        <small>CRM</small>
+      </div>
+    </a>
+
+    <button
+      id="logout-button"
+      class="ghost-button"
+      type="button"
+      hidden
+    >
+      Log out
+    </button>
+
+  </div>
+</header>
+
+
+<main class="admin-shell">
+
+  <section
+    class="login-card"
+    id="login-view"
+  >
+
+    <span class="eyebrow">
+      PRIVATE ADMIN
+    </span>
+
+    <h1>Client CRM</h1>
+
+    <p>
+      Sign in with your GD Studio 360
+      admin account.
+    </p>
+
+    <form id="login-form">
+
+      <label>
+        Email
+        <input
+          id="admin-email"
+          type="email"
+          required
+          autocomplete="username"
+        >
+      </label>
+
+      <label>
+        Password
+        <input
+          id="admin-password"
+          type="password"
+          required
+          autocomplete="current-password"
+        >
+      </label>
+
+      <button type="submit">
+        Sign in
+      </button>
+
+      <div
+        id="login-status"
+        class="status-text"
+        role="status"
+      ></div>
+
+    </form>
+
+  </section>
+
+
+  <section
+    id="dashboard-view"
+    hidden
+  >
+
+    <div class="dashboard-heading">
+
+      <div>
+        <span class="eyebrow">
+          GD STUDIO 360
+        </span>
+
+        <h1>Client CRM</h1>
+
+        <p>
+          Enquiries, projects,
+          conversations and payments.
+        </p>
+      </div>
+
+      <button
+        id="refresh-button"
+        class="ghost-button"
+        type="button"
+      >
+        Refresh
+      </button>
+
+    </div>
+
+
+    <div class="crm-tabs">
+
+      <button
+        class="crm-tab active"
+        data-view="new"
+        type="button"
+      >
+        <span>NEW</span>
+        <strong id="count-new">0</strong>
+      </button>
+
+      <button
+        class="crm-tab"
+        data-view="progress"
+        type="button"
+      >
+        <span>IN PROGRESS</span>
+        <strong id="count-progress">0</strong>
+      </button>
+
+      <button
+        class="crm-tab"
+        data-view="completed"
+        type="button"
+      >
+        <span>COMPLETED</span>
+        <strong id="count-completed">0</strong>
+      </button>
+
+      <button
+        class="crm-tab"
+        data-view="rejected"
+        type="button"
+      >
+        <span>REJECTED</span>
+        <strong id="count-rejected">0</strong>
+      </button>
+
+      <button
+        class="crm-tab"
+        data-view="all"
+        type="button"
+      >
+        <span>ALL</span>
+        <strong id="count-all">0</strong>
+      </button>
+
+    </div>
+
+
+    <div class="crm-toolbar">
+
+      <label class="crm-search">
+        Search
+        <input
+          id="search-input"
+          type="search"
+          placeholder="Business, name, email..."
+        >
+      </label>
+
+      <label>
+        Sort
+        <select id="sort-select">
+          <option value="newest">
+            Newest first
+          </option>
+
+          <option value="oldest">
+            Oldest first
+          </option>
+
+          <option value="business">
+            Business A–Z
+          </option>
+        </select>
+      </label>
+
+    </div>
+
+
+    <div
+      id="dashboard-status"
+      class="status-text"
+      role="status"
+    ></div>
+
+
+    <button
+      id="pending-enquiry-banner"
+      class="pending-enquiry-banner"
+      type="button"
+      hidden
+    ></button>
+
+
+    <div class="crm-layout">
+
+      <aside class="crm-sidebar">
+
+        <div class="crm-sidebar-head">
+          <strong>Clients</strong>
+          <span id="visible-count">0</span>
+        </div>
+
+        <div
+          id="client-list"
+          class="client-list"
+        ></div>
+
+      </aside>
+
+
+      <section
+        id="client-detail"
+        class="client-detail"
+      >
+
+        <div class="empty-detail">
+          <strong>Select a client</strong>
+
+          <p>
+            Choose a client from the list
+            to manage their project.
+          </p>
+        </div>
+
+      </section>
+
+    </div>
+
+  </section>
+
+</main>
+
+
+<script
+  src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+></script>
+
+<script src="site-config.js"></script>
+
+<script
+  src="admin-crm.js?v=crm-v1"
+></script>
+
+</body>
+</html>
