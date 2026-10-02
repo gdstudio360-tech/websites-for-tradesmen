@@ -46,6 +46,9 @@ let portalFiles = {
 
 let submittedAt = null;
 
+let serviceFieldCount = 1;
+let reviewFieldCount = 1;
+
 
 function escapeHtml(value) {
   return String(value ?? "")
@@ -69,101 +72,413 @@ function showMessage(
 }
 
 
-function createServices() {
+function lastMeaningfulIndex(
+  items,
+  fields
+) {
+  let count = 0;
+
+  items.forEach(
+    (item, index) => {
+      const hasContent =
+        fields.some(
+          field =>
+            String(
+              item?.[field] || ""
+            ).trim()
+        );
+
+      if (hasContent) {
+        count = index + 1;
+      }
+    }
+  );
+
+  return count;
+}
+
+
+function renderServices(
+  items = [],
+  requestedCount = null
+) {
   const target =
     document.getElementById(
       "services-list"
     );
 
+  const source =
+    Array.isArray(items)
+      ? items.slice(0, 6)
+      : [];
+
+  const savedCount =
+    lastMeaningfulIndex(
+      source,
+      [
+        "name",
+        "description"
+      ]
+    );
+
+  serviceFieldCount =
+    Math.min(
+      6,
+      Math.max(
+        1,
+        requestedCount ??
+        savedCount ??
+        1
+      )
+    );
+
   target.innerHTML =
     Array.from(
-      { length: 6 },
-      (_, index) => `
-        <div class="service-item">
+      {
+        length:
+          serviceFieldCount
+      },
+      (_, index) => {
+        const item =
+          source[index] || {};
 
-          <h3>
-            Service ${index + 1}
-            ${
-              index < 3
-                ? ""
-                : " — optional"
+        return `
+          <div class="service-item">
+
+            <div class="repeatable-head">
+
+              <h3>
+                Service ${index + 1}
+              </h3>
+
+              ${
+                index > 0
+                  ? `
+                    <button
+                      type="button"
+                      class="small-action"
+                      data-remove-service="${index}"
+                    >
+                      Remove
+                    </button>
+                  `
+                  : ""
+              }
+
+            </div>
+
+            <label>
+              Service name
+
+              <input
+                id="service-name-${index}"
+                maxlength="100"
+                placeholder="Service name"
+                value="${escapeHtml(
+                  item?.name || ""
+                )}"
+              >
+            </label>
+
+            <label>
+              Short description
+
+              <textarea
+                id="service-description-${index}"
+                rows="3"
+                maxlength="500"
+                placeholder="Briefly explain this service."
+              >${escapeHtml(
+                item?.description || ""
+              )}</textarea>
+            </label>
+
+          </div>
+        `;
+      }
+    ).join("") +
+    (
+      serviceFieldCount < 6
+        ? `
+          <button
+            type="button"
+            id="add-service"
+            class="add-item-button"
+          >
+            + Add another service
+          </button>
+        `
+        : `
+          <p class="field-note">
+            Maximum 6 services reached.
+          </p>
+        `
+    );
+
+  target
+    .querySelector(
+      "#add-service"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        const current =
+          collectServices();
+
+        renderServices(
+          current,
+          serviceFieldCount + 1
+        );
+
+        calculateProgress();
+      }
+    );
+
+  target
+    .querySelectorAll(
+      "[data-remove-service]"
+    )
+    .forEach(
+      button => {
+        button
+          .addEventListener(
+            "click",
+            () => {
+              const current =
+                collectServices();
+
+              const index =
+                Number(
+                  button.dataset
+                    .removeService
+                );
+
+              current.splice(
+                index,
+                1
+              );
+
+              renderServices(
+                current,
+                Math.max(
+                  1,
+                  serviceFieldCount - 1
+                )
+              );
+
+              calculateProgress();
+
+              if (!demoMode) {
+                saveStatus.textContent =
+                  "Unsaved changes";
+              }
             }
-          </h3>
-
-          <label>
-            Service name
-
-            <input
-              id="service-name-${index}"
-              maxlength="100"
-              placeholder="Service name"
-            >
-          </label>
-
-          <label>
-            Short description
-
-            <textarea
-              id="service-description-${index}"
-              rows="3"
-              maxlength="500"
-              placeholder="Briefly explain this service."
-            ></textarea>
-          </label>
-
-        </div>
-      `
-    ).join("");
+          );
+      }
+    );
 }
 
 
-function createReviews() {
+function createServices() {
+  renderServices(
+    [],
+    1
+  );
+}
+
+
+function renderReviews(
+  items = [],
+  requestedCount = null
+) {
   const target =
     document.getElementById(
       "reviews-list"
     );
 
+  const source =
+    Array.isArray(items)
+      ? items.slice(0, 3)
+      : [];
+
+  const savedCount =
+    lastMeaningfulIndex(
+      source,
+      [
+        "name",
+        "text"
+      ]
+    );
+
+  reviewFieldCount =
+    Math.min(
+      3,
+      Math.max(
+        1,
+        requestedCount ??
+        savedCount ??
+        1
+      )
+    );
+
   target.innerHTML =
     Array.from(
-      { length: 3 },
-      (_, index) => `
-        <div class="review-item">
+      {
+        length:
+          reviewFieldCount
+      },
+      (_, index) => {
+        const item =
+          source[index] || {};
 
-          <h3>
-            Review ${index + 1}
-            — optional
-          </h3>
+        return `
+          <div class="review-item">
 
-          <label>
-            Customer name
+            <div class="repeatable-head">
 
-            <input
-              id="review-name-${index}"
-              maxlength="100"
-              placeholder="Customer name"
-            >
-          </label>
+              <h3>
+                Review ${index + 1}
+                — optional
+              </h3>
 
-          <label>
-            Review
+              ${
+                index > 0
+                  ? `
+                    <button
+                      type="button"
+                      class="small-action"
+                      data-remove-review="${index}"
+                    >
+                      Remove
+                    </button>
+                  `
+                  : ""
+              }
 
-            <textarea
-              id="review-text-${index}"
-              rows="4"
-              maxlength="800"
-              placeholder="Paste the genuine customer review here."
-            ></textarea>
-          </label>
+            </div>
 
-        </div>
-      `
-    ).join("");
+            <label>
+              Customer name
+
+              <input
+                id="review-name-${index}"
+                maxlength="100"
+                placeholder="Customer name"
+                value="${escapeHtml(
+                  item?.name || ""
+                )}"
+              >
+            </label>
+
+            <label>
+              Review
+
+              <textarea
+                id="review-text-${index}"
+                rows="4"
+                maxlength="800"
+                placeholder="Paste the genuine customer review here."
+              >${escapeHtml(
+                item?.text || ""
+              )}</textarea>
+            </label>
+
+          </div>
+        `;
+      }
+    ).join("") +
+    (
+      reviewFieldCount < 3
+        ? `
+          <button
+            type="button"
+            id="add-review"
+            class="add-item-button"
+          >
+            + Add another review
+          </button>
+        `
+        : `
+          <p class="field-note">
+            Maximum 3 reviews reached.
+          </p>
+        `
+    );
+
+  target
+    .querySelector(
+      "#add-review"
+    )
+    ?.addEventListener(
+      "click",
+      () => {
+        const current =
+          collectReviews();
+
+        renderReviews(
+          current,
+          reviewFieldCount + 1
+        );
+      }
+    );
+
+  target
+    .querySelectorAll(
+      "[data-remove-review]"
+    )
+    .forEach(
+      button => {
+        button
+          .addEventListener(
+            "click",
+            () => {
+              const current =
+                collectReviews();
+
+              const index =
+                Number(
+                  button.dataset
+                    .removeReview
+                );
+
+              current.splice(
+                index,
+                1
+              );
+
+              renderReviews(
+                current,
+                Math.max(
+                  1,
+                  reviewFieldCount - 1
+                )
+              );
+
+              if (!demoMode) {
+                saveStatus.textContent =
+                  "Unsaved changes";
+              }
+            }
+          );
+      }
+    );
+}
+
+
+function createReviews() {
+  renderReviews(
+    [],
+    1
+  );
 }
 
 
 function collectServices() {
   return Array.from(
-    { length: 6 },
+    {
+      length:
+        serviceFieldCount
+    },
     (_, index) => ({
       name:
         document
@@ -187,7 +502,10 @@ function collectServices() {
 
 function collectReviews() {
   return Array.from(
-    { length: 3 },
+    {
+      length:
+        reviewFieldCount
+    },
     (_, index) => ({
       name:
         document
@@ -332,7 +650,7 @@ function calculateProgress() {
     Boolean(data.hero_text),
     Boolean(portalFiles.hero),
     Boolean(data.about_text),
-    serviceCount >= 3,
+    serviceCount >= 1,
     portalFiles.gallery.length >= 3,
     Boolean(data.contact.email),
     Boolean(data.contact.area)
@@ -492,28 +810,10 @@ function fillForm(
       ? content.services
       : [];
 
-  services
-    .slice(0, 6)
-    .forEach(
-      (item, index) => {
+  renderServices(
+    services
+  );
 
-        document
-          .getElementById(
-            `service-name-${index}`
-          )
-          .value =
-            item?.name ||
-            "";
-
-        document
-          .getElementById(
-            `service-description-${index}`
-          )
-          .value =
-            item?.description ||
-            "";
-      }
-    );
 
   const reviews =
     Array.isArray(
@@ -522,28 +822,10 @@ function fillForm(
       ? content.reviews
       : [];
 
-  reviews
-    .slice(0, 3)
-    .forEach(
-      (item, index) => {
+  renderReviews(
+    reviews
+  );
 
-        document
-          .getElementById(
-            `review-name-${index}`
-          )
-          .value =
-            item?.name ||
-            "";
-
-        document
-          .getElementById(
-            `review-text-${index}`
-          )
-          .value =
-            item?.text ||
-            "";
-      }
-    );
 
   document
     .getElementById(
