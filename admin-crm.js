@@ -1617,6 +1617,15 @@ function renderSelectedLead() {
       lead.current_site
     );
 
+  const contentPortalUrl =
+    lead.package ===
+      "Starter — £249" &&
+    lead.content_token
+      ? `https://gdstudio360.co.uk/content-starter.html?token=${encodeURIComponent(
+          lead.content_token
+        )}`
+      : "";
+
   const completed =
     lead.status ===
     "completed";
@@ -1714,6 +1723,29 @@ function renderSelectedLead() {
                   >
                     Live site ↗
                   </a>
+                `
+                : ""
+            }
+
+            ${
+              contentPortalUrl
+                ? `
+                  <a
+                    class="secondary-button detail-link-button"
+                    href="${escapeAttr(contentPortalUrl)}"
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    Content portal ↗
+                  </a>
+
+                  <button
+                    class="secondary-button detail-link-button"
+                    id="copy-content-link"
+                    type="button"
+                  >
+                    Copy content link
+                  </button>
                 `
                 : ""
             }
@@ -2690,6 +2722,50 @@ function bindProjectControls(
   const totalInput =
     document.getElementById(
       "project-total"
+    );
+
+
+  document
+    .getElementById(
+      "copy-content-link"
+    )
+    ?.addEventListener(
+      "click",
+      async (event) => {
+
+        if (
+          !lead.content_token ||
+          lead.package !==
+            "Starter — £249"
+        ) {
+          return;
+        }
+
+        const url =
+          `https://gdstudio360.co.uk/content-starter.html?token=${encodeURIComponent(
+            lead.content_token
+          )}`;
+
+        await navigator
+          .clipboard
+          .writeText(url);
+
+        event.currentTarget
+          .textContent =
+            "Copied ✓";
+
+        dashboardStatus.textContent =
+          "Content link copied.";
+
+        setTimeout(
+          () => {
+            event.currentTarget
+              .textContent =
+                "Copy content link";
+          },
+          1400
+        );
+      }
     );
 
 
