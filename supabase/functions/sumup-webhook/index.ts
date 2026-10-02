@@ -338,6 +338,16 @@ async function sendDepositEmails(
       ) || ""
     ).replace(/\/$/, "");
 
+  const contentPortalUrl =
+    lead.package ===
+      "Starter — £249" &&
+    lead.content_token &&
+    siteUrl
+      ? `${siteUrl}/content-starter.html?token=${encodeURIComponent(
+          lead.content_token,
+        )}`
+      : "";
+
   if (
     !resendKey ||
     !emailFrom ||
@@ -382,6 +392,40 @@ async function sendDepositEmails(
         Your GD Studio 360 project
         is now confirmed.
       </p>
+
+      ${
+        contentPortalUrl
+          ? `
+            <p>
+              The next step is to send us the
+              text and images for your website.
+            </p>
+
+            <p style="margin:28px 0">
+              <a
+                href="${escapeHtml(contentPortalUrl)}"
+                style="
+                  display:inline-block;
+                  padding:14px 20px;
+                  border-radius:9px;
+                  background:#ffd83d;
+                  color:#111;
+                  text-decoration:none;
+                  font-weight:700
+                "
+              >
+                Open your Content Portal
+              </a>
+            </p>
+
+            <p style="font-size:13px;color:#687386">
+              Keep this private link safe.
+              You can return to it later
+              to continue adding your content.
+            </p>
+          `
+          : ""
+      }
 
       <p>GD Studio 360</p>
     </div>
@@ -464,6 +508,9 @@ async function sendDepositEmails(
         "",
         `Deposit received: ${deposit}`,
         `Package: ${lead.package || "Not specified"}`,
+        contentPortalUrl
+          ? `Content portal sent: ${contentPortalUrl}`
+          : "Content portal: not applicable yet",
       ].join("\n"),
     );
   }
