@@ -777,7 +777,7 @@ form button{
 .workflow-progress{
   display:grid;
   grid-template-columns:
-    repeat(6,1fr);
+    repeat(7,minmax(0,1fr));
   gap:0;
   margin:16px 0 2px;
   padding:15px 12px;
