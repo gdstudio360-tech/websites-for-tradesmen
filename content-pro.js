@@ -2305,7 +2305,7 @@ document
             .length >= 12
         ) {
           showMessage(
-            "Business package allows up to 12 gallery images."
+            "Pro package allows up to 12 gallery images."
           );
 
           break;

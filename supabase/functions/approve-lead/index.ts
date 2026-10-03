@@ -350,7 +350,7 @@ Deno.serve(async (req) => {
 
                   <p>
                     <a href="${termsUrl}">
-                      Read the project terms
+                      Read the Website &amp; Enquiry Terms
                     </a>
                   </p>
 

@@ -110,7 +110,7 @@ function refreshCareOptions(packageName, preferredValue = "No care plan") {
 
     if (careFormNote) {
       careFormNote.textContent =
-        "Care starts after launch. It covers the maintenance allowance shown for this website package.";
+        "Care is activated separately after launch. Monthly billing is arranged when the website goes live. It covers the maintenance allowance shown for this website package.";
     }
   } else if (careFormNote) {
     careFormNote.textContent =
@@ -735,7 +735,7 @@ if (form) {
     terms.href = "terms.html";
     terms.target = "_blank";
     terms.rel = "noopener";
-    terms.textContent = "Enquiry Terms";
+    terms.textContent = "Website & Enquiry Terms";
 
     const andText = document.createTextNode(" and ");
 
@@ -944,7 +944,7 @@ if (form) {
     terms.href = "terms.html";
     terms.target = "_blank";
     terms.rel = "noopener";
-    terms.textContent = "Enquiry Terms";
+    terms.textContent = "Website & Enquiry Terms";
 
     const andText = document.createTextNode(" and ");
 
