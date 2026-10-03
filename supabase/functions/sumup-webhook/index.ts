@@ -338,12 +338,27 @@ async function sendDepositEmails(
       ) || ""
     ).replace(/\/$/, "");
 
+  const packageKey =
+    String(
+      lead.package || "",
+    )
+      .trim()
+      .toLowerCase();
+
+  const contentPortalFile =
+    packageKey.startsWith("pro")
+      ? "content-pro.html"
+      : packageKey.startsWith("business")
+        ? "content-business.html"
+        : packageKey.startsWith("starter")
+          ? "content-starter.html"
+          : "";
+
   const contentPortalUrl =
-    lead.package ===
-      "Starter — £249" &&
+    contentPortalFile &&
     lead.content_token &&
     siteUrl
-      ? `${siteUrl}/content-starter.html?token=${encodeURIComponent(
+      ? `${siteUrl}/${contentPortalFile}?token=${encodeURIComponent(
           lead.content_token,
         )}`
       : "";
