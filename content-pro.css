@@ -1166,3 +1166,115 @@ select:focus {
 
 
 /* BUSINESS PORTAL FIELDS V1 END */
+
+/* ==============================
+   SUBMIT CONFIRMATION
+============================== */
+
+.primary-button.is-submitted,
+.primary-button.is-submitted:disabled {
+  opacity: 1;
+
+  cursor: default;
+
+  color:
+    #090a0c;
+
+  background:
+    var(--gold);
+
+  transform:
+    none;
+}
+
+
+.submit-success-toast {
+  position:
+    fixed;
+
+  left:
+    50%;
+
+  bottom:
+    28px;
+
+  z-index:
+    9999;
+
+  width:
+    min(
+      calc(100% - 32px),
+      520px
+    );
+
+  padding:
+    16px 20px;
+
+  border:
+    1px solid
+    rgba(239,199,96,.42);
+
+  border-radius:
+    14px;
+
+  color:
+    #fff4cf;
+
+  background:
+    rgba(12,15,19,.96);
+
+  box-shadow:
+    0 22px 70px
+    rgba(0,0,0,.45);
+
+  backdrop-filter:
+    blur(12px);
+
+  font-size:
+    15px;
+
+  font-weight:
+    800;
+
+  text-align:
+    center;
+
+  opacity:
+    0;
+
+  pointer-events:
+    none;
+
+  transform:
+    translate(
+      -50%,
+      20px
+    );
+
+  transition:
+    opacity .22s ease,
+    transform .22s ease;
+}
+
+
+.submit-success-toast.show {
+  opacity:
+    1;
+
+  transform:
+    translate(
+      -50%,
+      0
+    );
+}
+
+
+@media
+(max-width: 700px) {
+
+  .submit-success-toast {
+    bottom:
+      18px;
+  }
+
+}

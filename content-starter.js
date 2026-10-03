@@ -72,6 +72,68 @@ function showMessage(
 }
 
 
+function showSubmitToast(
+  text
+) {
+  let toast =
+    document.getElementById(
+      "submit-success-toast"
+    );
+
+  if (!toast) {
+    toast =
+      document.createElement(
+        "div"
+      );
+
+    toast.id =
+      "submit-success-toast";
+
+    toast.className =
+      "submit-success-toast";
+
+    toast.setAttribute(
+      "role",
+      "status"
+    );
+
+    toast.setAttribute(
+      "aria-live",
+      "polite"
+    );
+
+    document.body.appendChild(
+      toast
+    );
+  }
+
+  toast.textContent =
+    text;
+
+  requestAnimationFrame(
+    () => {
+      toast.classList.add(
+        "show"
+      );
+    }
+  );
+
+  clearTimeout(
+    showSubmitToast.timer
+  );
+
+  showSubmitToast.timer =
+    setTimeout(
+      () => {
+        toast.classList.remove(
+          "show"
+        );
+      },
+      6500
+    );
+}
+
+
 function lastMeaningfulIndex(
   items,
   fields
@@ -1460,8 +1522,18 @@ submitButton
         }
       }
 
+      let submitSucceeded =
+        false;
+
       submitButton.disabled =
         true;
+
+      submitButton.textContent =
+        "Submitting…";
+
+      submitButton.classList.remove(
+        "is-submitted"
+      );
 
       saveStatus.textContent =
         "Submitting…";
@@ -1481,6 +1553,19 @@ submitButton
         submittedAt =
           data.submitted_at;
 
+        submitSucceeded =
+          true;
+
+        submitButton.textContent =
+          "Submitted ✓";
+
+        submitButton.classList.add(
+          "is-submitted"
+        );
+
+        submitButton.disabled =
+          true;
+
         saveStatus.textContent =
           "Submitted ✓";
 
@@ -1488,10 +1573,9 @@ submitButton
           "Thank you. Your website content has been submitted to GD Studio 360."
         );
 
-        window.scrollTo({
-          top: 0,
-          behavior: "smooth"
-        });
+        showSubmitToast(
+          "Content submitted successfully ✓"
+        );
 
       } catch (error) {
         saveStatus.textContent =
@@ -1499,8 +1583,13 @@ submitButton
           "Could not submit.";
 
       } finally {
-        submitButton.disabled =
-          false;
+        if (!submitSucceeded) {
+          submitButton.disabled =
+            false;
+
+          submitButton.textContent =
+            "Submit content";
+        }
       }
     }
   );
