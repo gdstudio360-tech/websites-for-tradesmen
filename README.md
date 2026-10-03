@@ -1,4 +1,4 @@
-# GD TradeWeb — Websites for UK Tradesmen
+# GD Studio 360 — Websites for UK Tradesmen
 
 Sales landing page for a website-building service aimed at UK tradespeople.
 
@@ -90,7 +90,7 @@ Configured Formspree form ID: `mjykeaej`
 ## V5 — Privacy Notice
 
 Added:
-- `privacy.html` in the same GD TradeWeb visual style
+- `privacy.html` in the same GD Studio 360 visual style
 - Privacy Notice link directly beside the enquiry form
 - Privacy Notice link in the footer
 - clearer form privacy wording
@@ -139,7 +139,7 @@ Important: a paid project should still use a separate quotation/project agreemen
 Added:
 - `Why GD` navigation item
 - new About / Trust section between the benefits and live demo
-- positions GD TradeWeb as an independent service focused on UK trades
+- positions GD Studio 360 as an independent service focused on UK trades
 - mentions real UK electrical/BMS trade experience without overstating qualifications
 - highlights direct communication, practical trade-minded websites and clear scope/pricing
 - includes CTA to free homepage preview and live demo
@@ -156,7 +156,7 @@ New lead flow:
 - enquiry form asks for business details
 - optional current website/social link
 - package-interest selector
-- GD TradeWeb reviews the enquiry and recommends the appropriate package
+- GD Studio 360 reviews the enquiry and recommends the appropriate package
 - no unpaid design work is promised at enquiry stage
 
 A future automated "Instant Preview" tool can be added separately if it can generate the preview without manual design time.
@@ -243,14 +243,14 @@ Until Supabase is connected, the existing Formspree enquiry flow continues to wo
 
 ## V11 — SumUp Hosted Checkout
 
-V11 replaces the planned Stripe payment integration with the existing GD TradeWeb SumUp merchant account.
+V11 replaces the planned Stripe payment integration with the existing GD Studio 360 SumUp merchant account.
 
 ### Important design change
 SumUp Hosted Checkout sessions are short-lived (currently around 30 minutes), so V11 does **not** create the actual SumUp checkout when an admin approves a project.
 
 Instead:
 1. Admin approves a lead.
-2. A long-lived GD TradeWeb payment-request URL is generated.
+2. A long-lived GD Studio 360 payment-request URL is generated.
 3. Client opens that URL and reviews business / package / deposit.
 4. Client accepts the project terms.
 5. Only then does the server create a **fresh SumUp Hosted Checkout**.
