@@ -1932,6 +1932,86 @@ function renderSelectedLead() {
         </section>
 
 
+        ${
+          contentPortalUrl
+            ? `
+              <section
+                class="detail-card full client-content-card"
+                id="client-content-card"
+              >
+
+                <div class="client-content-header">
+
+                  <div>
+                    <h3>Client Content</h3>
+
+                    <p
+                      id="client-content-status"
+                      class="client-content-status"
+                    >
+                      Loading client content…
+                    </p>
+                  </div>
+
+                  <div class="client-content-actions">
+
+                    <button
+                      class="secondary-button"
+                      id="refresh-client-content"
+                      type="button"
+                    >
+                      Refresh
+                    </button>
+
+                    <button
+                      class="secondary-button"
+                      id="copy-all-client-text"
+                      type="button"
+                    >
+                      Copy all text
+                    </button>
+
+                    <button
+                      class="primary-button"
+                      id="download-all-client-content"
+                      type="button"
+                    >
+                      Download all
+                    </button>
+
+                    <a
+                      class="secondary-button"
+                      href="${escapeAttr(contentPortalUrl)}"
+                      target="_blank"
+                      rel="noopener"
+                      style="
+                        display:inline-flex;
+                        align-items:center;
+                        text-decoration:none
+                      "
+                    >
+                      Edit / upload ↗
+                    </a>
+
+                  </div>
+
+                </div>
+
+                <div
+                  id="client-content-body"
+                  class="client-content-body"
+                >
+                  <p class="conversation-empty">
+                    Loading client content…
+                  </p>
+                </div>
+
+              </section>
+            `
+            : ""
+        }
+
+
         <section class="detail-card full">
 
           <h3>Project</h3>
@@ -2452,6 +2532,12 @@ function renderSelectedLead() {
     lead
   );
 
+  if (contentPortalUrl) {
+    loadClientContent(
+      lead
+    );
+  }
+
   startConversationPolling(
     lead
   );
@@ -2697,6 +2783,1378 @@ async function saveProject(
     }
 
     return false;
+  }
+}
+
+
+
+function clientContentApiUrl() {
+  return (
+    `${window.GD_CONFIG.SUPABASE_URL}` +
+    `/functions/v1/content-portal`
+  );
+}
+
+
+async function callClientContentApi(
+  body
+) {
+  const response =
+    await fetch(
+      clientContentApiUrl(),
+      {
+        method: "POST",
+
+        headers: {
+          "Content-Type":
+            "application/json",
+
+          "apikey":
+            window.GD_CONFIG
+              .SUPABASE_PUBLISHABLE_KEY
+        },
+
+        body:
+          JSON.stringify(body)
+      }
+    );
+
+  const data =
+    await response.json();
+
+  if (
+    !response.ok ||
+    !data?.ok
+  ) {
+    throw new Error(
+      data?.error ||
+      "Could not load client content."
+    );
+  }
+
+  return data;
+}
+
+
+async function uploadClientContentFile(
+  token,
+  slot,
+  file
+) {
+  const body =
+    new FormData();
+
+  body.append(
+    "action",
+    "upload"
+  );
+
+  body.append(
+    "token",
+    token
+  );
+
+  body.append(
+    "slot",
+    slot
+  );
+
+  body.append(
+    "file",
+    file
+  );
+
+  const response =
+    await fetch(
+      clientContentApiUrl(),
+      {
+        method: "POST",
+
+        headers: {
+          "apikey":
+            window.GD_CONFIG
+              .SUPABASE_PUBLISHABLE_KEY
+        },
+
+        body
+      }
+    );
+
+  const data =
+    await response.json();
+
+  if (
+    !response.ok ||
+    !data?.ok
+  ) {
+    throw new Error(
+      data?.error ||
+      "Upload failed."
+    );
+  }
+
+  return data;
+}
+
+
+function clientContentProgress(
+  data
+) {
+  const content =
+    data?.content || {};
+
+  const files =
+    data?.files || {};
+
+  const services =
+    Array.isArray(
+      content.services
+    )
+      ? content.services
+      : [];
+
+  const completeServices =
+    services.filter(
+      item =>
+        String(
+          item?.name || ""
+        ).trim() &&
+        String(
+          item?.description || ""
+        ).trim()
+    ).length;
+
+  const gallery =
+    Array.isArray(
+      files.gallery
+    )
+      ? files.gallery
+      : [];
+
+  const checks = [
+    Boolean(
+      String(
+        content.business_name ||
+        ""
+      ).trim()
+    ),
+
+    Boolean(
+      files.logo
+    ),
+
+    Boolean(
+      String(
+        content.hero_title ||
+        ""
+      ).trim()
+    ),
+
+    Boolean(
+      String(
+        content.hero_text ||
+        ""
+      ).trim()
+    ),
+
+    Boolean(
+      files.hero
+    ),
+
+    Boolean(
+      String(
+        content.about_text ||
+        ""
+      ).trim()
+    ),
+
+    completeServices >= 1,
+
+    gallery.length >= 3,
+
+    Boolean(
+      String(
+        content.contact?.email ||
+        ""
+      ).trim()
+    ),
+
+    Boolean(
+      String(
+        content.contact?.area ||
+        ""
+      ).trim()
+    )
+  ];
+
+  return Math.round(
+    (
+      checks.filter(Boolean).length /
+      checks.length
+    ) *
+    100
+  );
+}
+
+
+function clientContentText(
+  data
+) {
+  const c =
+    data?.content || {};
+
+  const services =
+    Array.isArray(c.services)
+      ? c.services.filter(
+          item =>
+            item?.name ||
+            item?.description
+        )
+      : [];
+
+  const reviews =
+    Array.isArray(c.reviews)
+      ? c.reviews.filter(
+          item =>
+            item?.name ||
+            item?.text
+        )
+      : [];
+
+  const lines = [
+    "GD STUDIO 360 — CLIENT CONTENT",
+    "",
+    `Business: ${c.business_name || ""}`,
+    "",
+    "HERO",
+    `Headline: ${c.hero_title || ""}`,
+    `Text: ${c.hero_text || ""}`,
+    "",
+    "ABOUT",
+    c.about_text || "",
+    "",
+    "SERVICES"
+  ];
+
+  services.forEach(
+    (item, index) => {
+      lines.push(
+        "",
+        `${index + 1}. ${item.name || ""}`,
+        item.description || ""
+      );
+    }
+  );
+
+  lines.push(
+    "",
+    "REVIEWS"
+  );
+
+  if (!reviews.length) {
+    lines.push(
+      "",
+      "(No reviews supplied)"
+    );
+  } else {
+    reviews.forEach(
+      (item, index) => {
+        lines.push(
+          "",
+          `${index + 1}. ${item.name || ""}`,
+          item.text || ""
+        );
+      }
+    );
+  }
+
+  lines.push(
+    "",
+    "CONTACT",
+    `Email: ${c.contact?.email || ""}`,
+    `Phone / WhatsApp: ${c.contact?.phone || ""}`,
+    `Area: ${c.contact?.area || ""}`,
+    `Opening hours: ${c.contact?.hours || ""}`,
+    "",
+    "ONLINE PROFILES",
+    `Website: ${c.socials?.website || ""}`,
+    `Facebook: ${c.socials?.facebook || ""}`,
+    `Instagram: ${c.socials?.instagram || ""}`
+  );
+
+  return lines.join("\n");
+}
+
+
+function safeDownloadName(
+  value,
+  fallback
+) {
+  const cleaned =
+    String(
+      value ||
+      fallback ||
+      "file"
+    )
+      .replace(
+        /[^\w.\- ]+/g,
+        "_"
+      )
+      .replace(
+        /\s+/g,
+        "-"
+      )
+      .slice(
+        0,
+        120
+      );
+
+  return (
+    cleaned ||
+    fallback ||
+    "file"
+  );
+}
+
+
+async function downloadClientFile(
+  url,
+  filename
+) {
+  const response =
+    await fetch(url);
+
+  if (!response.ok) {
+    throw new Error(
+      "Could not download file."
+    );
+  }
+
+  const blob =
+    await response.blob();
+
+  const objectUrl =
+    URL.createObjectURL(
+      blob
+    );
+
+  const link =
+    document.createElement(
+      "a"
+    );
+
+  link.href =
+    objectUrl;
+
+  link.download =
+    safeDownloadName(
+      filename,
+      "client-file"
+    );
+
+  document.body
+    .appendChild(
+      link
+    );
+
+  link.click();
+
+  link.remove();
+
+  setTimeout(
+    () => {
+      URL.revokeObjectURL(
+        objectUrl
+      );
+    },
+    1000
+  );
+}
+
+
+function clientFileCard(
+  item,
+  label,
+  slot,
+  index = null
+) {
+  if (
+    !item ||
+    !item.url
+  ) {
+    return `
+      <div class="client-content-file">
+
+        <div
+          class="client-content-file-meta"
+        >
+          <strong>
+            ${escapeHtml(label)}
+          </strong>
+
+          <span
+            class="client-content-empty"
+          >
+            No file supplied
+          </span>
+
+          <label
+            class="client-content-upload"
+          >
+            Upload
+
+            <input
+              type="file"
+              data-admin-upload="${escapeAttr(slot)}"
+              accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+              hidden
+            >
+          </label>
+        </div>
+
+      </div>
+    `;
+  }
+
+  return `
+    <div class="client-content-file">
+
+      <a
+        href="${escapeAttr(item.url)}"
+        target="_blank"
+        rel="noopener"
+      >
+        <img
+          src="${escapeAttr(item.url)}"
+          alt="${escapeAttr(label)}"
+        >
+      </a>
+
+      <div
+        class="client-content-file-meta"
+      >
+
+        <strong>
+          ${escapeHtml(
+            item.name ||
+            label
+          )}
+        </strong>
+
+        <div
+          class="client-content-file-actions"
+        >
+
+          <a
+            class="secondary-button"
+            href="${escapeAttr(item.url)}"
+            target="_blank"
+            rel="noopener"
+          >
+            Preview ↗
+          </a>
+
+          <button
+            class="secondary-button"
+            type="button"
+            data-client-download="${escapeAttr(
+              item.url
+            )}"
+            data-client-filename="${escapeAttr(
+              item.name ||
+              label
+            )}"
+          >
+            Download
+          </button>
+
+          ${
+            slot !==
+            "gallery"
+              ? `
+                <label
+                  class="client-content-upload"
+                >
+                  Replace
+
+                  <input
+                    type="file"
+                    data-admin-upload="${escapeAttr(slot)}"
+                    accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                    hidden
+                  >
+                </label>
+              `
+              : ""
+          }
+
+        </div>
+
+      </div>
+
+    </div>
+  `;
+}
+
+
+function renderClientContent(
+  lead,
+  data
+) {
+  const body =
+    document.getElementById(
+      "client-content-body"
+    );
+
+  const status =
+    document.getElementById(
+      "client-content-status"
+    );
+
+  if (
+    !body ||
+    !status
+  ) {
+    return;
+  }
+
+  const content =
+    data.content || {};
+
+  const files =
+    data.files || {};
+
+  const services =
+    Array.isArray(
+      content.services
+    )
+      ? content.services.filter(
+          item =>
+            item?.name ||
+            item?.description
+        )
+      : [];
+
+  const reviews =
+    Array.isArray(
+      content.reviews
+    )
+      ? content.reviews.filter(
+          item =>
+            item?.name ||
+            item?.text
+        )
+      : [];
+
+  const gallery =
+    Array.isArray(
+      files.gallery
+    )
+      ? files.gallery
+      : [];
+
+  const percentage =
+    clientContentProgress(
+      data
+    );
+
+  const submitted =
+    data.submitted_at
+      ? new Date(
+          data.submitted_at
+        ).toLocaleString(
+          "en-GB"
+        )
+      : null;
+
+  status.textContent =
+    `${percentage}% complete` +
+    (
+      submitted
+        ? ` • Submitted ${submitted}`
+        : " • Not submitted yet"
+    );
+
+  body.innerHTML = `
+    <section
+      class="client-content-section"
+    >
+      <h4>Business details</h4>
+
+      <div class="client-content-text">
+        <strong>
+          ${escapeHtml(
+            content.business_name ||
+            "Not supplied"
+          )}
+        </strong>
+      </div>
+    </section>
+
+
+    <section
+      class="client-content-section"
+    >
+      <h4>Hero</h4>
+
+      <div class="client-content-text">
+        <strong>Headline</strong>
+        <br>
+        ${
+          escapeHtml(
+            content.hero_title ||
+            "Not supplied"
+          )
+        }
+
+        <br><br>
+
+        <strong>Introduction</strong>
+        <br>
+        ${
+          escapeHtml(
+            content.hero_text ||
+            "Not supplied"
+          )
+        }
+      </div>
+    </section>
+
+
+    <section
+      class="client-content-section"
+    >
+      <h4>About</h4>
+
+      <div class="client-content-text">
+        ${
+          escapeHtml(
+            content.about_text ||
+            "Not supplied"
+          )
+        }
+      </div>
+    </section>
+
+
+    <section
+      class="client-content-section"
+    >
+      <h4>
+        Services (${services.length})
+      </h4>
+
+      ${
+        services.length
+          ? `
+            <ul
+              class="client-content-list"
+            >
+              ${
+                services
+                  .map(
+                    item => `
+                      <li>
+                        <strong>
+                          ${escapeHtml(
+                            item.name ||
+                            "Service"
+                          )}
+                        </strong>
+
+                        ${
+                          item.description
+                            ? `
+                              <br>
+                              ${escapeHtml(
+                                item.description
+                              )}
+                            `
+                            : ""
+                        }
+                      </li>
+                    `
+                  )
+                  .join("")
+              }
+            </ul>
+          `
+          : `
+            <span
+              class="client-content-empty"
+            >
+              No services supplied
+            </span>
+          `
+      }
+    </section>
+
+
+    <section
+      class="client-content-section"
+    >
+      <h4>
+        Reviews (${reviews.length})
+      </h4>
+
+      ${
+        reviews.length
+          ? `
+            <ul
+              class="client-content-list"
+            >
+              ${
+                reviews
+                  .map(
+                    item => `
+                      <li>
+                        <strong>
+                          ${escapeHtml(
+                            item.name ||
+                            "Customer"
+                          )}
+                        </strong>
+
+                        ${
+                          item.text
+                            ? `
+                              <br>
+                              ${escapeHtml(
+                                item.text
+                              )}
+                            `
+                            : ""
+                        }
+                      </li>
+                    `
+                  )
+                  .join("")
+              }
+            </ul>
+          `
+          : `
+            <span
+              class="client-content-empty"
+            >
+              No reviews supplied
+            </span>
+          `
+      }
+    </section>
+
+
+    <section
+      class="client-content-section"
+    >
+      <h4>Contact details</h4>
+
+      <div class="client-content-text">
+        Email:
+        ${
+          escapeHtml(
+            content.contact?.email ||
+            "—"
+          )
+        }
+
+        <br>
+
+        Phone / WhatsApp:
+        ${
+          escapeHtml(
+            content.contact?.phone ||
+            "—"
+          )
+        }
+
+        <br>
+
+        Area:
+        ${
+          escapeHtml(
+            content.contact?.area ||
+            "—"
+          )
+        }
+
+        <br>
+
+        Opening hours:
+        ${
+          escapeHtml(
+            content.contact?.hours ||
+            "—"
+          )
+        }
+      </div>
+    </section>
+
+
+    <section
+      class="client-content-section"
+    >
+      <h4>Online profiles</h4>
+
+      <div class="client-content-text">
+        Website:
+        ${
+          escapeHtml(
+            content.socials?.website ||
+            "—"
+          )
+        }
+
+        <br>
+
+        Facebook:
+        ${
+          escapeHtml(
+            content.socials?.facebook ||
+            "—"
+          )
+        }
+
+        <br>
+
+        Instagram:
+        ${
+          escapeHtml(
+            content.socials?.instagram ||
+            "—"
+          )
+        }
+      </div>
+    </section>
+
+
+    <section
+      class="client-content-section"
+    >
+      <h4>Logo</h4>
+
+      <div class="client-content-files">
+        ${
+          clientFileCard(
+            files.logo,
+            "Logo",
+            "logo"
+          )
+        }
+      </div>
+    </section>
+
+
+    <section
+      class="client-content-section"
+    >
+      <h4>Hero image</h4>
+
+      <div class="client-content-files">
+        ${
+          clientFileCard(
+            files.hero,
+            "Hero image",
+            "hero"
+          )
+        }
+      </div>
+    </section>
+
+
+    <section
+      class="client-content-section"
+    >
+      <h4>About image</h4>
+
+      <div class="client-content-files">
+        ${
+          clientFileCard(
+            files.about,
+            "About image",
+            "about"
+          )
+        }
+      </div>
+    </section>
+
+
+    <section
+      class="client-content-section"
+    >
+      <h4>
+        Website photos (${gallery.length})
+      </h4>
+
+      <div class="client-content-files">
+
+        ${
+          gallery
+            .map(
+              (item, index) =>
+                clientFileCard(
+                  item,
+                  `Website photo ${index + 1}`,
+                  "gallery",
+                  index
+                )
+            )
+            .join("")
+        }
+
+        ${
+          gallery.length < 6
+            ? `
+              <div
+                class="client-content-file"
+              >
+                <div
+                  class="client-content-file-meta"
+                >
+                  <strong>
+                    Add website photo
+                  </strong>
+
+                  <label
+                    class="client-content-upload"
+                  >
+                    Upload
+
+                    <input
+                      type="file"
+                      data-admin-upload="gallery"
+                      accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                      hidden
+                    >
+                  </label>
+                </div>
+              </div>
+            `
+            : ""
+        }
+
+      </div>
+    </section>
+  `;
+
+
+  body
+    .querySelectorAll(
+      "[data-client-download]"
+    )
+    .forEach(
+      button => {
+        button.addEventListener(
+          "click",
+          async () => {
+
+            button.disabled =
+              true;
+
+            try {
+              await downloadClientFile(
+                button.dataset
+                  .clientDownload,
+
+                button.dataset
+                  .clientFilename
+              );
+
+            } catch (error) {
+              dashboardStatus
+                .textContent =
+                  error?.message ||
+                  "Download failed.";
+
+            } finally {
+              button.disabled =
+                false;
+            }
+          }
+        );
+      }
+    );
+
+
+  body
+    .querySelectorAll(
+      "[data-admin-upload]"
+    )
+    .forEach(
+      input => {
+        input.addEventListener(
+          "change",
+          async () => {
+
+            const file =
+              input.files?.[0];
+
+            if (!file) {
+              return;
+            }
+
+            const slot =
+              input.dataset
+                .adminUpload;
+
+            dashboardStatus
+              .textContent =
+                `Uploading ${file.name}…`;
+
+            try {
+              await uploadClientContentFile(
+                lead.content_token,
+                slot,
+                file
+              );
+
+              dashboardStatus
+                .textContent =
+                  "Client content updated.";
+
+              await loadClientContent(
+                lead
+              );
+
+            } catch (error) {
+              dashboardStatus
+                .textContent =
+                  error?.message ||
+                  "Upload failed.";
+            }
+          }
+        );
+      }
+    );
+
+
+  const copyButton =
+    document.getElementById(
+      "copy-all-client-text"
+    );
+
+  if (copyButton) {
+    copyButton.onclick =
+      async () => {
+        await navigator
+          .clipboard
+          .writeText(
+            clientContentText(
+              data
+            )
+          );
+
+        copyButton.textContent =
+          "Copied ✓";
+
+        setTimeout(
+          () => {
+            copyButton.textContent =
+              "Copy all text";
+          },
+          1400
+        );
+      };
+  }
+
+
+  const refreshButton =
+    document.getElementById(
+      "refresh-client-content"
+    );
+
+  if (refreshButton) {
+    refreshButton.onclick =
+      () =>
+        loadClientContent(
+          lead
+        );
+  }
+
+
+  const downloadAllButton =
+    document.getElementById(
+      "download-all-client-content"
+    );
+
+  if (downloadAllButton) {
+    downloadAllButton.onclick =
+      async () => {
+
+        if (
+          typeof JSZip ===
+          "undefined"
+        ) {
+          dashboardStatus.textContent =
+            "ZIP library did not load.";
+
+          return;
+        }
+
+        downloadAllButton.disabled =
+          true;
+
+        downloadAllButton
+          .textContent =
+            "Preparing ZIP…";
+
+        try {
+          const zip =
+            new JSZip();
+
+          zip.file(
+            "content.txt",
+            clientContentText(
+              data
+            )
+          );
+
+          zip.file(
+            "content.json",
+            JSON.stringify(
+              {
+                package:
+                  data.package,
+
+                client_name:
+                  data.client_name,
+
+                business:
+                  data.business,
+
+                submitted_at:
+                  data.submitted_at,
+
+                content:
+                  data.content
+              },
+              null,
+              2
+            )
+          );
+
+          const jobs = [];
+
+
+          const addZipFile =
+            (
+              folderName,
+              item,
+              fallback
+            ) => {
+
+              if (
+                !item?.url
+              ) {
+                return;
+              }
+
+              jobs.push(
+                (
+                  async () => {
+
+                    const response =
+                      await fetch(
+                        item.url
+                      );
+
+                    if (
+                      !response.ok
+                    ) {
+                      throw new Error(
+                        `Could not download ${fallback}.`
+                      );
+                    }
+
+                    const blob =
+                      await response.blob();
+
+                    zip
+                      .folder(
+                        folderName
+                      )
+                      .file(
+                        safeDownloadName(
+                          item.name,
+                          fallback
+                        ),
+                        blob
+                      );
+                  }
+                )()
+              );
+            };
+
+
+          addZipFile(
+            "logo",
+            files.logo,
+            "logo"
+          );
+
+          addZipFile(
+            "hero",
+            files.hero,
+            "hero-image"
+          );
+
+          addZipFile(
+            "about",
+            files.about,
+            "about-image"
+          );
+
+          gallery.forEach(
+            (item, index) => {
+              addZipFile(
+                "website-photos",
+                item,
+                `photo-${String(
+                  index + 1
+                ).padStart(
+                  2,
+                  "0"
+                )}`
+              );
+            }
+          );
+
+
+          await Promise.all(
+            jobs
+          );
+
+
+          const blob =
+            await zip.generateAsync(
+              {
+                type: "blob",
+
+                compression:
+                  "STORE"
+              }
+            );
+
+
+          const url =
+            URL.createObjectURL(
+              blob
+            );
+
+          const link =
+            document.createElement(
+              "a"
+            );
+
+          const projectName =
+            safeDownloadName(
+              content.business_name ||
+              lead.business ||
+              "client",
+              "client"
+            );
+
+          link.href =
+            url;
+
+          link.download =
+            `${projectName}-content.zip`;
+
+          document.body
+            .appendChild(
+              link
+            );
+
+          link.click();
+
+          link.remove();
+
+
+          setTimeout(
+            () => {
+              URL.revokeObjectURL(
+                url
+              );
+            },
+            1500
+          );
+
+
+          dashboardStatus
+            .textContent =
+              "Client content downloaded.";
+
+        } catch (error) {
+          dashboardStatus
+            .textContent =
+              error?.message ||
+              "Could not create ZIP.";
+
+        } finally {
+          downloadAllButton.disabled =
+            false;
+
+          downloadAllButton
+            .textContent =
+              "Download all";
+        }
+      };
+  }
+}
+
+
+async function loadClientContent(
+  lead
+) {
+  const body =
+    document.getElementById(
+      "client-content-body"
+    );
+
+  const status =
+    document.getElementById(
+      "client-content-status"
+    );
+
+  if (
+    !body ||
+    !status ||
+    !lead?.content_token
+  ) {
+    return;
+  }
+
+  status.textContent =
+    "Loading client content…";
+
+  try {
+    const data =
+      await callClientContentApi({
+        action:
+          "load",
+
+        token:
+          lead.content_token
+      });
+
+    renderClientContent(
+      lead,
+      data
+    );
+
+  } catch (error) {
+    status.textContent =
+      "Could not load client content.";
+
+    body.innerHTML = `
+      <p class="conversation-empty">
+        ${
+          escapeHtml(
+            error?.message ||
+            "Unknown error."
+          )
+        }
+      </p>
+    `;
   }
 }
 
