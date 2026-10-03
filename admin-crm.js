@@ -1704,25 +1704,41 @@ function renderSelectedLead() {
       lead.current_site
     );
 
-  const isStarterPackage =
+  const packageKey =
     String(
       lead.package || ""
     )
       .trim()
-      .toLowerCase()
-      .startsWith(
-        "starter"
-      );
+      .toLowerCase();
+
+  const isStarterPackage =
+    packageKey.startsWith(
+      "starter"
+    );
+
+  const isBusinessPackage =
+    packageKey.startsWith(
+      "business"
+    );
+
+  const hasContentPortal =
+    isStarterPackage ||
+    isBusinessPackage;
 
   const contentToken =
     String(
       lead.content_token || ""
     ).trim();
 
+  const contentPortalFile =
+    isBusinessPackage
+      ? "content-business.html"
+      : "content-starter.html";
+
   const contentPortalUrl =
-    isStarterPackage &&
+    hasContentPortal &&
     contentToken
-      ? `https://gdstudio360.co.uk/content-starter.html?token=${encodeURIComponent(
+      ? `https://gdstudio360.co.uk/${contentPortalFile}?token=${encodeURIComponent(
           contentToken
         )}`
       : "";
@@ -2034,7 +2050,7 @@ function renderSelectedLead() {
 
 
         ${
-          isStarterPackage
+          hasContentPortal
             ? `
               <section
                 class="detail-card full client-content-card"
@@ -2913,20 +2929,39 @@ async function saveProject(
 
 
 
-function clientContentApiUrl() {
+function clientContentApiUrl(
+  packageName = ""
+) {
+  const key =
+    String(
+      packageName || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  const functionName =
+    key.startsWith(
+      "business"
+    )
+      ? "business-content-portal"
+      : "content-portal";
+
   return (
     `${window.GD_CONFIG.SUPABASE_URL}` +
-    `/functions/v1/content-portal`
+    `/functions/v1/${functionName}`
   );
 }
 
 
 async function callClientContentApi(
-  body
+  body,
+  packageName = ""
 ) {
   const response =
     await fetch(
-      clientContentApiUrl(),
+      clientContentApiUrl(
+        packageName
+      ),
       {
         method: "POST",
 
@@ -2964,7 +2999,8 @@ async function callClientContentApi(
 async function uploadClientContentFile(
   token,
   slot,
-  file
+  file,
+  packageName = ""
 ) {
   const body =
     new FormData();
@@ -2991,7 +3027,9 @@ async function uploadClientContentFile(
 
   const response =
     await fetch(
-      clientContentApiUrl(),
+      clientContentApiUrl(
+        packageName
+      ),
       {
         method: "POST",
 
@@ -3031,6 +3069,16 @@ function clientContentProgress(
   const files =
     data?.files || {};
 
+  const isBusiness =
+    String(
+      data?.package || ""
+    )
+      .trim()
+      .toLowerCase()
+      .startsWith(
+        "business"
+      );
+
   const services =
     Array.isArray(
       content.services
@@ -3046,6 +3094,21 @@ function clientContentProgress(
         ).trim() &&
         String(
           item?.description || ""
+        ).trim()
+    ).length;
+
+  const pages =
+    Array.isArray(
+      content.pages
+    )
+      ? content.pages
+      : [];
+
+  const completePages =
+    pages.filter(
+      item =>
+        String(
+          item?.name || ""
         ).trim()
     ).length;
 
@@ -3093,8 +3156,16 @@ function clientContentProgress(
       ).trim()
     ),
 
-    completeServices >= 1,
+    completeServices >= 1
+  ];
 
+  if (isBusiness) {
+    checks.push(
+      completePages >= 1
+    );
+  }
+
+  checks.push(
     gallery.length >= 3,
 
     Boolean(
@@ -3110,7 +3181,18 @@ function clientContentProgress(
         ""
       ).trim()
     )
-  ];
+  );
+
+  if (isBusiness) {
+    checks.push(
+      Boolean(
+        String(
+          content.domain?.status ||
+          ""
+        ).trim()
+      )
+    );
+  }
 
   return Math.round(
     (
@@ -3127,6 +3209,16 @@ function clientContentText(
 ) {
   const c =
     data?.content || {};
+
+  const isBusiness =
+    String(
+      data?.package || ""
+    )
+      .trim()
+      .toLowerCase()
+      .startsWith(
+        "business"
+      );
 
   const services =
     Array.isArray(c.services)
@@ -3146,9 +3238,39 @@ function clientContentText(
         )
       : [];
 
+  const pages =
+    Array.isArray(c.pages)
+      ? c.pages.filter(
+          item =>
+            item?.name ||
+            item?.notes
+        )
+      : [];
+
+  const areas =
+    Array.isArray(
+      c.service_areas
+    )
+      ? c.service_areas.filter(
+          item =>
+            item?.name ||
+            item?.notes
+        )
+      : [];
+
+  const faqs =
+    Array.isArray(c.faqs)
+      ? c.faqs.filter(
+          item =>
+            item?.question ||
+            item?.answer
+        )
+      : [];
+
   const lines = [
     "GD STUDIO 360 — CLIENT CONTENT",
     "",
+    `Package: ${data?.package || ""}`,
     `Business: ${c.business_name || ""}`,
     "",
     "HERO",
@@ -3170,6 +3292,67 @@ function clientContentText(
       );
     }
   );
+
+  if (isBusiness) {
+    lines.push(
+      "",
+      "WEBSITE PAGES"
+    );
+
+    pages.forEach(
+      (item, index) => {
+        lines.push(
+          "",
+          `${index + 1}. ${item.name || ""}`,
+          item.notes || ""
+        );
+      }
+    );
+
+    lines.push(
+      "",
+      "SERVICE AREAS"
+    );
+
+    areas.forEach(
+      (item, index) => {
+        lines.push(
+          "",
+          `${index + 1}. ${item.name || ""}`,
+          item.notes || ""
+        );
+      }
+    );
+
+    lines.push(
+      "",
+      "FAQ"
+    );
+
+    faqs.forEach(
+      (item, index) => {
+        lines.push(
+          "",
+          `${index + 1}. ${item.question || ""}`,
+          item.answer || ""
+        );
+      }
+    );
+
+    lines.push(
+      "",
+      "BRANDING",
+      `Primary colour: ${c.branding?.primary_color || ""}`,
+      `Secondary colour: ${c.branding?.secondary_color || ""}`,
+      `Style notes: ${c.branding?.style_notes || ""}`,
+      "",
+      "DOMAIN",
+      `Status: ${c.domain?.status || ""}`,
+      `Domain: ${c.domain?.name || ""}`,
+      `Registrar: ${c.domain?.registrar || ""}`,
+      `Notes: ${c.domain?.notes || ""}`
+    );
+  }
 
   lines.push(
     "",
@@ -3471,12 +3654,62 @@ function renderClientContent(
         )
       : [];
 
+  const isBusinessContent =
+    String(
+      data?.package ||
+      lead?.package ||
+      ""
+    )
+      .trim()
+      .toLowerCase()
+      .startsWith(
+        "business"
+      );
+
+  const pages =
+    Array.isArray(
+      content.pages
+    )
+      ? content.pages.filter(
+          item =>
+            item?.name ||
+            item?.notes
+        )
+      : [];
+
+  const serviceAreas =
+    Array.isArray(
+      content.service_areas
+    )
+      ? content.service_areas.filter(
+          item =>
+            item?.name ||
+            item?.notes
+        )
+      : [];
+
+  const faqs =
+    Array.isArray(
+      content.faqs
+    )
+      ? content.faqs.filter(
+          item =>
+            item?.question ||
+            item?.answer
+        )
+      : [];
+
   const gallery =
     Array.isArray(
       files.gallery
     )
       ? files.gallery
       : [];
+
+  const galleryLimit =
+    isBusinessContent
+      ? 12
+      : 6;
 
   const percentage =
     clientContentProgress(
@@ -3613,6 +3846,223 @@ function renderClientContent(
           `
       }
     </section>
+
+
+    ${
+      isBusinessContent
+        ? `
+          <section
+            class="client-content-section"
+          >
+            <h4>
+              Website pages (${pages.length})
+            </h4>
+
+            ${
+              pages.length
+                ? `
+                  <ul class="client-content-list">
+                    ${
+                      pages.map(
+                        item => `
+                          <li>
+                            <strong>
+                              ${escapeHtml(
+                                item.name ||
+                                "Page"
+                              )}
+                            </strong>
+
+                            ${
+                              item.notes
+                                ? `
+                                  <br>
+                                  ${escapeHtml(
+                                    item.notes
+                                  )}
+                                `
+                                : ""
+                            }
+                          </li>
+                        `
+                      ).join("")
+                    }
+                  </ul>
+                `
+                : `
+                  <span class="client-content-empty">
+                    No pages supplied
+                  </span>
+                `
+            }
+          </section>
+
+
+          <section
+            class="client-content-section"
+          >
+            <h4>
+              Service areas (${serviceAreas.length})
+            </h4>
+
+            ${
+              serviceAreas.length
+                ? `
+                  <ul class="client-content-list">
+                    ${
+                      serviceAreas.map(
+                        item => `
+                          <li>
+                            <strong>
+                              ${escapeHtml(
+                                item.name ||
+                                "Area"
+                              )}
+                            </strong>
+
+                            ${
+                              item.notes
+                                ? `
+                                  <br>
+                                  ${escapeHtml(
+                                    item.notes
+                                  )}
+                                `
+                                : ""
+                            }
+                          </li>
+                        `
+                      ).join("")
+                    }
+                  </ul>
+                `
+                : `
+                  <span class="client-content-empty">
+                    No service areas supplied
+                  </span>
+                `
+            }
+          </section>
+
+
+          <section
+            class="client-content-section"
+          >
+            <h4>
+              FAQ (${faqs.length})
+            </h4>
+
+            ${
+              faqs.length
+                ? `
+                  <ul class="client-content-list">
+                    ${
+                      faqs.map(
+                        item => `
+                          <li>
+                            <strong>
+                              ${escapeHtml(
+                                item.question ||
+                                "Question"
+                              )}
+                            </strong>
+
+                            ${
+                              item.answer
+                                ? `
+                                  <br>
+                                  ${escapeHtml(
+                                    item.answer
+                                  )}
+                                `
+                                : ""
+                            }
+                          </li>
+                        `
+                      ).join("")
+                    }
+                  </ul>
+                `
+                : `
+                  <span class="client-content-empty">
+                    No FAQs supplied
+                  </span>
+                `
+            }
+          </section>
+
+
+          <section
+            class="client-content-section"
+          >
+            <h4>Branding</h4>
+
+            <div class="client-content-text">
+              Primary colour:
+              ${escapeHtml(
+                content.branding?.primary_color ||
+                "—"
+              )}
+
+              <br>
+
+              Secondary colour:
+              ${escapeHtml(
+                content.branding?.secondary_color ||
+                "—"
+              )}
+
+              <br>
+
+              Style notes:
+              ${escapeHtml(
+                content.branding?.style_notes ||
+                "—"
+              )}
+            </div>
+          </section>
+
+
+          <section
+            class="client-content-section"
+          >
+            <h4>Domain</h4>
+
+            <div class="client-content-text">
+              Status:
+              ${escapeHtml(
+                content.domain?.status ||
+                "—"
+              )}
+
+              <br>
+
+              Domain:
+              ${escapeHtml(
+                content.domain?.name ||
+                "—"
+              )}
+
+              <br>
+
+              Registrar:
+              ${escapeHtml(
+                content.domain?.registrar ||
+                "—"
+              )}
+
+              <br>
+
+              Notes:
+              ${escapeHtml(
+                content.domain?.notes ||
+                "—"
+              )}
+            </div>
+          </section>
+        `
+        : ""
+    }
 
 
     <section
@@ -3827,7 +4277,7 @@ function renderClientContent(
         }
 
         ${
-          gallery.length < 6
+          gallery.length < galleryLimit
             ? `
               <div
                 class="client-content-file"
@@ -3929,7 +4379,8 @@ function renderClientContent(
               await uploadClientContentFile(
                 lead.content_token,
                 slot,
-                file
+                file,
+                lead.package
               );
 
               dashboardStatus
@@ -4253,13 +4704,16 @@ async function loadClientContent(
 
   try {
     const data =
-      await callClientContentApi({
-        action:
-          "load",
+      await callClientContentApi(
+        {
+          action:
+            "load",
 
-        token:
-          lead.content_token
-      });
+          token:
+            lead.content_token
+        },
+        lead.package
+      );
 
     renderClientContent(
       lead,
@@ -4316,22 +4770,33 @@ function bindProjectControls(
       "click",
       async (event) => {
 
-        if (
-          !lead.content_token ||
-          !String(
+        const packageKey =
+          String(
             lead.package || ""
           )
             .trim()
-            .toLowerCase()
-            .startsWith(
-              "starter"
-            )
+            .toLowerCase();
+
+        const portalFile =
+          packageKey.startsWith(
+            "business"
+          )
+            ? "content-business.html"
+            : packageKey.startsWith(
+                "starter"
+              )
+              ? "content-starter.html"
+              : "";
+
+        if (
+          !lead.content_token ||
+          !portalFile
         ) {
           return;
         }
 
         const url =
-          `https://gdstudio360.co.uk/content-starter.html?token=${encodeURIComponent(
+          `https://gdstudio360.co.uk/${portalFile}?token=${encodeURIComponent(
             lead.content_token
           )}`;
 

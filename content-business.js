@@ -1961,10 +1961,7 @@ async function loadPortal(
     options.quiet === true;
 
   if (demoMode) {
-    fillForm({
-      business_name:
-        "Your Business"
-    });
+    fillForm({});
 
     showMessage(
       "Preview mode — this is how the Business Content Portal will look to a client."
