@@ -97,7 +97,7 @@ Includes everything in Starter plus:
 - service and location content
 - FAQ section
 - custom branding and colours
-- domain setup support
+- multi-page navigation setup
 - 2 revision rounds
 
 Typical Business fit:
@@ -114,7 +114,7 @@ Includes everything in Business plus:
 - stronger SEO structure
 - advanced enquiry flow
 - 3 revision rounds
-- priority build queue
+- expanded service-page planning
 
 Typical Pro fit:
 A business with several important services that deserve individual pages, a larger website structure or a more advanced enquiry flow.
@@ -123,6 +123,7 @@ A business with several important services that deserve individual pages, a larg
 WEBSITE CARE
 
 Website Care is optional and currently available for websites built by GD Studio 360.
+Care is activated separately after launch. Monthly billing is arranged when the website goes live.
 
 Starter Care — £29/month:
 - routine health checks
@@ -159,7 +160,8 @@ IMPORTANT COMMERCIAL RULES
 - Never promise a completion date unless a human has confirmed one.
 - Domain registration, paid third-party services and work outside the agreed package may cost extra.
 - Website Care is optional.
-- Payments are handled through the secure SumUp payment flow after project approval.
+- Standard projects normally require a 50% deposit after project approval.
+- The remaining balance is requested through SumUp after the approved website has been launched.
 - Never ask for payment card numbers, CVV, online banking details or passwords.
 
 

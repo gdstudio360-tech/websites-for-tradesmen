@@ -318,18 +318,15 @@ Deno.serve(async (req) => {
       resendKey &&
       emailFrom
     ) {
-      const preview =
-        lead.preview_url
-          ? `
-            <p>
-              You can review your website here:
-              <br>
-              <a href="${escapeHtml(lead.preview_url)}">
-                Open website preview
-              </a>
-            </p>
-          `
-          : "";
+      const liveWebsite = `
+        <p>
+          Your website is live here:
+          <br>
+          <a href="${escapeHtml(lead.live_url)}">
+            Open live website
+          </a>
+        </p>
+      `;
 
       const conversationId =
         await ensureLeadConversation(
@@ -371,7 +368,7 @@ Deno.serve(async (req) => {
                     The remaining project balance is now due.
                   </p>
 
-                  ${preview}
+                  ${liveWebsite}
 
                   <p>
                     <strong>Project total:</strong>
@@ -432,11 +429,9 @@ Deno.serve(async (req) => {
           `Payment link: ${paymentUrl}`,
         ];
 
-        if (lead.preview_url) {
-          communicationLines.push(
-            `Preview: ${lead.preview_url}`,
-          );
-        }
+        communicationLines.push(
+          `Live website: ${lead.live_url}`,
+        );
 
         await logClientSystemMessage(
           serviceClient,
