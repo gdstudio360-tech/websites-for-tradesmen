@@ -1851,3 +1851,569 @@ html[data-theme="dark"]
 }
 
 /* INDEPENDENT PACKAGE SCROLL V21 END */
+
+
+/* =========================================================
+   CRM CLIENT ARCHIVES V1
+========================================================= */
+
+/* Completed + Rejected now live in archive buttons,
+   not in the main top navigation. */
+
+.crm-tab[data-view="completed"],
+.crm-tab[data-view="rejected"]{
+  display:none;
+}
+
+
+.crm-archive-actions{
+  display:grid;
+  gap:10px;
+  margin-top:16px;
+}
+
+
+.crm-archive-button{
+  width:100%;
+  min-height:54px;
+
+  display:grid;
+  grid-template-columns:
+    auto minmax(0,1fr) auto auto;
+
+  align-items:center;
+  gap:10px;
+
+  padding:11px 13px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius:
+    14px;
+
+  background:
+    #fff;
+
+  color:
+    var(--ink);
+
+  text-align:left;
+
+  box-shadow:
+    0 8px 24px
+    rgba(8,17,31,.045);
+
+  cursor:pointer;
+
+  transition:
+    transform .15s ease,
+    border-color .15s ease,
+    box-shadow .15s ease;
+}
+
+
+.crm-archive-button:hover{
+  transform:
+    translateY(-1px);
+
+  border-color:
+    #b9c4d0;
+
+  box-shadow:
+    0 12px 30px
+    rgba(8,17,31,.075);
+}
+
+
+.crm-archive-button.completed{
+  box-shadow:
+    inset 4px 0 0
+    #4acb91,
+    0 8px 24px
+    rgba(8,17,31,.045);
+}
+
+
+.crm-archive-button.rejected{
+  box-shadow:
+    inset 4px 0 0
+    #ef6b67,
+    0 8px 24px
+    rgba(8,17,31,.045);
+}
+
+
+.crm-archive-icon{
+  width:26px;
+  height:26px;
+
+  display:grid;
+  place-items:center;
+
+  border-radius:
+    8px;
+
+  background:
+    var(--soft);
+
+  font-size:
+    .78rem;
+
+  font-weight:
+    950;
+}
+
+
+.crm-archive-label{
+  min-width:0;
+
+  font-size:
+    .78rem;
+
+  font-weight:
+    900;
+}
+
+
+.crm-archive-count{
+  min-width:28px;
+
+  padding:
+    4px 7px;
+
+  border-radius:
+    999px;
+
+  background:
+    var(--soft);
+
+  color:
+    var(--muted);
+
+  font-size:
+    .67rem;
+
+  font-weight:
+    950;
+
+  text-align:
+    center;
+}
+
+
+.crm-archive-arrow{
+  color:
+    var(--muted);
+
+  font-size:
+    1.35rem;
+
+  line-height:
+    1;
+}
+
+
+body.archive-modal-open{
+  overflow:hidden;
+}
+
+
+.client-archive-modal{
+  position:fixed;
+  inset:0;
+
+  z-index:9999;
+
+  display:grid;
+  place-items:center;
+
+  padding:24px;
+}
+
+
+.client-archive-modal[hidden]{
+  display:none;
+}
+
+
+.client-archive-backdrop{
+  position:absolute;
+  inset:0;
+
+  border:0;
+
+  background:
+    rgba(3,8,15,.72);
+
+  backdrop-filter:
+    blur(6px);
+
+  cursor:pointer;
+}
+
+
+.client-archive-panel{
+  position:relative;
+
+  z-index:1;
+
+  width:
+    min(
+      720px,
+      100%
+    );
+
+  max-height:
+    min(
+      760px,
+      calc(100vh - 48px)
+    );
+
+  display:flex;
+  flex-direction:column;
+
+  overflow:hidden;
+
+  border:
+    1px solid var(--line);
+
+  border-radius:
+    20px;
+
+  background:
+    #fff;
+
+  box-shadow:
+    0 35px 100px
+    rgba(0,0,0,.3);
+}
+
+
+.client-archive-header{
+  flex:0 0 auto;
+
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:20px;
+
+  padding:
+    22px 22px 16px;
+
+  border-bottom:
+    1px solid var(--line);
+}
+
+
+.client-archive-header h2{
+  margin:
+    5px 0 3px;
+
+  font-size:
+    1.55rem;
+}
+
+
+.client-archive-header p{
+  margin:0;
+
+  color:
+    var(--muted);
+
+  font-size:
+    .78rem;
+}
+
+
+.client-archive-close{
+  width:42px;
+  height:42px;
+
+  display:grid;
+  place-items:center;
+
+  flex:0 0 auto;
+
+  padding:0;
+
+  border:
+    1px solid var(--line);
+
+  border-radius:
+    12px;
+
+  background:
+    var(--soft);
+
+  color:
+    var(--ink);
+
+  font-size:
+    1.55rem;
+
+  line-height:
+    1;
+
+  cursor:pointer;
+}
+
+
+.client-archive-search{
+  flex:0 0 auto;
+
+  display:grid;
+  gap:7px;
+
+  padding:
+    16px 22px;
+
+  border-bottom:
+    1px solid var(--line);
+
+  color:
+    var(--muted);
+
+  font-size:
+    .72rem;
+
+  font-weight:
+    850;
+}
+
+
+.client-archive-search input{
+  width:100%;
+}
+
+
+.client-archive-list{
+  min-height:120px;
+
+  overflow-y:auto;
+  overscroll-behavior:contain;
+
+  padding:
+    12px;
+
+  scrollbar-width:
+    thin;
+}
+
+
+.client-archive-list::-webkit-scrollbar{
+  width:8px;
+}
+
+
+.client-archive-list::-webkit-scrollbar-thumb{
+  border-radius:
+    999px;
+
+  background:
+    rgba(120,135,155,.42);
+}
+
+
+.client-archive-item{
+  width:100%;
+
+  display:grid;
+  gap:7px;
+
+  padding:
+    14px 15px;
+
+  border:
+    1px solid transparent;
+
+  border-bottom:
+    1px solid var(--line);
+
+  background:
+    transparent;
+
+  color:
+    var(--ink);
+
+  text-align:left;
+
+  cursor:pointer;
+}
+
+
+.client-archive-item:last-child{
+  border-bottom:0;
+}
+
+
+.client-archive-item:hover{
+  border-color:
+    var(--line);
+
+  border-radius:
+    12px;
+
+  background:
+    var(--soft);
+}
+
+
+.client-archive-item-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+
+
+.client-archive-business{
+  min-width:0;
+
+  overflow:hidden;
+
+  font-size:
+    .92rem;
+
+  font-weight:
+    950;
+
+  text-overflow:
+    ellipsis;
+
+  white-space:
+    nowrap;
+}
+
+
+.client-archive-status{
+  flex:0 0 auto;
+
+  padding:
+    4px 7px;
+
+  border-radius:
+    999px;
+
+  background:
+    var(--soft);
+
+  color:
+    var(--muted);
+
+  font-size:
+    .6rem;
+
+  font-weight:
+    950;
+
+  text-transform:
+    uppercase;
+}
+
+
+.client-archive-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:
+    5px 12px;
+
+  color:
+    var(--muted);
+
+  font-size:
+    .72rem;
+}
+
+
+.client-archive-empty{
+  min-height:180px;
+
+  display:grid;
+  place-content:center;
+
+  padding:24px;
+
+  color:
+    var(--muted);
+
+  text-align:center;
+}
+
+
+html[data-theme="dark"]
+.crm-archive-button,
+html[data-theme="dark"]
+.client-archive-panel{
+  background:
+    #111821;
+
+  border-color:
+    #273241;
+}
+
+
+html[data-theme="dark"]
+.crm-archive-button:hover,
+html[data-theme="dark"]
+.client-archive-item:hover{
+  background:
+    #151d27;
+
+  border-color:
+    #354354;
+}
+
+
+html[data-theme="dark"]
+.crm-archive-icon,
+html[data-theme="dark"]
+.crm-archive-count,
+html[data-theme="dark"]
+.client-archive-close,
+html[data-theme="dark"]
+.client-archive-status{
+  background:
+    #0c121a;
+}
+
+
+html[data-theme="dark"]
+.client-archive-header,
+html[data-theme="dark"]
+.client-archive-search,
+html[data-theme="dark"]
+.client-archive-item{
+  border-color:
+    #273241;
+}
+
+
+@media(max-width:760px){
+
+  .client-archive-modal{
+    padding:10px;
+  }
+
+  .client-archive-panel{
+    width:100%;
+    max-height:
+      calc(100vh - 20px);
+
+    border-radius:
+      16px;
+  }
+
+  .client-archive-header{
+    padding:
+      18px 16px 14px;
+  }
+
+  .client-archive-search{
+    padding:
+      14px 16px;
+  }
+
+}
+
+/* CRM CLIENT ARCHIVES V1 END */

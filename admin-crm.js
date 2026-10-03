@@ -88,6 +88,57 @@ const pendingBanner =
   );
 
 
+const completedArchiveButton =
+  document.getElementById(
+    "open-completed-clients"
+  );
+
+const rejectedArchiveButton =
+  document.getElementById(
+    "open-rejected-clients"
+  );
+
+const completedArchiveCount =
+  document.getElementById(
+    "archive-completed-count"
+  );
+
+const rejectedArchiveCount =
+  document.getElementById(
+    "archive-rejected-count"
+  );
+
+const archiveModal =
+  document.getElementById(
+    "client-archive-modal"
+  );
+
+const archiveTitle =
+  document.getElementById(
+    "client-archive-title"
+  );
+
+const archiveSummary =
+  document.getElementById(
+    "client-archive-summary"
+  );
+
+const archiveSearch =
+  document.getElementById(
+    "client-archive-search"
+  );
+
+const archiveList =
+  document.getElementById(
+    "client-archive-list"
+  );
+
+const archiveCloseButton =
+  document.getElementById(
+    "close-client-archive"
+  );
+
+
 const IN_PROGRESS_STATUSES = [
   "approved",
   "deposit_sent",
@@ -120,6 +171,8 @@ let leads = [];
 let activeView = "new";
 let selectedLeadId = null;
 let sumupTestMode = null;
+
+let archiveMode = null;
 
 let realtimeChannel = null;
 let pendingNewCount = 0;
@@ -917,7 +970,15 @@ function visibleLeads() {
          */
         const matchesView =
           query ||
-          activeView === "all" ||
+          (
+            activeView === "all" &&
+            ![
+              "completed",
+              "rejected"
+            ].includes(
+              category
+            )
+          ) ||
           category === activeView;
 
         if (!matchesView) {
@@ -1069,6 +1130,12 @@ async function loadLeads(
         );
 
       if (
+        ![
+          "completed",
+          "rejected"
+        ].includes(
+          nextView
+        ) &&
         nextView !==
         activeView
       ) {
@@ -1185,6 +1252,31 @@ function renderCounts() {
     )
     .textContent =
       counts.all;
+
+
+  if (
+    completedArchiveCount
+  ) {
+    completedArchiveCount
+      .textContent =
+        counts.completed;
+  }
+
+
+  if (
+    rejectedArchiveCount
+  ) {
+    rejectedArchiveCount
+      .textContent =
+        counts.rejected;
+  }
+
+
+  if (
+    archiveMode
+  ) {
+    renderArchiveList();
+  }
 }
 
 
@@ -1717,6 +1809,409 @@ function renderClientList() {
     );
   }
 }
+
+
+
+function archiveRows(
+  mode
+) {
+  const query =
+    String(
+      archiveSearch?.value ||
+      ""
+    )
+      .trim()
+      .toLowerCase();
+
+  let rows =
+    leads.filter(
+      lead =>
+        lead.status ===
+        mode
+    );
+
+  if (query) {
+    rows =
+      rows.filter(
+        lead => {
+          const haystack = [
+            lead.business,
+            lead.name,
+            lead.email,
+            lead.phone,
+            lead.package,
+            lead.trade,
+            lead.area
+          ]
+            .join(" ")
+            .toLowerCase();
+
+          return haystack
+            .includes(
+              query
+            );
+        }
+      );
+  }
+
+  return [...rows]
+    .sort(
+      (a,b) =>
+        new Date(
+          b.updated_at ||
+          b.created_at
+        ) -
+        new Date(
+          a.updated_at ||
+          a.created_at
+        )
+    );
+}
+
+
+function renderArchiveList() {
+  if (
+    !archiveMode ||
+    !archiveList
+  ) {
+    return;
+  }
+
+  const rows =
+    archiveRows(
+      archiveMode
+    );
+
+
+  if (archiveTitle) {
+    archiveTitle.textContent =
+      archiveMode ===
+        "completed"
+        ? "Completed clients"
+        : "Rejected clients";
+  }
+
+
+  if (archiveSummary) {
+    const allCount =
+      leads.filter(
+        lead =>
+          lead.status ===
+          archiveMode
+      ).length;
+
+    archiveSummary.textContent =
+      `${allCount} client${
+        allCount === 1
+          ? ""
+          : "s"
+      }`;
+  }
+
+
+  archiveList.innerHTML =
+    "";
+
+
+  if (!rows.length) {
+    archiveList.innerHTML = `
+      <div class="client-archive-empty">
+        ${
+          archiveSearch?.value
+            ?.trim()
+            ? "No matching clients."
+            : archiveMode ===
+                "completed"
+              ? "No completed clients yet."
+              : "No rejected clients yet."
+        }
+      </div>
+    `;
+
+    return;
+  }
+
+
+  for (
+    const lead of rows
+  ) {
+    const button =
+      document.createElement(
+        "button"
+      );
+
+    button.type =
+      "button";
+
+    button.className =
+      "client-archive-item";
+
+
+    const dateValue =
+      lead.updated_at ||
+      lead.created_at;
+
+    const date =
+      dateValue
+        ? new Date(
+            dateValue
+          )
+            .toLocaleDateString(
+              "en-GB"
+            )
+        : "";
+
+
+    button.innerHTML = `
+      <div class="client-archive-item-top">
+
+        <span class="client-archive-business">
+          ${
+            escapeHtml(
+              lead.business ||
+              "Unnamed business"
+            )
+          }
+        </span>
+
+        <span class="client-archive-status">
+          ${
+            escapeHtml(
+              prettyStatus(
+                lead.status
+              )
+            )
+          }
+        </span>
+
+      </div>
+
+      <div class="client-archive-meta">
+
+        <span>
+          ${
+            escapeHtml(
+              lead.name ||
+              "No name"
+            )
+          }
+        </span>
+
+        <span>
+          ${
+            escapeHtml(
+              lead.package ||
+              "No package"
+            )
+          }
+        </span>
+
+        <span>
+          ${escapeHtml(date)}
+        </span>
+
+      </div>
+
+      <div class="client-archive-meta">
+
+        ${
+          lead.email
+            ? `<span>${escapeHtml(lead.email)}</span>`
+            : ""
+        }
+
+        ${
+          lead.phone
+            ? `<span>${escapeHtml(lead.phone)}</span>`
+            : ""
+        }
+
+      </div>
+    `;
+
+
+    button.addEventListener(
+      "click",
+      () => {
+
+        const draft =
+          clientDetail
+            ?.querySelector(
+              "#reply-text"
+            );
+
+        if (
+          draft &&
+          draft.value.trim()
+        ) {
+          const leave =
+            confirm(
+              "You have an unsent reply. Switch client and discard it?"
+            );
+
+          if (!leave) {
+            return;
+          }
+        }
+
+
+        selectedLeadId =
+          lead.id;
+
+        closeClientArchive();
+
+        renderClientList();
+        renderSelectedLead();
+
+
+        if (
+          window.innerWidth <
+          760
+        ) {
+          clientDetail
+            ?.scrollIntoView({
+              behavior:
+                "smooth",
+              block:
+                "start"
+            });
+        }
+      }
+    );
+
+
+    archiveList
+      .appendChild(
+        button
+      );
+  }
+}
+
+
+function openClientArchive(
+  mode
+) {
+  if (
+    !archiveModal
+  ) {
+    return;
+  }
+
+  archiveMode =
+    mode;
+
+  if (
+    archiveSearch
+  ) {
+    archiveSearch.value =
+      "";
+  }
+
+  renderArchiveList();
+
+  archiveModal.hidden =
+    false;
+
+  document.body
+    .classList
+    .add(
+      "archive-modal-open"
+    );
+
+
+  setTimeout(
+    () =>
+      archiveSearch
+        ?.focus(),
+    50
+  );
+}
+
+
+function closeClientArchive() {
+  if (
+    !archiveModal
+  ) {
+    return;
+  }
+
+  archiveModal.hidden =
+    true;
+
+  archiveMode =
+    null;
+
+  document.body
+    .classList
+    .remove(
+      "archive-modal-open"
+    );
+}
+
+
+completedArchiveButton
+  ?.addEventListener(
+    "click",
+    () =>
+      openClientArchive(
+        "completed"
+      )
+  );
+
+
+rejectedArchiveButton
+  ?.addEventListener(
+    "click",
+    () =>
+      openClientArchive(
+        "rejected"
+      )
+  );
+
+
+archiveCloseButton
+  ?.addEventListener(
+    "click",
+    closeClientArchive
+  );
+
+
+document
+  .querySelectorAll(
+    "[data-archive-close]"
+  )
+  .forEach(
+    element => {
+      element
+        .addEventListener(
+          "click",
+          closeClientArchive
+        );
+    }
+  );
+
+
+archiveSearch
+  ?.addEventListener(
+    "input",
+    renderArchiveList
+  );
+
+
+document
+  .addEventListener(
+    "keydown",
+    event => {
+      if (
+        event.key ===
+          "Escape" &&
+        archiveModal &&
+        !archiveModal.hidden
+      ) {
+        closeClientArchive();
+      }
+    }
+  );
 
 
 function careOptionsHtml(

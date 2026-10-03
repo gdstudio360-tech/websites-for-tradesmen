@@ -22,7 +22,7 @@
 
   <link
     rel="stylesheet"
-    href="admin-crm.css?v=workflow-7-v1"
+    href="admin-crm.css?v=client-archives-v1"
   >
 </head>
 
@@ -283,7 +283,119 @@
     class="client-list"
   ></div>
 
+  <div class="crm-archive-actions">
+
+    <button
+      id="open-completed-clients"
+      class="crm-archive-button completed"
+      type="button"
+    >
+      <span class="crm-archive-icon">✓</span>
+
+      <span class="crm-archive-label">
+        Completed clients
+      </span>
+
+      <strong
+        id="archive-completed-count"
+        class="crm-archive-count"
+      >0</strong>
+
+      <span class="crm-archive-arrow">›</span>
+    </button>
+
+
+    <button
+      id="open-rejected-clients"
+      class="crm-archive-button rejected"
+      type="button"
+    >
+      <span class="crm-archive-icon">⛔</span>
+
+      <span class="crm-archive-label">
+        Rejected clients
+      </span>
+
+      <strong
+        id="archive-rejected-count"
+        class="crm-archive-count"
+      >0</strong>
+
+      <span class="crm-archive-arrow">›</span>
+    </button>
+
+  </div>
+
 </aside>
+
+
+<div
+  id="client-archive-modal"
+  class="client-archive-modal"
+  hidden
+>
+
+  <button
+    class="client-archive-backdrop"
+    data-archive-close
+    type="button"
+    aria-label="Close archive"
+  ></button>
+
+  <section
+    class="client-archive-panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="client-archive-title"
+  >
+
+    <div class="client-archive-header">
+
+      <div>
+        <span class="eyebrow">
+          CLIENT ARCHIVE
+        </span>
+
+        <h2 id="client-archive-title">
+          Completed clients
+        </h2>
+
+        <p id="client-archive-summary">
+          0 clients
+        </p>
+      </div>
+
+      <button
+        id="close-client-archive"
+        class="client-archive-close"
+        type="button"
+        aria-label="Close archive"
+      >
+        ×
+      </button>
+
+    </div>
+
+
+    <label class="client-archive-search">
+      Search clients
+
+      <input
+        id="client-archive-search"
+        type="search"
+        placeholder="Business, name, email, phone..."
+      >
+    </label>
+
+
+    <div
+      id="client-archive-list"
+      class="client-archive-list"
+    ></div>
+
+  </section>
+
+</div>
 
 
 
@@ -321,7 +433,7 @@
 ></script>
 
 <script
-  src="admin-crm.js?v=packages-v18"
+  src="admin-crm.js?v=client-archives-v1"
 ></script>
 
 </body>
