@@ -37,6 +37,11 @@ const logoutButton =
     "logout-button"
   );
 
+const themeToggle =
+  document.getElementById(
+    "theme-toggle"
+  );
+
 const paymentModeBadge =
   document.getElementById(
     "payment-mode-badge"
@@ -139,6 +144,88 @@ if (
   loginStatus.textContent =
     "Supabase is not connected.";
 }
+
+
+function applyCrmTheme(
+  theme
+) {
+  const selected =
+    theme === "dark"
+      ? "dark"
+      : "light";
+
+  document.documentElement
+    .setAttribute(
+      "data-theme",
+      selected
+    );
+
+  localStorage.setItem(
+    "gd-crm-theme",
+    selected
+  );
+
+  if (themeToggle) {
+    const dark =
+      selected === "dark";
+
+    themeToggle.textContent =
+      dark
+        ? "Light mode"
+        : "Dark mode";
+
+    themeToggle.setAttribute(
+      "aria-pressed",
+      dark
+        ? "true"
+        : "false"
+    );
+  }
+
+  const themeMeta =
+    document.querySelector(
+      'meta[name="theme-color"]'
+    );
+
+  if (themeMeta) {
+    themeMeta.setAttribute(
+      "content",
+      selected === "dark"
+        ? "#070b12"
+        : "#08111f"
+    );
+  }
+}
+
+
+const savedCrmTheme =
+  localStorage.getItem(
+    "gd-crm-theme"
+  ) || "light";
+
+applyCrmTheme(
+  savedCrmTheme
+);
+
+
+themeToggle
+  ?.addEventListener(
+    "click",
+    () => {
+
+      const current =
+        document.documentElement
+          .getAttribute(
+            "data-theme"
+          );
+
+      applyCrmTheme(
+        current === "dark"
+          ? "light"
+          : "dark"
+      );
+    }
+  );
 
 
 function moneyFromPence(

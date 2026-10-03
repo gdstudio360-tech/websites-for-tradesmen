@@ -1251,3 +1251,278 @@ small{
 }
 
 /* CRM CLIENT CONTENT V12 END */
+
+
+/* ==========================================================
+   CRM LIGHT / DARK MODE V15
+========================================================== */
+
+.theme-toggle{
+  min-height:34px;
+  padding:0 12px;
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:999px;
+  background:transparent;
+  color:#fff;
+  font-size:.64rem;
+  font-weight:950;
+  cursor:pointer;
+}
+
+.theme-toggle:hover{
+  border-color:rgba(255,216,61,.6);
+  color:var(--yellow);
+}
+
+
+/* DARK MODE */
+
+html[data-theme="dark"]{
+  color-scheme:dark;
+
+  --ink:#edf2f7;
+  --muted:#9aa7b8;
+  --line:#273241;
+  --soft:#151c26;
+  --navy:#070b12;
+  --green:#54c58a;
+  --red:#ff7d73;
+  --blue:#7ca7ff;
+}
+
+
+html[data-theme="dark"] body{
+  background:#0b1017;
+  color:var(--ink);
+}
+
+
+html[data-theme="dark"] .admin-header{
+  background:#05080d;
+  border-bottom:1px solid #202a36;
+}
+
+
+html[data-theme="dark"] .login-card,
+html[data-theme="dark"] .crm-tab,
+html[data-theme="dark"] .crm-sidebar,
+html[data-theme="dark"] .client-detail,
+html[data-theme="dark"] .detail-card,
+html[data-theme="dark"] .link-box,
+html[data-theme="dark"] .payment-stat,
+html[data-theme="dark"] .client-content-section,
+html[data-theme="dark"] .client-content-file,
+html[data-theme="dark"] .client-content-list li{
+  background:#111821;
+  border-color:#273241;
+  color:var(--ink);
+  box-shadow:none;
+}
+
+
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea{
+  background:#0c121a;
+  border-color:#303c4b;
+  color:#eef3f8;
+}
+
+
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder{
+  color:#657386;
+}
+
+
+html[data-theme="dark"] label{
+  color:#bac4d0;
+}
+
+
+html[data-theme="dark"] .secondary-button,
+html[data-theme="dark"] .ghost-button,
+html[data-theme="dark"] .danger-button,
+html[data-theme="dark"] .client-content-upload{
+  background:#151d27;
+  border-color:#344253;
+  color:#e8eef5;
+}
+
+
+html[data-theme="dark"] .danger-button{
+  color:#ff8d85;
+}
+
+
+html[data-theme="dark"] .crm-tab.active{
+  background:#242113;
+  border-color:#d4b421;
+  box-shadow:
+    inset 0 0 0 1px
+    #d4b421;
+}
+
+
+html[data-theme="dark"] .client-row-card{
+  background:#111821;
+  border-color:#273241;
+}
+
+
+html[data-theme="dark"] .client-row-card:hover{
+  background:#151e29;
+}
+
+
+html[data-theme="dark"] .client-row-card.active{
+  background:#252112;
+}
+
+
+html[data-theme="dark"] .client-row-main{
+  color:var(--ink);
+}
+
+
+html[data-theme="dark"] .message-box,
+html[data-theme="dark"] .workflow-progress{
+  background:#0e151e;
+  border-color:#273241;
+}
+
+
+html[data-theme="dark"] .workflow-dot{
+  background:#111821;
+  border-color:#394657;
+  color:#a7b2c0;
+}
+
+
+html[data-theme="dark"] .workflow-step::after{
+  background:#354150;
+}
+
+
+html[data-theme="dark"] .workflow-step.current .workflow-dot{
+  background:#ffd83d;
+  color:#111;
+  border-color:#d4b421;
+}
+
+
+html[data-theme="dark"] .workflow-step.current small{
+  color:#ffd83d;
+}
+
+
+html[data-theme="dark"] .conversation-message{
+  background:#111821;
+  border-color:#2b3746;
+}
+
+
+html[data-theme="dark"] .conversation-message.role-assistant{
+  background:#17212d;
+}
+
+
+html[data-theme="dark"] .conversation-message.role-human{
+  background:#292311;
+  border-color:#65571c;
+}
+
+
+html[data-theme="dark"] .conversation-message.role-system{
+  background:#171d25;
+  border-color:#46515e;
+  color:#bac4d0;
+}
+
+
+html[data-theme="dark"] .client-content-text{
+  color:#cbd5df;
+}
+
+
+html[data-theme="dark"] .client-content-file img{
+  background:#090e14;
+}
+
+
+html[data-theme="dark"] .pending-enquiry-banner{
+  background:#2a2410;
+  border-color:#75651d;
+  color:#f4d95a;
+}
+
+
+html[data-theme="dark"]
+.client-row-status.status-new,
+html[data-theme="dark"]
+.detail-status.status-new{
+  background:#352d10;
+  color:#f4d95a;
+}
+
+
+html[data-theme="dark"]
+.client-row-status.status-progress,
+html[data-theme="dark"]
+.detail-status.status-progress{
+  background:#14233a;
+  color:#8db6ff;
+}
+
+
+html[data-theme="dark"]
+.client-row-status.status-completed,
+html[data-theme="dark"]
+.detail-status.status-completed{
+  background:#123023;
+  color:#78d9a3;
+}
+
+
+html[data-theme="dark"]
+.client-row-status.status-rejected,
+html[data-theme="dark"]
+.detail-status.status-rejected{
+  background:#371a1a;
+  color:#ff9088;
+}
+
+
+html[data-theme="dark"] .workflow-rejected{
+  background:#2a1617;
+  border-color:#633033;
+  color:#ff9b94;
+}
+
+
+html[data-theme="dark"] .payment-mode-switch.to-live{
+  background:#301719;
+  border-color:#704044;
+  color:#ff9d96;
+}
+
+
+html[data-theme="dark"] .payment-mode-switch.to-test{
+  background:#292410;
+  border-color:#6b5d1e;
+  color:#f5d85d;
+}
+
+
+html[data-theme="dark"] a{
+  color:#8eb7ff;
+}
+
+
+html[data-theme="dark"] .admin-brand,
+html[data-theme="dark"] .admin-brand strong{
+  color:#fff;
+}
+
+
+/* CRM DARK MODE V15 END */
