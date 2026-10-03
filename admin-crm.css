@@ -1526,3 +1526,118 @@ html[data-theme="dark"] .admin-brand strong{
 
 
 /* CRM DARK MODE V15 END */
+
+
+/* CRM PACKAGE GROUPS V18 */
+
+.client-list{
+  display:grid;
+  gap:12px;
+  padding:12px;
+}
+
+.package-client-group{
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:13px;
+  background:#fff;
+}
+
+.package-client-group-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  min-height:42px;
+  padding:10px 12px;
+  border-bottom:1px solid var(--line);
+  background:var(--soft);
+}
+
+.package-client-group-head strong{
+  font-size:.75rem;
+  font-weight:950;
+}
+
+.package-client-group-head span{
+  min-width:25px;
+  padding:4px 7px;
+  border-radius:999px;
+  background:#fff;
+  color:var(--muted);
+  font-size:.65rem;
+  font-weight:950;
+  text-align:center;
+}
+
+.package-starter
+.package-client-group-head{
+  box-shadow:
+    inset 4px 0 0
+    var(--muted);
+}
+
+.package-business
+.package-client-group-head{
+  box-shadow:
+    inset 4px 0 0
+    var(--yellow);
+}
+
+.package-pro
+.package-client-group-head{
+  box-shadow:
+    inset 4px 0 0
+    var(--blue);
+}
+
+.package-unassigned
+.package-client-group-head{
+  box-shadow:
+    inset 4px 0 0
+    var(--red);
+}
+
+.package-client-group
+.client-row-card:last-child{
+  border-bottom:0;
+}
+
+.package-client-empty{
+  padding:15px 12px;
+  color:var(--muted);
+  font-size:.72rem;
+}
+
+
+/* DARK MODE */
+
+html[data-theme="dark"]
+.package-client-group{
+  background:#111821;
+  border-color:#273241;
+}
+
+html[data-theme="dark"]
+.package-client-group-head{
+  background:#151c26;
+  border-color:#273241;
+}
+
+html[data-theme="dark"]
+.package-client-group-head span{
+  background:#0c121a;
+  color:#aab5c3;
+}
+
+
+/* MOBILE */
+
+@media(max-width:760px){
+
+  .client-list{
+    padding:10px;
+  }
+
+}
+
+/* CRM PACKAGE GROUPS V18 END */

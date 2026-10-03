@@ -1243,6 +1243,44 @@ function clientPaymentState(
 }
 
 
+function packageGroupKey(
+  lead
+) {
+  const value =
+    String(
+      lead?.package || ""
+    )
+      .trim()
+      .toLowerCase();
+
+  if (
+    value.startsWith(
+      "starter"
+    )
+  ) {
+    return "starter";
+  }
+
+  if (
+    value.startsWith(
+      "business"
+    )
+  ) {
+    return "business";
+  }
+
+  if (
+    value.startsWith(
+      "pro"
+    )
+  ) {
+    return "pro";
+  }
+
+  return "unassigned";
+}
+
+
 function renderClientList() {
   if (!clientList) {
     return;
@@ -1257,88 +1295,174 @@ function renderClientList() {
   clientList.innerHTML =
     "";
 
-  if (!rows.length) {
-    clientList.innerHTML =
-      `
-        <div style="
-          padding:18px;
-          color:#687386;
-          font-size:.8rem
-        ">
-          No clients in this list.
-        </div>
-      `;
+  const groups = [
+    {
+      key: "starter",
+      label: "Starter — £249"
+    },
+    {
+      key: "business",
+      label: "Business — £399"
+    },
+    {
+      key: "pro",
+      label: "Pro — £599"
+    }
+  ];
 
-    return;
+  const grouped = {
+    starter: [],
+    business: [],
+    pro: [],
+    unassigned: []
+  };
+
+  rows.forEach(
+    lead => {
+      grouped[
+        packageGroupKey(
+          lead
+        )
+      ].push(
+        lead
+      );
+    }
+  );
+
+  if (
+    grouped.unassigned.length
+  ) {
+    groups.push({
+      key: "unassigned",
+      label: "Not assigned"
+    });
   }
 
+
   for (
-    const lead of rows
+    const group of groups
   ) {
-    const wrapper =
+    const groupRows =
+      grouped[group.key];
+
+    const section =
+      document.createElement(
+        "section"
+      );
+
+    section.className =
+      `package-client-group package-${group.key}`;
+
+    const heading =
       document.createElement(
         "div"
       );
 
-    wrapper.className =
-      "client-row-card";
+    heading.className =
+      "package-client-group-head";
+
+    heading.innerHTML = `
+      <strong>
+        ${escapeHtml(
+          group.label
+        )}
+      </strong>
+
+      <span>
+        ${groupRows.length}
+      </span>
+    `;
+
+    const groupList =
+      document.createElement(
+        "div"
+      );
+
+    groupList.className =
+      "package-client-group-list";
 
     if (
-      String(
-        lead.id
-      ) ===
-      String(
-        selectedLeadId
-      )
+      !groupRows.length
     ) {
-      wrapper.classList
-        .add("active");
+      groupList.innerHTML = `
+        <div
+          class="package-client-empty"
+        >
+          No clients
+        </div>
+      `;
     }
 
-    const button =
-      document.createElement(
-        "button"
-      );
 
-    button.type =
-      "button";
+    for (
+      const lead of groupRows
+    ) {
+      const wrapper =
+        document.createElement(
+          "div"
+        );
 
-    button.className =
-      "client-row-main";
+      wrapper.className =
+        "client-row-card";
 
-
-    const date =
-      lead.created_at
-        ? new Date(
-            lead.created_at
-          ).toLocaleDateString(
-            "en-GB"
-          )
-        : "";
-
-
-    const paymentState =
-      clientPaymentState(
-        lead
-      );
+      if (
+        String(
+          lead.id
+        ) ===
+        String(
+          selectedLeadId
+        )
+      ) {
+        wrapper.classList
+          .add("active");
+      }
 
 
-    const preview =
-      safeUrl(
-        lead.preview_url
-      );
+      const button =
+        document.createElement(
+          "button"
+        );
 
-    const live =
-      safeUrl(
-        lead.live_url
-      );
+      button.type =
+        "button";
+
+      button.className =
+        "client-row-main";
 
 
-    button.innerHTML =
-      `
+      const date =
+        lead.created_at
+          ? new Date(
+              lead.created_at
+            ).toLocaleDateString(
+              "en-GB"
+            )
+          : "";
+
+
+      const paymentState =
+        clientPaymentState(
+          lead
+        );
+
+
+      const preview =
+        safeUrl(
+          lead.preview_url
+        );
+
+      const live =
+        safeUrl(
+          lead.live_url
+        );
+
+
+      button.innerHTML = `
         <div class="client-row-top">
 
-          <span class="client-row-business">
+          <span
+            class="client-row-business"
+          >
             ${
               escapeHtml(
                 lead.business ||
@@ -1368,7 +1492,9 @@ function renderClientList() {
         </div>
 
 
-        <span class="client-row-person">
+        <span
+          class="client-row-person"
+        >
           ${
             escapeHtml(
               lead.name || ""
@@ -1377,7 +1503,9 @@ function renderClientList() {
         </span>
 
 
-        <span class="client-row-bottom">
+        <span
+          class="client-row-bottom"
+        >
 
           <span>
             ${
@@ -1396,10 +1524,10 @@ function renderClientList() {
       `;
 
 
-    button
-      .addEventListener(
+      button.addEventListener(
         "click",
         () => {
+
           if (
             String(
               selectedLeadId
@@ -1411,6 +1539,7 @@ function renderClientList() {
             return;
           }
 
+
           const draft =
             clientDetail
               .querySelector(
@@ -1419,8 +1548,7 @@ function renderClientList() {
 
           if (
             draft &&
-            draft.value
-              .trim()
+            draft.value.trim()
           ) {
             const leave =
               confirm(
@@ -1432,11 +1560,13 @@ function renderClientList() {
             }
           }
 
+
           selectedLeadId =
             lead.id;
 
           renderClientList();
           renderSelectedLead();
+
 
           if (
             window.innerWidth <
@@ -1454,110 +1584,120 @@ function renderClientList() {
       );
 
 
-    const quick =
-      document.createElement(
-        "div"
-      );
-
-    quick.className =
-      "client-row-quick";
-
-
-    const payment =
-      document.createElement(
-        "span"
-      );
-
-    payment.className =
-      `client-payment-state ${
-        paymentState.className
-      }`;
-
-    payment.textContent =
-      paymentState.label;
-
-    quick.appendChild(
-      payment
-    );
-
-
-    const links =
-      document.createElement(
-        "div"
-      );
-
-    links.className =
-      "client-row-links";
-
-
-    if (preview) {
-      const previewLink =
+      const quick =
         document.createElement(
-          "a"
+          "div"
         );
 
-      previewLink.href =
-        preview;
-
-      previewLink.target =
-        "_blank";
-
-      previewLink.rel =
-        "noopener";
-
-      previewLink.textContent =
-        "Preview ↗";
-
-      previewLink.title =
-        "Open website preview";
-
-      links.appendChild(
-        previewLink
-      );
-    }
+      quick.className =
+        "client-row-quick";
 
 
-    if (live) {
-      const liveLink =
+      const payment =
         document.createElement(
-          "a"
+          "span"
         );
 
-      liveLink.href =
-        live;
+      payment.className =
+        `client-payment-state ${
+          paymentState.className
+        }`;
 
-      liveLink.target =
-        "_blank";
+      payment.textContent =
+        paymentState.label;
 
-      liveLink.rel =
-        "noopener";
-
-      liveLink.textContent =
-        "Live ↗";
-
-      liveLink.title =
-        "Open live website";
-
-      links.appendChild(
-        liveLink
+      quick.appendChild(
+        payment
       );
-    }
 
 
-    quick.appendChild(
-      links
-    );
+      const links =
+        document.createElement(
+          "div"
+        );
+
+      links.className =
+        "client-row-links";
 
 
-    wrapper.append(
-      button,
-      quick
-    );
+      if (preview) {
+        const previewLink =
+          document.createElement(
+            "a"
+          );
 
-    clientList
-      .appendChild(
+        previewLink.href =
+          preview;
+
+        previewLink.target =
+          "_blank";
+
+        previewLink.rel =
+          "noopener";
+
+        previewLink.textContent =
+          "Preview ↗";
+
+        previewLink.title =
+          "Open website preview";
+
+        links.appendChild(
+          previewLink
+        );
+      }
+
+
+      if (live) {
+        const liveLink =
+          document.createElement(
+            "a"
+          );
+
+        liveLink.href =
+          live;
+
+        liveLink.target =
+          "_blank";
+
+        liveLink.rel =
+          "noopener";
+
+        liveLink.textContent =
+          "Live ↗";
+
+        liveLink.title =
+          "Open live website";
+
+        links.appendChild(
+          liveLink
+        );
+      }
+
+
+      quick.appendChild(
+        links
+      );
+
+
+      wrapper.append(
+        button,
+        quick
+      );
+
+      groupList.appendChild(
         wrapper
       );
+    }
+
+
+    section.append(
+      heading,
+      groupList
+    );
+
+    clientList.appendChild(
+      section
+    );
   }
 }
 
