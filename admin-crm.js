@@ -1750,7 +1750,7 @@ function renderSelectedLead() {
                     target="_blank"
                     rel="noopener"
                   >
-                    Content portal ↗
+                    Open client content portal ↗
                   </a>
 
                   <button
