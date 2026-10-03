@@ -1721,9 +1721,15 @@ function renderSelectedLead() {
       "business"
     );
 
+  const isProPackage =
+    packageKey.startsWith(
+      "pro"
+    );
+
   const hasContentPortal =
     isStarterPackage ||
-    isBusinessPackage;
+    isBusinessPackage ||
+    isProPackage;
 
   const contentToken =
     String(
@@ -1731,9 +1737,11 @@ function renderSelectedLead() {
     ).trim();
 
   const contentPortalFile =
-    isBusinessPackage
-      ? "content-business.html"
-      : "content-starter.html";
+    isProPackage
+      ? "content-pro.html"
+      : isBusinessPackage
+        ? "content-business.html"
+        : "content-starter.html";
 
   const contentPortalUrl =
     hasContentPortal &&
@@ -2941,10 +2949,14 @@ function clientContentApiUrl(
 
   const functionName =
     key.startsWith(
-      "business"
+      "pro"
     )
-      ? "business-content-portal"
-      : "content-portal";
+      ? "pro-content-portal"
+      : key.startsWith(
+          "business"
+        )
+        ? "business-content-portal"
+        : "content-portal";
 
   return (
     `${window.GD_CONFIG.SUPABASE_URL}` +
@@ -3069,15 +3081,26 @@ function clientContentProgress(
   const files =
     data?.files || {};
 
-  const isBusiness =
+  const packageKey =
     String(
       data?.package || ""
     )
       .trim()
-      .toLowerCase()
-      .startsWith(
-        "business"
-      );
+      .toLowerCase();
+
+  const isBusiness =
+    packageKey.startsWith(
+      "business"
+    );
+
+  const isPro =
+    packageKey.startsWith(
+      "pro"
+    );
+
+  const isAdvanced =
+    isBusiness ||
+    isPro;
 
   const services =
     Array.isArray(
@@ -3159,7 +3182,7 @@ function clientContentProgress(
     completeServices >= 1
   ];
 
-  if (isBusiness) {
+  if (isAdvanced) {
     checks.push(
       completePages >= 1
     );
@@ -3183,13 +3206,30 @@ function clientContentProgress(
     )
   );
 
-  if (isBusiness) {
+  if (isAdvanced) {
     checks.push(
       Boolean(
         String(
           content.domain?.status ||
           ""
         ).trim()
+      )
+    );
+  }
+
+  if (isPro) {
+    const seoReady =
+      Boolean(
+        content.seo?.priority_services ||
+        content.seo?.priority_locations ||
+        content.seo?.search_phrases
+      );
+
+    checks.push(
+      seoReady,
+      Boolean(
+        content.enquiry
+          ?.primary_action
       )
     );
   }
@@ -3210,15 +3250,26 @@ function clientContentText(
   const c =
     data?.content || {};
 
-  const isBusiness =
+  const packageKey =
     String(
       data?.package || ""
     )
       .trim()
-      .toLowerCase()
-      .startsWith(
-        "business"
-      );
+      .toLowerCase();
+
+  const isBusiness =
+    packageKey.startsWith(
+      "business"
+    );
+
+  const isPro =
+    packageKey.startsWith(
+      "pro"
+    );
+
+  const isAdvanced =
+    isBusiness ||
+    isPro;
 
   const services =
     Array.isArray(c.services)
@@ -3293,7 +3344,7 @@ function clientContentText(
     }
   );
 
-  if (isBusiness) {
+  if (isAdvanced) {
     lines.push(
       "",
       "WEBSITE PAGES"
@@ -3303,7 +3354,11 @@ function clientContentText(
       (item, index) => {
         lines.push(
           "",
-          `${index + 1}. ${item.name || ""}`,
+          `${index + 1}. ${item.name || ""}${
+            isPro && item.type === "service"
+              ? " [Individual service page]"
+              : ""
+          }`,
           item.notes || ""
         );
       }
@@ -3351,6 +3406,23 @@ function clientContentText(
       `Domain: ${c.domain?.name || ""}`,
       `Registrar: ${c.domain?.registrar || ""}`,
       `Notes: ${c.domain?.notes || ""}`
+    );
+  }
+
+  if (isPro) {
+    lines.push(
+      "",
+      "SEARCH VISIBILITY",
+      `Priority services: ${c.seo?.priority_services || ""}`,
+      `Priority locations: ${c.seo?.priority_locations || ""}`,
+      `Search phrases: ${c.seo?.search_phrases || ""}`,
+      `Examples / competitors: ${c.seo?.examples || ""}`,
+      "",
+      "ENQUIRY FLOW",
+      `Main action: ${c.enquiry?.primary_action || ""}`,
+      `Destination: ${c.enquiry?.destination || ""}`,
+      `Questions: ${c.enquiry?.questions || ""}`,
+      `Notes: ${c.enquiry?.notes || ""}`
     );
   }
 
@@ -3654,17 +3726,28 @@ function renderClientContent(
         )
       : [];
 
-  const isBusinessContent =
+  const contentPackageKey =
     String(
       data?.package ||
       lead?.package ||
       ""
     )
       .trim()
-      .toLowerCase()
-      .startsWith(
-        "business"
-      );
+      .toLowerCase();
+
+  const isBusinessContent =
+    contentPackageKey.startsWith(
+      "business"
+    );
+
+  const isProContent =
+    contentPackageKey.startsWith(
+      "pro"
+    );
+
+  const isAdvancedContent =
+    isBusinessContent ||
+    isProContent;
 
   const pages =
     Array.isArray(
@@ -3707,7 +3790,7 @@ function renderClientContent(
       : [];
 
   const galleryLimit =
-    isBusinessContent
+    isAdvancedContent
       ? 12
       : 6;
 
@@ -3849,7 +3932,7 @@ function renderClientContent(
 
 
     ${
-      isBusinessContent
+      isAdvancedContent
         ? `
           <section
             class="client-content-section"
@@ -3872,6 +3955,21 @@ function renderClientContent(
                                 "Page"
                               )}
                             </strong>
+
+                            ${
+                              isProContent
+                                ? `
+                                  <br>
+                                  <small>
+                                    ${
+                                      item.type === "service"
+                                        ? "Individual service page"
+                                        : "Standard page"
+                                    }
+                                  </small>
+                                `
+                                : ""
+                            }
 
                             ${
                               item.notes
@@ -4056,6 +4154,98 @@ function renderClientContent(
               Notes:
               ${escapeHtml(
                 content.domain?.notes ||
+                "—"
+              )}
+            </div>
+          </section>
+        `
+        : ""
+    }
+
+
+    ${
+      isProContent
+        ? `
+          <section
+            class="client-content-section"
+          >
+            <h4>Search visibility</h4>
+
+            <div class="client-content-text">
+              <strong>Priority services</strong>
+              <br>
+              ${escapeHtml(
+                content.seo?.priority_services ||
+                "—"
+              )}
+
+              <br><br>
+
+              <strong>Priority locations</strong>
+              <br>
+              ${escapeHtml(
+                content.seo?.priority_locations ||
+                "—"
+              )}
+
+              <br><br>
+
+              <strong>Customer search phrases</strong>
+              <br>
+              ${escapeHtml(
+                content.seo?.search_phrases ||
+                "—"
+              )}
+
+              <br><br>
+
+              <strong>Examples / competitors</strong>
+              <br>
+              ${escapeHtml(
+                content.seo?.examples ||
+                "—"
+              )}
+            </div>
+          </section>
+
+
+          <section
+            class="client-content-section"
+          >
+            <h4>Enquiry flow</h4>
+
+            <div class="client-content-text">
+              <strong>Main action</strong>
+              <br>
+              ${escapeHtml(
+                content.enquiry?.primary_action ||
+                "—"
+              )}
+
+              <br><br>
+
+              <strong>Destination</strong>
+              <br>
+              ${escapeHtml(
+                content.enquiry?.destination ||
+                "—"
+              )}
+
+              <br><br>
+
+              <strong>Questions to ask</strong>
+              <br>
+              ${escapeHtml(
+                content.enquiry?.questions ||
+                "—"
+              )}
+
+              <br><br>
+
+              <strong>Notes</strong>
+              <br>
+              ${escapeHtml(
+                content.enquiry?.notes ||
                 "—"
               )}
             </div>
@@ -4779,14 +4969,18 @@ function bindProjectControls(
 
         const portalFile =
           packageKey.startsWith(
-            "business"
+            "pro"
           )
-            ? "content-business.html"
+            ? "content-pro.html"
             : packageKey.startsWith(
-                "starter"
+                "business"
               )
-              ? "content-starter.html"
-              : "";
+              ? "content-business.html"
+              : packageKey.startsWith(
+                  "starter"
+                )
+                ? "content-starter.html"
+                : "";
 
         if (
           !lead.content_token ||
