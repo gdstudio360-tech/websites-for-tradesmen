@@ -335,17 +335,33 @@ function packagePrice(
 
 
 function workflowStepIndex(
-  status
+  lead
 ) {
+  const status =
+    lead?.status || "new";
+
+  if (status === "completed") {
+    return 6;
+  }
+
+  if (status === "balance_due") {
+    return 5;
+  }
+
+  if (
+    status === "review" &&
+    lead?.live_url
+  ) {
+    return 4;
+  }
+
   const map = {
     new: 0,
     approved: 1,
     deposit_sent: 1,
     deposit_paid: 2,
     building: 2,
-    review: 3,
-    balance_due: 4,
-    completed: 5
+    review: 3
   };
 
   return map[status] ?? 0;
@@ -375,13 +391,14 @@ function workflowProgressHtml(
     "Deposit",
     "Build",
     "Review",
+    "Launch",
     "Final payment",
     "Complete"
   ];
 
   const current =
     workflowStepIndex(
-      lead.status
+      lead
     );
 
   return `
@@ -2595,10 +2612,11 @@ function renderSelectedLead() {
 
             ${
               depositPaid &&
+              lead.live_url &&
               !lead.balance_paid_at &&
-              ![
-                "rejected",
-                "completed"
+              [
+                "review",
+                "balance_due"
               ].includes(
                 lead.status
               )
@@ -2612,7 +2630,7 @@ function renderSelectedLead() {
                       lead.status ===
                       "balance_due"
                         ? "Resend final payment"
-                        : "Client approved — Send final payment"
+                        : "Website launched — Send final payment"
                     }
                   </button>
                 `

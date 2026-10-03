@@ -184,6 +184,22 @@ Deno.serve(async (req) => {
       );
     }
 
+    if (
+      !lead.live_url
+    ) {
+      return Response.json(
+        {
+          ok: false,
+          error:
+            "The website must be live before the final payment can be sent.",
+        },
+        {
+          status: 409,
+          headers: corsHeaders,
+        },
+      );
+    }
+
     const projectTotal =
       Number(
         lead.project_total ||
@@ -344,16 +360,15 @@ Deno.serve(async (req) => {
                 `GD Studio 360 — final payment for ${lead.business}`,
               html: `
                 <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;color:#172033;line-height:1.6">
-                  <h2>Your website is ready</h2>
+                  <h2>Your website is live</h2>
 
                   <p>
                     Hi ${escapeHtml(lead.name)},
                   </p>
 
                   <p>
-                    Thank you for reviewing the website.
-                    The project is now ready for the
-                    final payment.
+                    Your website has now been launched.
+                    The remaining project balance is now due.
                   </p>
 
                   ${preview}
