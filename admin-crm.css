@@ -1641,3 +1641,131 @@ html[data-theme="dark"]
 }
 
 /* CRM PACKAGE GROUPS V18 END */
+
+
+/* CRM SEPARATE PACKAGE CARDS V19 */
+
+.crm-sidebar{
+  border:0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+  overflow:visible;
+}
+
+.crm-sidebar-head{
+  padding:2px 4px 8px;
+  border-bottom:0;
+  background:transparent;
+}
+
+.client-list{
+  display:grid;
+  gap:16px;
+  padding:0;
+}
+
+.package-client-group{
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:#fff;
+  box-shadow:
+    0 10px 28px
+    rgba(8,17,31,.05);
+}
+
+html[data-theme="dark"]
+.crm-sidebar{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+}
+
+html[data-theme="dark"]
+.package-client-group{
+  background:#111821;
+  border-color:#273241;
+  box-shadow:
+    0 10px 28px
+    rgba(0,0,0,.18);
+}
+
+/* CRM SEPARATE PACKAGE CARDS V19 END */
+
+
+/* CRM SEPARATE PACKAGE WINDOWS V20 */
+
+.crm-package-column{
+  position:sticky;
+  top:14px;
+  align-self:start;
+  min-width:0;
+  background:transparent;
+  border:0;
+  box-shadow:none;
+}
+
+.crm-package-column .client-list{
+  display:grid;
+  gap:18px;
+  padding:0;
+  max-height:
+    calc(100vh - 180px);
+  overflow-y:auto;
+}
+
+.crm-package-column
+.package-client-group{
+  margin:0;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:18px;
+  background:#fff;
+  box-shadow:
+    0 12px 35px
+    rgba(8,17,31,.055);
+}
+
+.crm-package-column
+.package-client-group-head{
+  min-height:48px;
+  padding:12px 15px;
+}
+
+.crm-package-column
+.package-client-group-head strong{
+  font-size:.82rem;
+}
+
+html[data-theme="dark"]
+.crm-package-column{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+}
+
+html[data-theme="dark"]
+.crm-package-column
+.package-client-group{
+  background:#111821;
+  border-color:#273241;
+  box-shadow:
+    0 12px 35px
+    rgba(0,0,0,.2);
+}
+
+@media(max-width:760px){
+
+  .crm-package-column{
+    position:static;
+  }
+
+  .crm-package-column .client-list{
+    max-height:none;
+    overflow:visible;
+  }
+
+}
+
+/* CRM SEPARATE PACKAGE WINDOWS V20 END */
