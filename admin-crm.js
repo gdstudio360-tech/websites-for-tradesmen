@@ -1830,18 +1830,13 @@ function renderSelectedLead() {
       lead.deposit_paid_at
     );
 
-  const paidSoFar =
-    depositPaid
-      ? depositAmount
-      : 0;
-
   const calculatedBalance =
     projectTotal
       ? Math.max(
           Number(
             projectTotal
           ) -
-          paidSoFar,
+          depositAmount,
           0
         )
       : null;
@@ -2545,7 +2540,7 @@ function renderSelectedLead() {
                 : lead.balance_sent_at
                   ? "Final payment request has been sent."
                   : depositPaid
-                    ? "Deposit received. The remaining amount will be collected when the client approves the finished website."
+                    ? "Deposit received. Build, review and launch the website before requesting the remaining balance."
                     : "Deposit has not been recorded as paid yet."
             }
           </p>
