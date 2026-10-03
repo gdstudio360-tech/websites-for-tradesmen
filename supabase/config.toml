@@ -28,3 +28,6 @@ verify_jwt = false
 
 [functions.pro-content-portal]
 verify_jwt = false
+
+[functions.set-lead-disposition]
+verify_jwt = false
