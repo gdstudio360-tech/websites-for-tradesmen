@@ -1617,12 +1617,26 @@ function renderSelectedLead() {
       lead.current_site
     );
 
+  const isStarterPackage =
+    String(
+      lead.package || ""
+    )
+      .trim()
+      .toLowerCase()
+      .startsWith(
+        "starter"
+      );
+
+  const contentToken =
+    String(
+      lead.content_token || ""
+    ).trim();
+
   const contentPortalUrl =
-    lead.package ===
-      "Starter — £249" &&
-    lead.content_token
+    isStarterPackage &&
+    contentToken
       ? `https://gdstudio360.co.uk/content-starter.html?token=${encodeURIComponent(
-          lead.content_token
+          contentToken
         )}`
       : "";
 
@@ -1933,7 +1947,7 @@ function renderSelectedLead() {
 
 
         ${
-          contentPortalUrl
+          isStarterPackage
             ? `
               <section
                 class="detail-card full client-content-card"
@@ -1955,43 +1969,57 @@ function renderSelectedLead() {
 
                   <div class="client-content-actions">
 
-                    <button
-                      class="secondary-button"
-                      id="refresh-client-content"
-                      type="button"
-                    >
-                      Refresh
-                    </button>
+                    ${
+                      contentPortalUrl
+                        ? `
+                          <button
+                            class="secondary-button"
+                            id="refresh-client-content"
+                            type="button"
+                          >
+                            Refresh
+                          </button>
 
-                    <button
-                      class="secondary-button"
-                      id="copy-all-client-text"
-                      type="button"
-                    >
-                      Copy all text
-                    </button>
+                          <button
+                            class="secondary-button"
+                            id="copy-all-client-text"
+                            type="button"
+                          >
+                            Copy all text
+                          </button>
 
-                    <button
-                      class="primary-button"
-                      id="download-all-client-content"
-                      type="button"
-                    >
-                      Download all
-                    </button>
+                          <button
+                            class="primary-button"
+                            id="download-all-client-content"
+                            type="button"
+                          >
+                            Download all
+                          </button>
 
-                    <a
-                      class="secondary-button"
-                      href="${escapeAttr(contentPortalUrl)}"
-                      target="_blank"
-                      rel="noopener"
-                      style="
-                        display:inline-flex;
-                        align-items:center;
-                        text-decoration:none
-                      "
-                    >
-                      Edit / upload ↗
-                    </a>
+                          <a
+                            class="secondary-button"
+                            href="${escapeAttr(contentPortalUrl)}"
+                            target="_blank"
+                            rel="noopener"
+                            style="
+                              display:inline-flex;
+                              align-items:center;
+                              text-decoration:none
+                            "
+                          >
+                            Edit / upload ↗
+                          </a>
+                        `
+                        : `
+                          <button
+                            class="primary-button"
+                            id="create-content-link"
+                            type="button"
+                          >
+                            Create content link
+                          </button>
+                        `
+                    }
 
                   </div>
 
@@ -2001,9 +2029,19 @@ function renderSelectedLead() {
                   id="client-content-body"
                   class="client-content-body"
                 >
-                  <p class="conversation-empty">
-                    Loading client content…
-                  </p>
+                  ${
+                    contentPortalUrl
+                      ? `
+                        <p class="conversation-empty">
+                          Loading client content…
+                        </p>
+                      `
+                      : `
+                        <p class="conversation-empty">
+                          Content access link has not been created for this client yet.
+                        </p>
+                      `
+                  }
                 </div>
 
               </section>
@@ -4193,8 +4231,14 @@ function bindProjectControls(
 
         if (
           !lead.content_token ||
-          lead.package !==
-            "Starter — £249"
+          !String(
+            lead.package || ""
+          )
+            .trim()
+            .toLowerCase()
+            .startsWith(
+              "starter"
+            )
         ) {
           return;
         }
@@ -4223,6 +4267,58 @@ function bindProjectControls(
           },
           1400
         );
+      }
+    );
+
+
+  document
+    .getElementById(
+      "create-content-link"
+    )
+    ?.addEventListener(
+      "click",
+      async (event) => {
+
+        event.currentTarget.disabled =
+          true;
+
+        dashboardStatus.textContent =
+          "Creating content access…";
+
+        const newToken =
+          crypto.randomUUID();
+
+        const {
+          error
+        } =
+          await client
+            .from("leads")
+            .update({
+              content_token:
+                newToken
+            })
+            .eq(
+              "id",
+              lead.id
+            );
+
+        if (error) {
+          dashboardStatus.textContent =
+            error.message;
+
+          event.currentTarget.disabled =
+            false;
+
+          return;
+        }
+
+        dashboardStatus.textContent =
+          "Content access created.";
+
+        await loadLeads({
+          background: true,
+          refreshDetail: true
+        });
       }
     );
 
