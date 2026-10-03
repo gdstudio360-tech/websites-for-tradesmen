@@ -2801,3 +2801,38 @@ header, section, footer, main{
 }
 
 /* GD INNER SCREEN SCROLL V2 END */
+
+
+/* PRICING TYPOGRAPHY HIERARCHY V1 */
+
+.gd-premium .price-top > span{
+  display:block;
+  color:var(--gd-yellow);
+  font-size:1.55rem;
+  line-height:1.1;
+  font-weight:900;
+  letter-spacing:-.025em;
+}
+
+.gd-premium .price-top > strong{
+  display:block;
+  margin:11px 0 17px;
+  font-size:2.8rem;
+  line-height:1;
+  font-weight:900;
+  letter-spacing:-.045em;
+}
+
+@media(max-width:680px){
+
+  .gd-premium .price-top > span{
+    font-size:1.4rem;
+  }
+
+  .gd-premium .price-top > strong{
+    font-size:2.55rem;
+  }
+
+}
+
+/* PRICING TYPOGRAPHY HIERARCHY V1 END */
