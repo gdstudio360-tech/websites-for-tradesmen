@@ -1769,3 +1769,85 @@ html[data-theme="dark"]
 }
 
 /* CRM SEPARATE PACKAGE WINDOWS V20 END */
+
+
+/* INDEPENDENT PACKAGE SCROLL V21 */
+
+.crm-package-column{
+  position:sticky;
+  top:14px;
+  align-self:start;
+  min-width:0;
+}
+
+.crm-package-column .client-list{
+  display:grid;
+  gap:16px;
+  padding:0;
+
+  max-height:none;
+  overflow:visible;
+}
+
+.package-client-group{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
+
+.package-client-group-head{
+  flex:0 0 auto;
+}
+
+.package-client-group-list{
+  max-height:220px;
+  overflow-y:auto;
+  overflow-x:hidden;
+
+  overscroll-behavior:contain;
+
+  scrollbar-width:thin;
+}
+
+.package-client-group-list::-webkit-scrollbar{
+  width:7px;
+}
+
+.package-client-group-list::-webkit-scrollbar-thumb{
+  background:rgba(120,135,155,.45);
+  border-radius:999px;
+}
+
+.package-client-group-list::-webkit-scrollbar-track{
+  background:transparent;
+}
+
+.package-client-empty{
+  min-height:58px;
+  display:flex;
+  align-items:center;
+}
+
+/* Dark mode */
+
+html[data-theme="dark"]
+.package-client-group-list::-webkit-scrollbar-thumb{
+  background:rgba(170,185,205,.35);
+}
+
+
+/* Mobile */
+
+@media(max-width:760px){
+
+  .crm-package-column{
+    position:static;
+  }
+
+  .package-client-group-list{
+    max-height:280px;
+  }
+
+}
+
+/* INDEPENDENT PACKAGE SCROLL V21 END */
