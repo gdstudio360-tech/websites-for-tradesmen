@@ -2417,3 +2417,76 @@ html[data-theme="dark"]
 }
 
 /* CRM CLIENT ARCHIVES V1 END */
+
+/* =========================================================
+   REJECTED CLIENT FILTERS V1
+========================================================= */
+
+.rejected-archive-filters{
+  padding:
+    0 24px 18px;
+
+  border-bottom:
+    1px solid var(--line);
+}
+
+.rejected-archive-filters[hidden]{
+  display:none;
+}
+
+.rejected-archive-filters label{
+  display:grid;
+  gap:7px;
+
+  font-size:.82rem;
+  font-weight:700;
+}
+
+.rejected-archive-filters select{
+  width:100%;
+
+  min-height:42px;
+
+  padding:
+    0 12px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius:
+    10px;
+
+  background:
+    var(--panel);
+
+  color:
+    var(--text);
+}
+
+.client-archive-note{
+  margin-top:
+    8px;
+
+  padding:
+    8px 10px;
+
+  border-left:
+    3px solid #f0b429;
+
+  background:
+    rgba(
+      240,
+      180,
+      41,
+      .08
+    );
+
+  border-radius:
+    6px;
+
+  font-size:
+    .82rem;
+
+  line-height:
+    1.45;
+}

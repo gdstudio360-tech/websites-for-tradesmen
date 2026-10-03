@@ -389,6 +389,35 @@
 
 
     <div
+      id="rejected-archive-filters"
+      class="rejected-archive-filters"
+      hidden
+    >
+      <label>
+        Show
+
+        <select id="rejected-archive-filter">
+          <option value="all">
+            All rejected
+          </option>
+
+          <option value="resubmit_requested">
+            Resubmit requested
+          </option>
+
+          <option value="declined">
+            Declined
+          </option>
+
+          <option value="blocked">
+            Blocked
+          </option>
+        </select>
+      </label>
+    </div>
+
+
+    <div
       id="client-archive-list"
       class="client-archive-list"
     ></div>
@@ -433,7 +462,7 @@
 ></script>
 
 <script
-  src="admin-crm.js?v=client-archives-v1"
+  src="admin-crm.js?v=rejection-workflow-v1"
 ></script>
 
 </body>

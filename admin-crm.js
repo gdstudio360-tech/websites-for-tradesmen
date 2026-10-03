@@ -128,6 +128,16 @@ const archiveSearch =
     "client-archive-search"
   );
 
+const rejectedArchiveFilters =
+  document.getElementById(
+    "rejected-archive-filters"
+  );
+
+const rejectedArchiveFilter =
+  document.getElementById(
+    "rejected-archive-filter"
+  );
+
 const archiveList =
   document.getElementById(
     "client-archive-list"
@@ -173,6 +183,7 @@ let selectedLeadId = null;
 let sumupTestMode = null;
 
 let archiveMode = null;
+let rejectedArchiveFilterValue = "all";
 
 let realtimeChannel = null;
 let pendingNewCount = 0;
@@ -1812,6 +1823,29 @@ function renderClientList() {
 
 
 
+function rejectionLabel(
+  lead
+) {
+  const labels = {
+    resubmit_requested:
+      "Resubmit requested",
+
+    declined:
+      "Declined",
+
+    blocked:
+      "Blocked"
+  };
+
+  return (
+    labels[
+      lead?.rejection_kind
+    ] ||
+    "Declined"
+  );
+}
+
+
 function archiveRows(
   mode
 ) {
@@ -1830,10 +1864,29 @@ function archiveRows(
         mode
     );
 
+
+  if (
+    mode === "rejected" &&
+    rejectedArchiveFilterValue !==
+      "all"
+  ) {
+    rows =
+      rows.filter(
+        lead =>
+          (
+            lead.rejection_kind ||
+            "declined"
+          ) ===
+          rejectedArchiveFilterValue
+      );
+  }
+
+
   if (query) {
     rows =
       rows.filter(
         lead => {
+
           const haystack = [
             lead.business,
             lead.name,
@@ -1841,7 +1894,9 @@ function archiveRows(
             lead.phone,
             lead.package,
             lead.trade,
-            lead.area
+            lead.area,
+            lead.rejection_kind,
+            lead.rejection_note
           ]
             .join(" ")
             .toLowerCase();
@@ -1854,14 +1909,17 @@ function archiveRows(
       );
   }
 
+
   return [...rows]
     .sort(
       (a,b) =>
         new Date(
+          b.rejected_at ||
           b.updated_at ||
           b.created_at
         ) -
         new Date(
+          a.rejected_at ||
           a.updated_at ||
           a.created_at
         )
@@ -1876,6 +1934,7 @@ function renderArchiveList() {
   ) {
     return;
   }
+
 
   const rows =
     archiveRows(
@@ -1892,20 +1951,32 @@ function renderArchiveList() {
   }
 
 
-  if (archiveSummary) {
-    const allCount =
-      leads.filter(
-        lead =>
-          lead.status ===
-          archiveMode
-      ).length;
+  const allCount =
+    leads.filter(
+      lead =>
+        lead.status ===
+        archiveMode
+    ).length;
 
-    archiveSummary.textContent =
-      `${allCount} client${
-        allCount === 1
-          ? ""
-          : "s"
-      }`;
+
+  if (archiveSummary) {
+
+    if (
+      archiveMode ===
+        "rejected" &&
+      rejectedArchiveFilterValue !==
+        "all"
+    ) {
+      archiveSummary.textContent =
+        `${rows.length} of ${allCount} clients`;
+    } else {
+      archiveSummary.textContent =
+        `${allCount} client${
+          allCount === 1
+            ? ""
+            : "s"
+        }`;
+    }
   }
 
 
@@ -1923,7 +1994,7 @@ function renderArchiveList() {
             : archiveMode ===
                 "completed"
               ? "No completed clients yet."
-              : "No rejected clients yet."
+              : "No rejected clients in this filter."
         }
       </div>
     `;
@@ -1935,6 +2006,7 @@ function renderArchiveList() {
   for (
     const lead of rows
   ) {
+
     const button =
       document.createElement(
         "button"
@@ -1948,8 +2020,10 @@ function renderArchiveList() {
 
 
     const dateValue =
+      lead.rejected_at ||
       lead.updated_at ||
       lead.created_at;
+
 
     const date =
       dateValue
@@ -1960,6 +2034,17 @@ function renderArchiveList() {
               "en-GB"
             )
         : "";
+
+
+    const statusLabel =
+      archiveMode ===
+        "rejected"
+        ? rejectionLabel(
+            lead
+          )
+        : prettyStatus(
+            lead.status
+          );
 
 
     button.innerHTML = `
@@ -1977,14 +2062,13 @@ function renderArchiveList() {
         <span class="client-archive-status">
           ${
             escapeHtml(
-              prettyStatus(
-                lead.status
-              )
+              statusLabel
             )
           }
         </span>
 
       </div>
+
 
       <div class="client-archive-meta">
 
@@ -2012,6 +2096,7 @@ function renderArchiveList() {
 
       </div>
 
+
       <div class="client-archive-meta">
 
         ${
@@ -2027,6 +2112,21 @@ function renderArchiveList() {
         }
 
       </div>
+
+
+      ${
+        archiveMode ===
+          "rejected" &&
+        lead.rejection_note
+          ? `
+            <div class="client-archive-note">
+              ${escapeHtml(
+                lead.rejection_note
+              )}
+            </div>
+          `
+          : ""
+      }
     `;
 
 
@@ -2039,6 +2139,7 @@ function renderArchiveList() {
             ?.querySelector(
               "#reply-text"
             );
+
 
         if (
           draft &&
@@ -2072,6 +2173,7 @@ function renderArchiveList() {
             ?.scrollIntoView({
               behavior:
                 "smooth",
+
               block:
                 "start"
             });
@@ -2105,6 +2207,24 @@ function openClientArchive(
   ) {
     archiveSearch.value =
       "";
+  }
+
+  rejectedArchiveFilterValue =
+    "all";
+
+  if (
+    rejectedArchiveFilter
+  ) {
+    rejectedArchiveFilter.value =
+      "all";
+  }
+
+  if (
+    rejectedArchiveFilters
+  ) {
+    rejectedArchiveFilters.hidden =
+      mode !==
+      "rejected";
   }
 
   renderArchiveList();
@@ -2195,6 +2315,20 @@ archiveSearch
   ?.addEventListener(
     "input",
     renderArchiveList
+  );
+
+
+rejectedArchiveFilter
+  ?.addEventListener(
+    "change",
+    () => {
+
+      rejectedArchiveFilterValue =
+        rejectedArchiveFilter.value ||
+        "all";
+
+      renderArchiveList();
+    }
   );
 
 
@@ -5576,6 +5710,82 @@ async function loadClientContent(
 }
 
 
+async function setLeadDisposition(
+  lead,
+  action,
+  note = null
+) {
+
+  dashboardStatus.textContent =
+    "Updating enquiry…";
+
+
+  const {
+    data,
+    error
+  } =
+    await client.functions
+      .invoke(
+        "set-lead-disposition",
+        {
+          body: {
+            lead_id:
+              lead.id,
+
+            action,
+
+            note
+          }
+        }
+      );
+
+
+  if (
+    error ||
+    !data?.ok
+  ) {
+    dashboardStatus.textContent =
+      data?.error ||
+      error?.message ||
+      "Could not update enquiry.";
+
+    return false;
+  }
+
+
+  const messages = {
+    resubmit:
+      "Marked as resubmit requested.",
+
+    decline:
+      "Enquiry declined.",
+
+    block:
+      "Client blocked for future enquiries.",
+
+    restore:
+      "Enquiry restored to New.",
+
+    unblock_restore:
+      "Client unblocked and enquiry restored to New."
+  };
+
+
+  dashboardStatus.textContent =
+    messages[action] ||
+    "Enquiry updated.";
+
+
+  await loadLeads({
+    refreshDetail:
+      true
+  });
+
+
+  return true;
+}
+
+
 function bindProjectControls(
   lead
 ) {
@@ -6145,18 +6355,30 @@ function bindProjectControls(
     ?.addEventListener(
       "click",
       async () => {
+
+        const blocked =
+          lead.rejection_kind ===
+          "blocked";
+
+
         const ok =
           confirm(
-            `Restore ${lead.business} to New?`
+            blocked
+              ? `Unblock ${lead.business} and restore the enquiry to New?`
+              : `Restore ${lead.business} to New?`
           );
+
 
         if (!ok) {
           return;
         }
 
-        await updateLeadStatus(
-          lead.id,
-          "new"
+
+        await setLeadDisposition(
+          lead,
+          blocked
+            ? "unblock_restore"
+            : "restore"
         );
       }
     );
@@ -6169,18 +6391,101 @@ function bindProjectControls(
     ?.addEventListener(
       "click",
       async () => {
-        const ok =
-          confirm(
-            `Reject ${lead.business}?`
+
+        const business =
+          lead.business ||
+          lead.name ||
+          "this enquiry";
+
+
+        const choice =
+          prompt(
+            `How should "${business}" be closed?\n\n` +
+            `1 — Request new submission\n` +
+            `2 — Decline this enquiry\n` +
+            `3 — Block future enquiries\n\n` +
+            `Type 1, 2 or 3.`
           );
 
-        if (!ok) {
+
+        if (
+          choice === null
+        ) {
           return;
         }
 
-        await updateLeadStatus(
-          lead.id,
-          "rejected"
+
+        const actions = {
+          "1": "resubmit",
+          "2": "decline",
+          "3": "block"
+        };
+
+
+        const action =
+          actions[
+            choice.trim()
+          ];
+
+
+        if (!action) {
+          dashboardStatus.textContent =
+            "Nothing changed. Choose 1, 2 or 3.";
+
+          return;
+        }
+
+
+        const note =
+          prompt(
+            action ===
+              "block"
+              ? "Reason for blocking this client (required):"
+              : "Optional internal note:"
+          );
+
+
+        if (
+          note === null
+        ) {
+          return;
+        }
+
+
+        if (
+          action ===
+            "block" &&
+          !note.trim()
+        ) {
+          dashboardStatus.textContent =
+            "A blocking reason is required.";
+
+          return;
+        }
+
+
+        if (
+          action ===
+          "block"
+        ) {
+          const confirmed =
+            confirm(
+              `Block future enquiries from ${business}?\n\n` +
+              `This is the strongest action and can be reversed later.`
+            );
+
+
+          if (!confirmed) {
+            return;
+          }
+        }
+
+
+        await setLeadDisposition(
+          lead,
+          action,
+          note.trim() ||
+          null
         );
       }
     );
