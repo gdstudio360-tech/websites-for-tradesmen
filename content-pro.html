@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <meta
+    name="robots"
+    content="noindex,nofollow,noarchive"
+  >
+
+  <title>
+    Pro Website Content | GD Studio 360
+  </title>
+
+  <link
+    rel="icon"
+    type="image/png"
+    sizes="32x32"
+    href="/favicon-32x32.png"
+  >
+
+  <link
+    rel="stylesheet"
+    href="content-pro.css?v=pro-v1"
+  >
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script src="site-config.js"></script>
+  <script src="content-pro.js?v=pro-v1" defer></script>
+</head>
+
+<body>
+
+<header class="portal-header">
+
+  <a class="brand" href="/">
+    <span class="brand-mark">GD</span>
+
+    <span class="brand-copy">
+      <strong>Studio 360</strong>
+      <small>Website Content Portal</small>
+    </span>
+  </a>
+
+  <span class="package-badge">
+    PRO
+  </span>
+
+</header>
+
+
+<main class="portal-shell">
+
+  <section class="portal-intro">
+
+    <p class="eyebrow">
+      YOUR WEBSITE CONTENT
+    </p>
+
+    <h1>
+      Send us everything we need
+      to build your website.
+    </h1>
+
+    <p class="intro-text">
+      Add your text and images below.
+      You can save your progress and return later
+      using the same private project link.
+    </p>
+
+
+    <div class="progress-wrap">
+
+      <div class="progress-track">
+        <div
+          id="progress-bar"
+          class="progress-bar"
+        ></div>
+      </div>
+
+      <strong id="progress-text">
+        0% complete
+      </strong>
+
+    </div>
+
+
+    <div
+      id="portal-message"
+      class="portal-message"
+      hidden
+    ></div>
+
+  </section>
+
+
+  <form
+    id="content-form"
+    class="content-form"
+  >
+
+    <!-- BUSINESS -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>01</span>
+
+        <div>
+          <h2>Business details</h2>
+          <p>
+            Basic information about your business.
+          </p>
+        </div>
+      </div>
+
+      <label>
+        Business name
+
+        <input
+          id="business-name"
+          type="text"
+          maxlength="150"
+          autocomplete="organization"
+          placeholder="Your Business"
+        >
+      </label>
+
+    </section>
+
+
+    <!-- LOGO -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>02</span>
+
+        <div>
+          <h2>Logo</h2>
+          <p>
+            Upload your main business logo.
+          </p>
+        </div>
+      </div>
+
+      <div
+        id="logo-preview"
+        class="file-preview"
+      ></div>
+
+      <label class="upload-button">
+        Upload logo
+
+        <input
+          type="file"
+          data-upload-slot="logo"
+          accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+          hidden
+        >
+      </label>
+
+      <p class="field-note">
+        JPG, PNG or WEBP. Maximum 8 MB.
+      </p>
+
+    </section>
+
+
+    <!-- HERO -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>03</span>
+
+        <div>
+          <h2>Hero section</h2>
+          <p>
+            The first section visitors see.
+          </p>
+        </div>
+      </div>
+
+
+      <label>
+        Main headline
+
+        <input
+          id="hero-title"
+          type="text"
+          maxlength="140"
+          placeholder="Clearly explain what your business offers"
+        >
+      </label>
+
+
+      <label>
+        Short introduction
+
+        <textarea
+          id="hero-text"
+          rows="4"
+          maxlength="700"
+          placeholder="Write a short introduction to your business and services."
+        ></textarea>
+      </label>
+
+
+      <label class="field-label">
+        Main hero image
+      </label>
+
+      <p class="field-note">
+        Choose one strong landscape image
+        representing your business.
+      </p>
+
+
+      <div
+        id="hero-preview"
+        class="file-preview"
+      ></div>
+
+
+      <label class="upload-button">
+        Upload hero image
+
+        <input
+          type="file"
+          data-upload-slot="hero"
+          accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+          hidden
+        >
+      </label>
+
+    </section>
+
+
+    <!-- ABOUT -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>04</span>
+
+        <div>
+          <h2>About your business</h2>
+          <p>
+            Tell customers who you are.
+          </p>
+        </div>
+      </div>
+
+
+      <label>
+        About text
+
+        <textarea
+          id="about-text"
+          rows="7"
+          maxlength="2000"
+          placeholder="Tell us about your business, experience and approach."
+        ></textarea>
+      </label>
+
+
+      <div
+        id="about-preview"
+        class="file-preview"
+      ></div>
+
+
+      <label class="upload-button">
+        Upload About image
+
+        <input
+          type="file"
+          data-upload-slot="about"
+          accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+          hidden
+        >
+      </label>
+
+    </section>
+
+
+    <!-- SERVICES -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>05</span>
+
+        <div>
+          <h2>Services</h2>
+          <p>
+            Add up to 10 services.
+          </p>
+        </div>
+      </div>
+
+      <div id="services-list"></div>
+
+    </section>
+
+
+
+    <!-- PAGE PLANNER -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>06</span>
+
+        <div>
+          <h2>Website pages</h2>
+          <p>
+            Plan the pages you want on your website. Individual services can also have their own dedicated page.
+          </p>
+        </div>
+      </div>
+
+      <div id="pages-list"></div>
+
+      <p class="field-note">
+        Pro package includes up to 8 pages in total,
+        including individual service pages.
+      </p>
+
+    </section>
+
+
+    <!-- SERVICE AREAS -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>07</span>
+
+        <div>
+          <h2>Service areas</h2>
+          <p>
+            Add towns, cities or areas where you provide your services.
+          </p>
+        </div>
+      </div>
+
+      <div id="service-areas-list"></div>
+
+      <p class="field-note">
+        Optional — add only the locations relevant to your business.
+      </p>
+
+    </section>
+
+
+    <!-- GALLERY -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>08</span>
+
+        <div>
+          <h2>Website photos</h2>
+          <p>
+            Upload up to 12 photos you’d like us to use on your website.
+          </p>
+        </div>
+      </div>
+
+
+      <div
+        id="gallery-preview"
+        class="gallery-preview"
+      ></div>
+
+
+      <label class="upload-button">
+        Upload photos
+
+        <input
+          id="gallery-upload"
+          type="file"
+          accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+          multiple
+          hidden
+        >
+      </label>
+
+
+      <p class="field-note">
+        Pro package: maximum 12 images.
+      </p>
+
+    </section>
+
+
+    <!-- REVIEWS -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>09</span>
+
+        <div>
+          <h2>Customer reviews</h2>
+          <p>
+            Optional — add as many genuine customer reviews as you need.
+          </p>
+        </div>
+      </div>
+
+      <div id="reviews-list"></div>
+
+    </section>
+
+
+
+    <!-- FAQ -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>10</span>
+
+        <div>
+          <h2>Frequently asked questions</h2>
+          <p>
+            Add common questions customers ask about your business.
+          </p>
+        </div>
+      </div>
+
+      <div id="faqs-list"></div>
+
+      <p class="field-note">
+        Optional — add up to 8 FAQs.
+      </p>
+
+    </section>
+
+
+    <!-- BRANDING -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>11</span>
+
+        <div>
+          <h2>Branding & colours</h2>
+          <p>
+            Tell us how you would like your website to look.
+          </p>
+        </div>
+      </div>
+
+      <div class="two-column">
+
+        <label>
+          Preferred primary colour
+
+          <input
+            id="branding-primary"
+            type="text"
+            placeholder="Example: dark blue, #10243A, black..."
+          >
+        </label>
+
+        <label>
+          Preferred secondary colour
+
+          <input
+            id="branding-secondary"
+            type="text"
+            placeholder="Example: gold, white, green..."
+          >
+        </label>
+
+      </div>
+
+      <label>
+        Style / branding notes
+
+        <textarea
+          id="branding-style"
+          rows="4"
+          placeholder="Example: modern, premium, minimal, bold, friendly. Tell us what you like or dislike."
+        ></textarea>
+      </label>
+
+      <p class="field-note">
+        Optional — if you are not sure, GD Studio 360 can recommend a suitable direction.
+      </p>
+
+    </section>
+
+
+    <!-- DOMAIN -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>12</span>
+
+        <div>
+          <h2>Domain</h2>
+          <p>
+            Tell us whether you already own a website domain.
+          </p>
+        </div>
+      </div>
+
+      <label>
+        Domain status
+
+        <select id="domain-status">
+          <option value="">Choose one</option>
+          <option value="Already own a domain">
+            I already own a domain
+          </option>
+          <option value="Need help choosing a domain">
+            I need help choosing a domain
+          </option>
+          <option value="Not sure yet">
+            I am not sure yet
+          </option>
+        </select>
+      </label>
+
+      <div class="two-column">
+
+        <label>
+          Domain name
+
+          <input
+            id="domain-name"
+            type="text"
+            placeholder="example.co.uk"
+          >
+        </label>
+
+        <label>
+          Domain provider / registrar
+
+          <input
+            id="domain-registrar"
+            type="text"
+            placeholder="Example: GoDaddy, Cloudflare, IONOS..."
+          >
+        </label>
+
+      </div>
+
+      <label>
+        Domain notes
+
+        <textarea
+          id="domain-notes"
+          rows="3"
+          placeholder="Anything we should know about the domain."
+        ></textarea>
+      </label>
+
+    </section>
+
+
+
+    <!-- SEARCH VISIBILITY -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>13</span>
+
+        <div>
+          <h2>Search visibility</h2>
+          <p>
+            Help us understand what you want customers to find you for in Google.
+          </p>
+        </div>
+      </div>
+
+      <label>
+        Priority services
+
+        <textarea
+          id="seo-priority-services"
+          rows="3"
+          placeholder="Which services are most important to your business?"
+        ></textarea>
+      </label>
+
+      <label>
+        Priority locations
+
+        <textarea
+          id="seo-priority-locations"
+          rows="3"
+          placeholder="Example: Ipswich, Suffolk, Colchester..."
+        ></textarea>
+      </label>
+
+      <label>
+        What might customers search for?
+
+        <textarea
+          id="seo-search-phrases"
+          rows="4"
+          placeholder="Example: emergency electrician Ipswich, wedding photographer Suffolk..."
+        ></textarea>
+      </label>
+
+      <label>
+        Competitors or websites you like — optional
+
+        <textarea
+          id="seo-examples"
+          rows="3"
+          placeholder="Add website links or business names if there are examples you like."
+        ></textarea>
+      </label>
+
+      <p class="field-note">
+        You do not need to know SEO terminology.
+        Just describe what customers should find you for.
+      </p>
+
+    </section>
+
+
+    <!-- ENQUIRY FLOW -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>14</span>
+
+        <div>
+          <h2>Enquiry flow</h2>
+          <p>
+            Tell us how you would like new customer enquiries to work.
+          </p>
+        </div>
+      </div>
+
+      <label>
+        Main customer action
+
+        <select id="enquiry-primary-action">
+          <option value="">Choose one</option>
+          <option value="Enquiry form">Enquiry form</option>
+          <option value="WhatsApp">WhatsApp</option>
+          <option value="Email">Email</option>
+          <option value="Phone">Phone</option>
+          <option value="Not sure">Not sure — recommend the best option</option>
+        </select>
+      </label>
+
+      <label>
+        Where should enquiries go?
+
+        <input
+          id="enquiry-destination"
+          type="text"
+          placeholder="Email address, WhatsApp number or other destination"
+        >
+      </label>
+
+      <label>
+        What should we ask customers?
+
+        <textarea
+          id="enquiry-questions"
+          rows="5"
+          placeholder="Example: service required, postcode, preferred date, project details..."
+        ></textarea>
+      </label>
+
+      <label>
+        Additional enquiry notes — optional
+
+        <textarea
+          id="enquiry-notes"
+          rows="3"
+          placeholder="Anything else about how enquiries should work."
+        ></textarea>
+      </label>
+
+    </section>
+
+
+    <!-- CONTACT -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>15</span>
+
+        <div>
+          <h2>Contact details</h2>
+          <p>
+            How customers can reach you.
+          </p>
+        </div>
+      </div>
+
+
+      <div class="two-column">
+
+        <label>
+          Email
+
+          <input
+            id="contact-email"
+            type="email"
+            autocomplete="email"
+          >
+        </label>
+
+
+        <label>
+          Phone / WhatsApp
+
+          <input
+            id="contact-phone"
+            type="text"
+            autocomplete="tel"
+          >
+        </label>
+
+      </div>
+
+
+      <label>
+        Area you serve
+
+        <input
+          id="contact-area"
+          type="text"
+          placeholder="Town, region or service area"
+        >
+      </label>
+
+
+      <label>
+        Opening hours
+
+        <textarea
+          id="contact-hours"
+          rows="3"
+          placeholder="Example: Monday–Friday 08:00–17:00"
+        ></textarea>
+      </label>
+
+    </section>
+
+
+    <!-- SOCIAL -->
+
+    <section class="content-card">
+
+      <div class="section-heading">
+        <span>16</span>
+
+        <div>
+          <h2>Existing online profiles</h2>
+          <p>
+            Optional.
+          </p>
+        </div>
+      </div>
+
+
+      <label>
+        Existing website
+
+        <input
+          id="social-website"
+          type="text"
+          placeholder="https://..."
+        >
+      </label>
+
+
+      <label>
+        Facebook
+
+        <input
+          id="social-facebook"
+          type="text"
+          placeholder="https://..."
+        >
+      </label>
+
+
+      <label>
+        Instagram
+
+        <input
+          id="social-instagram"
+          type="text"
+          placeholder="https://..."
+        >
+      </label>
+
+    </section>
+
+
+    <!-- FINISH -->
+
+    <section class="submit-card">
+
+      <div>
+        <h2>Ready?</h2>
+
+        <p>
+          Save your work at any time.
+          When everything is ready,
+          submit it to GD Studio 360.
+        </p>
+      </div>
+
+
+      <div class="submit-actions">
+
+        <button
+          id="save-button"
+          class="secondary-button"
+          type="button"
+        >
+          Save & continue later
+        </button>
+
+
+        <button
+          id="submit-button"
+          class="primary-button"
+          type="button"
+        >
+          Submit content
+        </button>
+
+      </div>
+
+
+      <span
+        id="save-status"
+        class="save-status"
+      ></span>
+
+    </section>
+
+  </form>
+
+</main>
+
+</body>
+</html>

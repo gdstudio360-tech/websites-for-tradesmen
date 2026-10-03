@@ -25,3 +25,6 @@ verify_jwt = false
 
 [functions.business-content-portal]
 verify_jwt = false
+
+[functions.pro-content-portal]
+verify_jwt = false
