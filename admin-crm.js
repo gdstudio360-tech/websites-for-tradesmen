@@ -2419,6 +2419,59 @@ function packageOptionsHtml(
 }
 
 
+
+function bindClientContentToggle() {
+  const button =
+    document.getElementById(
+      "toggle-client-content"
+    );
+
+  const body =
+    document.getElementById(
+      "client-content-body"
+    );
+
+  if (
+    !button ||
+    !body
+  ) {
+    return;
+  }
+
+  const setExpanded =
+    expanded => {
+
+      body.hidden =
+        !expanded;
+
+      button.setAttribute(
+        "aria-expanded",
+        String(expanded)
+      );
+
+      button.textContent =
+        expanded
+          ? "Hide client uploads ↑"
+          : "View client uploads ↓";
+    };
+
+  setExpanded(false);
+
+  button.onclick =
+    () => {
+
+      const expanded =
+        button.getAttribute(
+          "aria-expanded"
+        ) === "true";
+
+      setExpanded(
+        !expanded
+      );
+    };
+}
+
+
 function renderSelectedLead() {
   stopConversationPolling();
 
@@ -2864,6 +2917,16 @@ function renderSelectedLead() {
                     ${
                       contentPortalUrl
                         ? `
+                          <button
+                            class="secondary-button client-content-toggle"
+                            id="toggle-client-content"
+                            type="button"
+                            aria-expanded="false"
+                            aria-controls="client-content-body"
+                          >
+                            View client uploads ↓
+                          </button>
+
                           <button
                             class="secondary-button"
                             id="refresh-client-content"
@@ -3462,6 +3525,8 @@ function renderSelectedLead() {
   bindProjectControls(
     lead
   );
+
+  bindClientContentToggle();
 
   if (contentPortalUrl) {
     loadClientContent(
@@ -7378,3 +7443,89 @@ document
 
 
 ensureSession();
+
+/* ==========================================================
+   BACK TO TOP V1
+========================================================== */
+
+function initBackToTopButton() {
+  if (
+    document.getElementById(
+      "back-to-top-button"
+    )
+  ) {
+    return;
+  }
+
+  const button =
+    document.createElement(
+      "button"
+    );
+
+  button.id =
+    "back-to-top-button";
+
+  button.className =
+    "back-to-top-button";
+
+  button.type =
+    "button";
+
+  button.textContent =
+    "↑ Back to top";
+
+  button.setAttribute(
+    "aria-label",
+    "Back to top"
+  );
+
+  const updateVisibility =
+    () => {
+
+      const visible =
+        window.scrollY > 650;
+
+      button.classList.toggle(
+        "is-visible",
+        visible
+      );
+
+      button.tabIndex =
+        visible ? 0 : -1;
+
+      button.setAttribute(
+        "aria-hidden",
+        visible
+          ? "false"
+          : "true"
+      );
+    };
+
+  button.addEventListener(
+    "click",
+    () => {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+  );
+
+  window.addEventListener(
+    "scroll",
+    updateVisibility,
+    {
+      passive: true
+    }
+  );
+
+  document.body.appendChild(
+    button
+  );
+
+  updateVisibility();
+}
+
+initBackToTopButton();
+
+/* BACK TO TOP V1 END */

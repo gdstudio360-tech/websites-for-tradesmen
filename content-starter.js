@@ -1600,3 +1600,99 @@ submitButton
 ============================== */
 
 loadPortal();
+
+/* ==========================================================
+   CLIENT PORTAL BACK TO TOP V1
+========================================================== */
+
+function initPortalBackToTop() {
+  if (
+    document.getElementById(
+      "back-to-top-button"
+    )
+  ) {
+    return;
+  }
+
+  const button =
+    document.createElement(
+      "button"
+    );
+
+  button.id =
+    "back-to-top-button";
+
+  button.className =
+    "back-to-top-button";
+
+  button.type =
+    "button";
+
+  button.textContent =
+    "↑ Back to top";
+
+  button.setAttribute(
+    "aria-label",
+    "Back to top"
+  );
+
+  const updateVisibility =
+    () => {
+
+      const visible =
+        window.scrollY > 650;
+
+      button.classList.toggle(
+        "is-visible",
+        visible
+      );
+
+      button.tabIndex =
+        visible ? 0 : -1;
+
+      button.setAttribute(
+        "aria-hidden",
+        visible
+          ? "false"
+          : "true"
+      );
+    };
+
+  button.addEventListener(
+    "click",
+    () => {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
+  );
+
+  window.addEventListener(
+    "scroll",
+    updateVisibility,
+    {
+      passive: true
+    }
+  );
+
+  document.body.appendChild(
+    button
+  );
+
+  updateVisibility();
+}
+
+if (
+  document.readyState ===
+  "loading"
+) {
+  document.addEventListener(
+    "DOMContentLoaded",
+    initPortalBackToTop
+  );
+} else {
+  initPortalBackToTop();
+}
+
+/* CLIENT PORTAL BACK TO TOP V1 END */

@@ -1278,3 +1278,77 @@ select:focus {
   }
 
 }
+
+/* ==========================================================
+   CLIENT PORTAL BACK TO TOP V1
+========================================================== */
+
+.back-to-top-button{
+  position:fixed;
+  right:22px;
+  bottom:22px;
+  z-index:1500;
+
+  min-height:46px;
+  padding:0 17px;
+
+  border:
+    1px solid
+    rgba(239,199,96,.45);
+
+  border-radius:999px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--gold-light),
+      var(--gold)
+    );
+
+  color:#111;
+
+  font-weight:900;
+
+  box-shadow:
+    0 14px 36px
+    rgba(0,0,0,.40);
+
+  opacity:0;
+  pointer-events:none;
+
+  transform:
+    translateY(12px);
+
+  transition:
+    opacity .18s ease,
+    transform .18s ease;
+}
+
+.back-to-top-button.is-visible{
+  opacity:1;
+  pointer-events:auto;
+
+  transform:
+    translateY(0);
+}
+
+.back-to-top-button:hover{
+  transform:
+    translateY(-2px);
+}
+
+@media(max-width:700px){
+
+  .back-to-top-button{
+    right:14px;
+    bottom:14px;
+
+    min-height:44px;
+    padding:0 14px;
+
+    font-size:.78rem;
+  }
+
+}
+
+/* CLIENT PORTAL BACK TO TOP V1 END */
