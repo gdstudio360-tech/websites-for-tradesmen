@@ -2836,3 +2836,117 @@ header, section, footer, main{
 }
 
 /* PRICING TYPOGRAPHY HIERARCHY V1 END */
+
+
+/* =========================================================
+   GD STUDIO 360 — ENQUIRY FORM VALIDATION UX
+========================================================= */
+
+.form-validation-summary{
+  position:fixed;
+  top:90px;
+  right:22px;
+  z-index:10050;
+  width:min(410px,calc(100vw - 32px));
+  padding:18px 48px 18px 19px;
+  border:1px solid #efb3ad;
+  border-left:5px solid #d6453d;
+  border-radius:14px;
+  background:#fff7f6;
+  color:#742720;
+  box-shadow:0 20px 55px rgba(0,0,0,.24);
+}
+
+.form-validation-summary[hidden]{
+  display:none !important;
+}
+
+.form-validation-summary strong,
+.form-validation-summary > span{
+  display:block;
+}
+
+.form-validation-summary strong{
+  margin-bottom:5px;
+  color:#7e241d;
+  font-size:.95rem;
+}
+
+.form-validation-summary > span{
+  color:#914038;
+  font-size:.78rem;
+}
+
+.form-validation-summary ul{
+  margin:10px 0 0;
+  padding-left:19px;
+}
+
+.form-validation-summary li{
+  margin:5px 0;
+  font-size:.78rem;
+  line-height:1.4;
+}
+
+.form-validation-close{
+  position:absolute;
+  top:10px;
+  right:10px;
+  width:30px;
+  height:30px;
+  display:grid;
+  place-items:center;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:#7e241d;
+  font-size:1.35rem;
+  line-height:1;
+  cursor:pointer;
+}
+
+.form-validation-close:hover{
+  background:#f6dfdc;
+}
+
+.lead-form input.field-error,
+.lead-form select.field-error,
+.lead-form textarea.field-error{
+  border-color:#d6453d !important;
+  background:#fff8f7;
+  box-shadow:0 0 0 3px rgba(214,69,61,.12);
+}
+
+.lead-form label.has-error{
+  color:#8f3028;
+}
+
+.terms-consent.has-error{
+  border-color:#d6453d;
+  background:#fff8f7;
+  box-shadow:0 0 0 3px rgba(214,69,61,.08);
+}
+
+.field-error-message{
+  display:block;
+  margin-top:1px;
+  color:#b0362d;
+  font-size:.69rem;
+  font-weight:800;
+  line-height:1.35;
+}
+
+@media(max-width:680px){
+  .form-validation-summary{
+    top:auto;
+    right:14px;
+    bottom:18px;
+    left:14px;
+    width:auto;
+    max-height:45vh;
+    overflow:auto;
+  }
+}
+
+/* GD STUDIO 360 — ENQUIRY FORM VALIDATION UX END */
+

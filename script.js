@@ -314,20 +314,222 @@ const form = document.getElementById("lead-form");
 const formStatus = document.getElementById("form-status");
 const submitButton = document.getElementById("lead-submit");
 
+const validationSummary =
+  document.getElementById("form-validation-summary");
+
+const validationList =
+  document.getElementById("form-validation-list");
+
+const validationClose =
+  document.getElementById("form-validation-close");
+
 function setFormStatus(message, type = "") {
   if (!formStatus) return;
   formStatus.textContent = message;
   formStatus.className = `form-status ${type}`.trim();
 }
 
+function getLeadValidationErrors() {
+  if (!form) return [];
+
+  const name = document.getElementById("lead-name");
+  const business = document.getElementById("lead-business");
+  const trade = document.getElementById("lead-trade");
+  const email = document.getElementById("lead-email");
+  const terms = document.getElementById("terms-accepted");
+
+  const errors = [];
+
+  if (!name?.value.trim()) {
+    errors.push({
+      field: name,
+      message: "Please enter your name."
+    });
+  }
+
+  if (!business?.value.trim()) {
+    errors.push({
+      field: business,
+      message: "Please enter your business name."
+    });
+  }
+
+  if (!trade?.value) {
+    errors.push({
+      field: trade,
+      message: "Please choose your business type."
+    });
+  }
+
+  if (!email?.value.trim()) {
+    errors.push({
+      field: email,
+      message: "Please enter your email address."
+    });
+  } else if (!email.validity.valid) {
+    errors.push({
+      field: email,
+      message: "Please enter a valid email address."
+    });
+  }
+
+  if (!terms?.checked) {
+    errors.push({
+      field: terms,
+      message: "Please accept the Website & Enquiry Terms and Privacy Notice."
+    });
+  }
+
+  return errors;
+}
+
+function clearLeadValidationStyles() {
+  if (!form) return;
+
+  form
+    .querySelectorAll(".field-error")
+    .forEach((field) => {
+      field.classList.remove("field-error");
+      field.removeAttribute("aria-invalid");
+    });
+
+  form
+    .querySelectorAll(".has-error")
+    .forEach((label) => {
+      label.classList.remove("has-error");
+    });
+
+  form
+    .querySelectorAll(".field-error-message")
+    .forEach((message) => {
+      message.remove();
+    });
+}
+
+function renderLeadValidation(errors, focusFirst = false) {
+  clearLeadValidationStyles();
+
+  if (!errors.length) {
+    if (validationSummary) {
+      validationSummary.hidden = true;
+    }
+
+    if (validationList) {
+      validationList.innerHTML = "";
+    }
+
+    return;
+  }
+
+  if (validationList) {
+    validationList.innerHTML = "";
+  }
+
+  errors.forEach(({ field, message }) => {
+    if (!field) return;
+
+    field.classList.add("field-error");
+    field.setAttribute("aria-invalid", "true");
+
+    const label = field.closest("label");
+
+    if (label) {
+      label.classList.add("has-error");
+
+      const inlineError =
+        document.createElement("span");
+
+      inlineError.className =
+        "field-error-message";
+
+      inlineError.textContent = message;
+
+      label.appendChild(inlineError);
+    }
+
+    if (validationList) {
+      const item = document.createElement("li");
+      item.textContent = message;
+      validationList.appendChild(item);
+    }
+  });
+
+  if (validationSummary) {
+    validationSummary.hidden = false;
+  }
+
+  setFormStatus("", "");
+
+  if (focusFirst && errors[0]?.field) {
+    const firstField = errors[0].field;
+
+    firstField.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+
+    window.setTimeout(() => {
+      try {
+        firstField.focus({
+          preventScroll: true
+        });
+      } catch (_) {
+        firstField.focus();
+      }
+    }, 400);
+  }
+}
+
+validationClose?.addEventListener("click", () => {
+  validationSummary.hidden = true;
+});
+
 if (form) {
+  const validationFields = [
+    "lead-name",
+    "lead-business",
+    "lead-trade",
+    "lead-email",
+    "terms-accepted"
+  ]
+    .map((id) => document.getElementById(id))
+    .filter(Boolean);
+
+  validationFields.forEach((field) => {
+    const eventName =
+      field.tagName === "SELECT" ||
+      field.type === "checkbox"
+        ? "change"
+        : "input";
+
+    field.addEventListener(eventName, () => {
+      if (
+        validationSummary &&
+        !validationSummary.hidden
+      ) {
+        renderLeadValidation(
+          getLeadValidationErrors(),
+          false
+        );
+      }
+    });
+  });
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    if (!form.checkValidity()) {
-      form.reportValidity();
+    const validationErrors =
+      getLeadValidationErrors();
+
+    if (validationErrors.length) {
+      renderLeadValidation(
+        validationErrors,
+        true
+      );
       return;
     }
+
+    renderLeadValidation([], false);
 
     if (
       !FORMSPREE_FORM_ID ||

@@ -897,6 +897,25 @@
             <strong>Tell us about your project</strong>
           </div>
 
+          <div
+            class="form-validation-summary"
+            id="form-validation-summary"
+            role="alert"
+            aria-live="assertive"
+            hidden
+          >
+            <button
+              type="button"
+              class="form-validation-close"
+              id="form-validation-close"
+              aria-label="Close validation message"
+            >×</button>
+
+            <strong>We couldn't send your enquiry yet.</strong>
+            <span>Please check the following:</span>
+            <ul id="form-validation-list"></ul>
+          </div>
+
           <div class="selected-package" id="selected-package" hidden>
             <span>SELECTED PACKAGE</span>
             <strong id="selected-package-name"></strong>
@@ -952,7 +971,7 @@
 
           <label>
             Current website / Facebook / Instagram <span class="optional">(optional)</span>
-            <input type="url" name="currentSite" id="lead-current-site" placeholder="https://...">
+            <input type="text" name="currentSite" id="lead-current-site" placeholder="Website, Facebook or Instagram link / handle">
           </label>
 
           <label id="package-field">
