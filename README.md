@@ -1,6 +1,6 @@
 # GD Studio 360 — Web Design for Small Businesses & Local Services
 
-Sales landing page for a website-building service aimed at UK tradespeople.
+Web design and digital solutions for small businesses, sole traders and local service providers.
 
 ## Current positioning
 - Electricians
