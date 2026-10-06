@@ -1,4 +1,4 @@
-# GD Studio 360 — Websites for UK Tradesmen
+# GD Studio 360 — Web Design for Small Businesses & Local Services
 
 Sales landing page for a website-building service aimed at UK tradespeople.
 
