@@ -2950,3 +2950,15 @@ header, section, footer, main{
 
 /* GD STUDIO 360 — ENQUIRY FORM VALIDATION UX END */
 
+
+/* Pro package extras */
+.pro-extras-note{
+  margin:-8px 0 18px;
+  padding:12px 14px;
+  border-left:3px solid #b58d00;
+  border-radius:8px;
+  background:#f8f6ee;
+  color:var(--muted);
+  font-size:.76rem;
+  line-height:1.55;
+}
