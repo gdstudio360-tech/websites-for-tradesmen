@@ -76,6 +76,10 @@ const carePlanSelect = document.getElementById("lead-care-plan");
 const careField = document.getElementById("care-field");
 const careFormNote = document.getElementById("care-form-note");
 
+const PACKAGE_DISPLAY_NAMES = {
+  "Pro — £599": "Pro — From £599"
+};
+
 const CARE_BY_PACKAGE = {
   "Starter — £249": {
     value: "Website Care — £29/month",
@@ -147,7 +151,8 @@ function updateSelectedPackage(packageName, showSummary = true) {
     selectedPackageBox.hidden = !(showSummary && isSpecificPackage);
 
     if (isSpecificPackage) {
-      selectedPackageName.textContent = packageName;
+      selectedPackageName.textContent =
+        PACKAGE_DISPLAY_NAMES[packageName] || packageName;
     }
   }
 }
