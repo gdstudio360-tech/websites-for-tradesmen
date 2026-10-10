@@ -2586,3 +2586,11 @@ html[data-theme="dark"]
 .whatsapp-message p{white-space:pre-wrap}
 @media(max-width:700px){.gd360-wa-layout{grid-template-columns:1fr}.gd360-wa-panel{min-height:180px}}
 /* GD360 WhatsApp Inbox END */
+
+/* GD360 WhatsApp unread counters */
+.gd360-wa-unread{display:inline-flex;align-items:center;justify-content:center;
+  min-width:22px;height:22px;padding:0 6px;margin-left:9px;border-radius:100px;
+  background:#ffd83d;color:#111827;font-weight:900;font-size:12px;line-height:1}
+.gd360-wa-unread[hidden]{display:none!important}
+.whatsapp-conversation-item{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.whatsapp-conversation-item.is-unread{font-weight:850;border-color:#c89f20}
