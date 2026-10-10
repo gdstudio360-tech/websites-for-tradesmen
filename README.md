@@ -188,9 +188,9 @@ This version adds the foundation for the complete customer pipeline:
 - `payment-cancelled.html`
 
 ### New private/admin UI
-- `admin.html`
-- `admin.css`
-- `admin.js`
+- `admin-crm.html`
+- `admin-crm.css`
+- `admin-crm.js`
 
 The admin page is not linked publicly and is protected by Supabase Auth + database Row Level Security.
 Knowing the URL alone does not grant access.
@@ -205,7 +205,7 @@ Knowing the URL alone does not grant access.
 1. Customer submits the normal website enquiry.
 2. Formspree still sends the existing notification email.
 3. When Supabase is connected, the same enquiry is also stored in the admin pipeline.
-4. Admin signs into `admin.html`.
+4. Admin signs into `admin-crm.html`.
 5. Admin reviews the lead and clicks `Approve & create deposit`.
 6. Secure server-side function creates the correct 50% Stripe Checkout deposit:
    - Starter £249 -> £124.50
