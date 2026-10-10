@@ -77,6 +77,7 @@
       button.addEventListener("click", () => {
         activeConversation = conversation.id;
         chatTitle.textContent = name;
+        document.getElementById("whatsapp-reply-form").hidden = false;
         loadMessages(conversation.id);
       });
       conversationsList.appendChild(button);
@@ -117,6 +118,24 @@
     }
   }
 
+  $("whatsapp-reply-form").onsubmit=async e=>{
+    e.preventDefault();
+    if(!activeConversation)return;
+    const input=$("whatsapp-reply-text");
+    const btn=$("whatsapp-send");
+    const content=input.value.trim();
+    if(!content)return;
+    btn.disabled=true;
+    status.textContent="Sending...";
+    try{
+      const {data,error}=await getClient().functions.invoke("whatsapp-reply",{body:{conversation_id:activeConversation,content}});
+      if(error||!data?.ok)throw Error(data?.error||error?.message||"Send failed");
+      input.value="";
+      await loadMessages(activeConversation);
+      status.textContent=data.warning||"Message sent";
+    }catch(err){status.textContent="Send failed: "+err.message;}
+    finally{btn.disabled=false;}
+  };
   projectsTab.addEventListener("click", () => showTab("projects"));
   whatsappTab.addEventListener("click", () => showTab("whatsapp"));
   $("whatsapp-refresh")?.addEventListener("click", loadConversations);
