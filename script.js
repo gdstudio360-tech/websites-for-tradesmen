@@ -33,7 +33,7 @@ if (year) year.textContent = new Date().getFullYear();
   public website can make contact details impossible for determined bots to discover.
 */
 const contact = {
-  phone: ["+44", "7561", "430471"].join(""),
+  phone: ["+44", "7343", "127648"].join(""),
   email: ["gdstudio360", "@", "gmail.com"].join("")
 };
 
