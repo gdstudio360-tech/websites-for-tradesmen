@@ -1,0 +1,40 @@
+/* GD Studio 360 Contact Book — matching existing CRM light/dark design. */
+#contacts-view[hidden],#gd-contact-form-panel[hidden]{display:none!important}
+.gd-contacts-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:14px}
+.gd-contacts-head h2{margin:0 0 5px;color:var(--ink)}
+.gd-contacts-head p{margin:0;color:var(--muted)}
+.gd-contacts-tools{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.gd-contacts-add{padding:11px 17px;border:1px solid #d4b421;border-radius:10px;background:#ffd83d;color:#111827;font-weight:800;cursor:pointer}
+.gd-contacts-main{display:grid;grid-template-columns:minmax(260px,365px) minmax(0,1fr);gap:15px;margin:14px 0}
+.gd-contacts-sidebar,.gd-contacts-detail{border:1px solid var(--line);border-radius:15px;background:var(--soft);padding:18px;min-width:0;color:var(--ink)}
+.gd-contacts-sidebar>label{display:grid;gap:7px;color:var(--ink);font-size:.83rem;font-weight:700}
+#gd-contacts-search{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--soft);color:var(--ink)}
+.gd-contacts-counter{display:block;margin:12px 0 6px;color:var(--muted);font-size:.81rem}
+#gd-contacts-list{max-height:65vh;overflow:auto;min-height:200px}
+.gd-contact-item{display:grid;gap:4px;width:100%;padding:12px;margin:5px 0;background:transparent;color:var(--ink);text-align:left;border:1px solid var(--line);border-radius:10px;cursor:pointer}
+.gd-contact-item:hover,.gd-contact-item.active{border-color:#d4b421;background:rgba(255,216,61,.08)}
+.gd-contact-item strong{overflow-wrap:anywhere}
+.gd-contact-item small{color:var(--muted);overflow-wrap:anywhere}
+.gd-contact-pill{width:max-content;font-size:.66rem;font-weight:700;border:1px solid var(--line);padding:2px 7px;border-radius:999px}
+.gd-contacts-detail h3{margin:0 0 4px;font-size:1.22rem}
+.gd-contact-muted{color:var(--muted);font-size:.88rem;overflow-wrap:anywhere}
+.gd-contact-fields{display:grid;gap:11px;margin:20px 0}
+.gd-contact-field{display:grid;gap:3px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.gd-contact-field span{color:var(--muted);font-size:.73rem}
+.gd-contact-field strong{font-weight:600;overflow-wrap:anywhere;white-space:pre-wrap}
+.gd-contact-actions{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.gd-contact-actions a{text-decoration:none;display:inline-flex;align-items:center}
+.gd-contact-related{margin:20px 0;border-top:1px solid var(--line);padding-top:12px}
+.gd-contact-related h4{margin:0 0 10px}
+.gd-contact-related-item{display:grid;gap:4px;padding:9px 0;border-bottom:1px solid var(--line)}
+.gd-contact-related-item small{color:var(--muted)}
+.gd-contact-chat-button{padding:10px 13px;border:1px solid #d4b421;border-radius:9px;background:rgba(255,216,61,.12);color:var(--ink);cursor:pointer}
+#gd-contact-form-panel{border:1px solid var(--line);border-radius:14px;padding:18px;background:var(--soft)}
+#gd-contact-form-panel h3{margin:0 0 15px}
+#gd-contact-form{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+#gd-contact-form label{display:grid;gap:6px;font-size:.8rem;font-weight:700;color:var(--ink)}
+#gd-contact-form input,#gd-contact-form textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:9px;background:var(--soft);color:var(--ink);font:inherit}
+#gd-contact-form .gd-contact-wide{grid-column:1/-1}
+#gd-contact-form .gd-contact-form-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#gd-contact-form-status{color:var(--muted);font-size:.85rem}
+@media(max-width:780px){.gd-contacts-main{grid-template-columns:1fr}#gd-contacts-list{max-height:36vh}#gd-contact-form{grid-template-columns:1fr}}

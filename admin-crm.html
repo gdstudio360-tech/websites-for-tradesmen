@@ -24,6 +24,7 @@
     rel="stylesheet"
     href="admin-crm.css?v=navigation-v1"
   >
+<link rel="stylesheet" href="admin-contacts.css?v=1">
 </head>
 
 <body>
@@ -176,6 +177,7 @@
     <nav id="gd360-whatsapp-switch" class="gd360-wa-nav" aria-label="CRM sections">
       <button id="projects-tab" class="gd360-wa-tab active" type="button">Projects</button>
       <button id="whatsapp-tab" class="gd360-wa-tab" type="button">WhatsApp Inbox</button>
+      <button id="contacts-tab" class="gd360-wa-tab" type="button">Contacts</button>
     </nav>
 
     <section id="whatsapp-inbox" hidden>
@@ -207,6 +209,46 @@ maxlength="4096" placeholder="Type a message..." required></textarea>
       </div>
     </section>
 
+
+    <section id="contacts-view" hidden>
+      <div class="gd-contacts-head">
+        <div><h2>Contact Book</h2><p>All customer details, website enquiries and WhatsApp chats in one place.</p></div>
+        <div class="gd-contacts-tools">
+          <button id="gd-contacts-refresh" class="ghost-button" type="button">Refresh</button>
+          <button id="gd-contact-add" class="gd-contacts-add" type="button">+ Add contact</button>
+        </div>
+      </div>
+      <p id="gd-contacts-status" class="status-text" role="status"></p>
+      <div class="gd-contacts-main">
+        <aside class="gd-contacts-sidebar">
+          <label>Search contacts
+            <input id="gd-contacts-search" type="search" placeholder="Name, company, email or number" autocomplete="off">
+          </label>
+          <small id="gd-contacts-count" class="gd-contacts-counter">0 contacts</small>
+          <div id="gd-contacts-list"></div>
+        </aside>
+        <div class="gd-contacts-detail">
+          <section id="gd-contact-form-panel" hidden>
+            <h3 id="gd-contact-form-title">Add contact</h3>
+            <form id="gd-contact-form">
+              <label>Name<input id="gd-contact-name" type="text" maxlength="150" autocomplete="off"></label>
+              <label>Business name<input id="gd-contact-business" type="text" maxlength="160"></label>
+              <label>WhatsApp / phone<input id="gd-contact-phone" type="tel" maxlength="40" placeholder="+44 7700 900123"></label>
+              <label>Email<input id="gd-contact-email" type="email" maxlength="250" autocomplete="off"></label>
+              <label class="gd-contact-wide">Private notes
+                <textarea id="gd-contact-notes" rows="3" maxlength="2000" placeholder="Useful details about this contact"></textarea>
+              </label>
+              <div class="gd-contact-wide gd-contact-form-actions">
+                <button id="gd-contact-save" class="gd-contacts-add" type="submit">Save contact</button>
+                <button id="gd-contact-cancel" class="ghost-button" type="button">Cancel</button>
+                <span id="gd-contact-form-status" role="status"></span>
+              </div>
+            </form>
+          </section>
+          <section id="gd-contact-details"><p class="gd-contact-muted">Select a contact or add a new one.</p></section>
+        </div>
+      </div>
+    </section>
 
     <div class="crm-tabs">
 
@@ -500,7 +542,8 @@ maxlength="4096" placeholder="Type a message..." required></textarea>
 <script
   src="admin-crm.js?v=navigation-v1"
 ></script>
-<script src="admin-whatsapp-inbox.js?v=4"></script>
+<script src="admin-whatsapp-inbox.js?v=5"></script>
+<script src="admin-contacts.js?v=1"></script>
 
 </body>
 </html>

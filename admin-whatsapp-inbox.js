@@ -2,6 +2,8 @@
   const $ = id => document.getElementById(id);
   const projectsTab = $("projects-tab");
   const whatsappTab = $("whatsapp-tab");
+  const contactsTab = $("contacts-tab");
+  const contactsView = $("contacts-view");
   const inbox = $("whatsapp-inbox");
   const heading = document.querySelector("#dashboard-view > .dashboard-heading");
   const stats = document.querySelector("#dashboard-view > .stats-grid");
@@ -20,17 +22,21 @@
 
   function showTab(tab) {
     const isWhatsApp = tab === "whatsapp";
+    const isContacts = tab === "contacts";
 
     inbox.hidden = !isWhatsApp;
-    projectsTab.classList.toggle("active", !isWhatsApp);
+    contactsView.hidden = !isContacts;
+    projectsTab.classList.toggle("active", !isWhatsApp && !isContacts);
     whatsappTab.classList.toggle("active", isWhatsApp);
-    projectsTab.setAttribute("aria-selected", String(!isWhatsApp));
+    contactsTab.classList.toggle("active", isContacts);
+    projectsTab.setAttribute("aria-selected", String(!isWhatsApp && !isContacts));
     whatsappTab.setAttribute("aria-selected", String(isWhatsApp));
+    contactsTab.setAttribute("aria-selected", String(isContacts));
 
     for (const el of [...document.querySelectorAll("#dashboard-view > .crm-tabs, #dashboard-view > .crm-toolbar, #dashboard-view > .crm-layout"), dashboardStatus, pendingBanner]) {
       if (!el) continue;
-      if (isWhatsApp) {
-        el.dataset.previousHidden = String(el.hidden);
+      if (isWhatsApp || isContacts) {
+        if (el.dataset.previousHidden === undefined) el.dataset.previousHidden = String(el.hidden);
         el.hidden = true;
       } else if (el.dataset.previousHidden !== undefined) {
         el.hidden = el.dataset.previousHidden === "true";
@@ -39,6 +45,7 @@
     }
 
     if (isWhatsApp) loadConversations();
+    if (isContacts) document.dispatchEvent(new Event("gd360:contacts:show"));
   }
 
   function getClient() {
@@ -193,6 +200,16 @@
   };
   projectsTab.addEventListener("click", () => showTab("projects"));
   whatsappTab.addEventListener("click", () => showTab("whatsapp"));
+  contactsTab.addEventListener("click", () => showTab("contacts"));
+  document.addEventListener("gd360:open-whatsapp", event => {
+    const { conversationId, name } = event.detail || {};
+    if (!conversationId) return;
+    activeConversation = conversationId;
+    chatTitle.textContent = name || "WhatsApp customer";
+    $("whatsapp-reply-form").hidden = false;
+    showTab("whatsapp");
+    loadMessages(conversationId);
+  });
   $("whatsapp-refresh")?.addEventListener("click", loadConversations);
   setInterval(() => {
     if (!document.hidden && !document.getElementById("dashboard-view").hidden)
