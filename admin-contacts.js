@@ -133,6 +133,7 @@
     details.appendChild(fields);
     const actions = node('div', null, 'gd-contact-actions');
     actions.appendChild(button('Edit contact', () => openForm(g.primary), 'ghost-button'));
+    actions.appendChild(button('Delete contact', () => deleteContactGroup(g.key), 'gd-contact-delete'));
     if (g.phone) actions.appendChild(button('Copy number', async () => {
       try { await navigator.clipboard.writeText(g.phone); message('Phone number copied.'); }
       catch (_) { message('Copy unavailable. Select the phone number above.'); }
@@ -168,6 +169,38 @@
     details.appendChild(chats);
     if (g.records.length > 1) details.appendChild(node('p',
       'This phone has ' + g.records.length + ' existing database records. They are shown together here; no data was deleted or merged.', 'gd-contact-muted'));
+  }
+  async function deleteContactGroup(key) {
+    const group = groups.find(g => g.key === key);
+    if (!group || !db()) return;
+    const ids = [...new Set(group.records.map(c => c.id))];
+    const extra = ids.length > 1 ? ` (${ids.length} linked contact records)` : '';
+    if (!window.confirm(
+      `Delete "${group.name}" from the Contact Book${extra}?\n\n` +
+      'This hides the contact from the address book. It does NOT delete website enquiries, ' +
+      'projects, WhatsApp conversations or messages.\n\nContinue?'
+    )) return;
+    const deleteButtons = [...details.querySelectorAll('.gd-contact-delete')];
+    deleteButtons.forEach(el => { el.disabled = true; });
+    message('Removing contact from the book…');
+    try {
+      const tenant = await resolveTenant();
+      const now = new Date().toISOString();
+      const { data, error } = await db().from('contacts')
+        .update({ deleted_at: now, updated_at: now })
+        .eq('tenant_id', tenant).in('id', ids).is('deleted_at', null)
+        .select('id');
+      if (error) throw error;
+      if ((data || []).length !== ids.length) throw new Error('Not all contact records could be archived. Refresh to verify.');
+      selected = null;
+      hideForm();
+      await loadContacts();
+      message('Contact removed from the book. Related projects and WhatsApp messages were preserved.');
+    } catch (error) {
+      message('Could not remove contact: ' + error.message);
+    } finally {
+      deleteButtons.forEach(el => { el.disabled = false; });
+    }
   }
   function hideForm() { formPanel.hidden = true; editing = null; form.reset(); formStatus.textContent = ''; }
   function openForm(contact = null) {
@@ -271,7 +304,7 @@
   add.addEventListener('click', () => openForm());
   cancel.addEventListener('click', hideForm);
   search.addEventListener('input', renderList);
-  $('gd-contacts-refresh').addEventListener('click', loadContacts);
+  document.addEventListener('gd360:contacts:refresh', loadContacts);
   document.addEventListener('gd360:contacts:show', loadContacts);
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden && !view.hidden) loadContacts();

@@ -210,7 +210,7 @@
     showTab("whatsapp");
     loadMessages(conversationId);
   });
-  $("whatsapp-refresh")?.addEventListener("click", loadConversations);
+  document.addEventListener("gd360:whatsapp:refresh", loadConversations);
   setInterval(() => {
     if (!document.hidden && !document.getElementById("dashboard-view").hidden)
       loadConversations();

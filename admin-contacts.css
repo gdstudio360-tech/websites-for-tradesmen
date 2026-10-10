@@ -38,3 +38,9 @@
 #gd-contact-form .gd-contact-form-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 #gd-contact-form-status{color:var(--muted);font-size:.85rem}
 @media(max-width:780px){.gd-contacts-main{grid-template-columns:1fr}#gd-contacts-list{max-height:36vh}#gd-contact-form{grid-template-columns:1fr}}
+
+/* Dangerous action: visually distinct; database records are soft-deleted. */
+.gd-contact-delete{padding:11px 15px;border:1px solid rgba(220,70,70,.42);border-radius:10px;background:rgba(220,70,70,.08);color:#d95b5b;font-weight:700;cursor:pointer}
+.gd-contact-delete:hover{background:rgba(220,70,70,.17);border-color:#d95b5b}
+.gd-contact-delete:disabled{opacity:.55;cursor:wait}
+html[data-theme="dark"] .gd-contact-delete{color:#ff9c9c}

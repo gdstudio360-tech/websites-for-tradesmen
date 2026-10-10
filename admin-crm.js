@@ -939,10 +939,15 @@ logoutButton
 refreshButton
   ?.addEventListener(
     "click",
-    () =>
-      loadLeads({
-        refreshDetail: true
-      })
+    () => {
+      if (document.getElementById("contacts-view")?.hidden === false) {
+        document.dispatchEvent(new Event("gd360:contacts:refresh"));
+      } else if (document.getElementById("whatsapp-inbox")?.hidden === false) {
+        document.dispatchEvent(new Event("gd360:whatsapp:refresh"));
+      } else {
+        loadLeads({ refreshDetail: true });
+      }
+    }
   );
 
 

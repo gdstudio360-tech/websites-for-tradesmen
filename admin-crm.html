@@ -24,7 +24,7 @@
     rel="stylesheet"
     href="admin-crm.css?v=navigation-v1"
   >
-<link rel="stylesheet" href="admin-contacts.css?v=1">
+<link rel="stylesheet" href="admin-contacts.css?v=2">
 </head>
 
 <body>
@@ -186,7 +186,6 @@
           <h2>WhatsApp Inbox</h2>
           <p>Customer conversations and messages</p>
         </div>
-        <button id="whatsapp-refresh" class="ghost-button" type="button">Refresh</button>
       </div>
 
       <p id="whatsapp-status" class="status-text" role="status"></p>
@@ -214,7 +213,6 @@ maxlength="4096" placeholder="Type a message..." required></textarea>
       <div class="gd-contacts-head">
         <div><h2>Contact Book</h2><p>All customer details, website enquiries and WhatsApp chats in one place.</p></div>
         <div class="gd-contacts-tools">
-          <button id="gd-contacts-refresh" class="ghost-button" type="button">Refresh</button>
           <button id="gd-contact-add" class="gd-contacts-add" type="button">+ Add contact</button>
         </div>
       </div>
@@ -540,10 +538,10 @@ maxlength="4096" placeholder="Type a message..." required></textarea>
 ></script>
 
 <script
-  src="admin-crm.js?v=navigation-v1"
+  src="admin-crm.js?v=contacts-refresh-v2"
 ></script>
-<script src="admin-whatsapp-inbox.js?v=5"></script>
-<script src="admin-contacts.js?v=1"></script>
+<script src="admin-whatsapp-inbox.js?v=6"></script>
+<script src="admin-contacts.js?v=2"></script>
 
 </body>
 </html>
