@@ -129,7 +129,7 @@
     status.textContent="Sending...";
     try{
       const {data,error}=await getClient().functions.invoke("whatsapp-reply",{body:{conversation_id:activeConversation,content}});
-      if(error||!data?.ok)throw Error(data?.error||error?.message||"Send failed");
+      if(error||!data?.ok){const r=error?.context;const d=r?await r.clone().json().catch(()=>null):null;throw Error(d?.error||data?.error||error?.message||"Send failed");}
       input.value="";
       await loadMessages(activeConversation);
       status.textContent=data.warning||"Message sent";
