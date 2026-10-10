@@ -172,6 +172,36 @@
     </div>
 
 
+
+    <nav id="gd360-whatsapp-switch" class="gd360-wa-nav" aria-label="CRM sections">
+      <button id="projects-tab" class="gd360-wa-tab active" type="button">Projects</button>
+      <button id="whatsapp-tab" class="gd360-wa-tab" type="button">WhatsApp Inbox</button>
+    </nav>
+
+    <section id="whatsapp-inbox" hidden>
+      <div class="gd360-wa-heading">
+        <div>
+          <h2>WhatsApp Inbox</h2>
+          <p>Customer conversations and messages</p>
+        </div>
+        <button id="whatsapp-refresh" class="ghost-button" type="button">Refresh</button>
+      </div>
+
+      <p id="whatsapp-status" class="status-text" role="status"></p>
+
+      <div class="gd360-wa-layout">
+        <aside class="gd360-wa-panel">
+          <h3>Conversations</h3>
+          <div id="whatsapp-conversation-list"></div>
+        </aside>
+        <section class="gd360-wa-panel gd360-wa-chat">
+          <h3 id="whatsapp-chat-title">Select a conversation</h3>
+          <div id="whatsapp-message-list"></div>
+        </section>
+      </div>
+    </section>
+
+
     <div class="crm-tabs">
 
       <button
@@ -464,6 +494,7 @@
 <script
   src="admin-crm.js?v=navigation-v1"
 ></script>
+<script src="admin-whatsapp-inbox.js?v=2"></script>
 
 </body>
 </html>
